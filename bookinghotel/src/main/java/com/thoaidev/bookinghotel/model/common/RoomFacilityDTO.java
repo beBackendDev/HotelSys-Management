@@ -11,5 +11,4 @@ public class RoomFacilityDTO {
     private Integer id;
     private String icon;
     private String name;
-
 }
