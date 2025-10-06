@@ -1,0 +1,12 @@
+.footerWrapper {
+  border-color: #e5e7eb; // Tailwind border-gray-200
+  :global {
+    a {
+      transition: color 0.2s ease;
+      &:hover {
+        color: #f4610d; // Hover màu xanh (giống Ant Design)
+      }
+    }
+    background-color: #F5F5F5;
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "hotels": [
+    {
+      "id": 1,
+      "name": "FLC Quy Nhon Center",
+      "description": "Gần biển, view cực đẹp.",
+      "address": "đường số 1- Trần Quang Diệu- Quy Nhơn",
+      "rating": "*****",
+      "mail": "FLCQuyNhonCenter@gmail.com",
+      "phone": "0336678790",
+      "min_price": "699.000",
+      "createdAt": "2020-5-11",
+      "updatedAt": "2023-5-11",
+      "image": "https://tripi.vn/cdn-cgi/image/width=640,height=640/https://www.googleapis.com/download/storage/v1/b/hotelcdn/o/422%2FE5M56T4Q2D_194940667.jpg?generation=1586250485244075&alt=media",
+      
+      "rooms": [
+            {
+              "id": 1,
+              "name": "Single Room",
+              "description": "Gần biển, view cực đẹp.",
+              "address": "đường số 1- Trần Quang Diệu- Quy Nhơn",
+              "type_id": "*****",
+              "bed_quantity": 4,
+              "price": "699.000",
+              "createdAt": "2020-5-11",
+              "updatedAt": "2023-5-11",
+              "image": "https://tripi.vn/cdn-cgi/image/width=640,height=640/https://staticproxy.mytourcdn.com/1000x600,q90/resources/pictures/hotels/1/7rs1503731652_le_belhamy_resort_and_spa.jpg"
+            },
+            {
+              "id": 2,
+              "name": "Double Room",
+              "description": "Gần biển, view cực đẹp.",
+              "address": "đường số 1- Trần Quang Diệu- Quy Nhơn",
+              "type_id": "*****",
+              "bed_quantity": 4,
+              "price": "699.000",
+              "createdAt": "2020-5-11",
+              "updatedAt": "2023-5-11",
+              "image": "https://tripi.vn/cdn-cgi/image/width=640,height=640/https://staticproxy.mytourcdn.com/1000x600,q90/resources/pictures/hotels/1/7rs1503731652_le_belhamy_resort_and_spa.jpg"
+            }
+          ]
+    
+    }
+  ]
+
+
+}

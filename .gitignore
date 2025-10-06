@@ -1,0 +1,43 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# ===== COMMON SYSTEM FILES =====
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+*.tmp
+*.swp
+*.bak
+# ===FRONT- END
+hotel-booking-FE/node_modules/
+hotel-booking-FE/build/
+hotel-booking-FE/.env
+hotel-booking-FE/.env.local
+hotel-booking-FE/.env.development
+hotel-booking-FE/.env.production
+# ===BACK- END
+bookinghotel/target/
+bookinghotel/.classpath
+bookinghotel/.project
+bookinghotel/.settings/
+bookinghotel/.idea/
+bookinghotel/logs/
+bookinghotel/*.log
+bookinghotel/.env
+bookinghotel/src/main/resources/application.properties
+bookinghotel/src/main/resources/application-*.properties
+# ===DEPENDENCIES AT ROOT
+node_modules/
+package-lock.json
+# === DATABASE / SQL FILES
+*.sql
+# === OS-specific
+ehthumbs.db
+desktop.ini
+
+# === Java
+*.class
+*.jar
+*.war
+*.ear

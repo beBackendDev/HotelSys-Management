@@ -1,0 +1,17 @@
+.filterWrapper {
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  position: sticky; // Giữ bộ lọc cố định khi scroll, nhưng không "bay" theo
+  top: 20px; // Cách top một khoảng khi scroll
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 8px;
+  width: 100%; // Chiếm toàn bộ chiều ngang cột (trong flex w-1/3)
+
+  .filterBtnDelete {
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #4d608d;
+  }
+
+}

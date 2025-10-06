@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html   xmlns:th="http://thmyelead.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate = "~{layout}"                                                        
+        >
+<!--    Head- Links-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--
+    --   favicon
+    -->
+    <link rel="shortcut icon" th:href="@{image/icons8_phoenix_framework_125px 1.png}" type="image/svg+xml">
+
+    <title>Quy Nhon Traveling- Trang chủ</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{css/style.css}">
+    <!--  using Swiper from CDN-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+
+
+<body class="bg-light">
+
+    <!-- Modal Login- Form-->
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form action="submit">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold d-flex align-items-center">
+                            <i class="bi bi-person-circle fs-3 me-3"></i>Đăng nhập
+                        </h5>
+                        <button type="reset" class="btn-close shadow-none" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div
+                                class="col-lg-7 col-md-7 col-sm-7 d-flex flex-column justify-content-center align-items-center">
+                                <img src="../../image/Logo.png" style="width: 150px;">
+                                <h2 class="fw-bold text-center mb-1">QUY NHON <br>Traveling</h2>
+                            </div>
+                            <div class="col-lg-5 col-md-5 col-sm-5 p-3 border shadow rounded-3"
+                                style="background-color: #FFF;">
+                                <div class="mb-4">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control shadow-none">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Mật khẩu</label>
+                                    <input type="password" class="form-control shadow-none">
+                                </div>
+                                <div class="d-flex justify-content-end mb-3">
+                                    <a href="#" class="fs-4 text-dark text-decoration-none me-2"><i
+                                            class="bi bi-facebook"></i></a>
+                                    <a href="#" class="fs-4 text-dark text-decoration-none"><i
+                                            class="bi bi-google"></i></a>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <button type="submit" class="btn btn-info shadow-none">ĐĂNG NHẬP</button>
+                                    <a href="javascript: void(0)" class="text-secondary text-decoration-none">Quên mật
+                                        khẩu?</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Register- Form-->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form action="">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold d-flex align-items-center">
+                            <i class="bi bi-person-lines-fill fs-3 me-2"></i>ĐĂNG KÍ
+                        </h5>
+                        <button type="reset" class="btn-close shadow-none" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <span class="badge bg-light text-dark mb-3 text-wrap lh-base">
+                            Lưu ý: Thông tin cụ thể của bạn phải chính xác và đúng với giấy tờ định danh(CCCD, Giẩy phép
+                            lái xe, etc.) nó sẽ được
+                            yêu cầu trong suốt quá trình Check- in.
+                        </span>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-6 ps-0 mb-3">
+                                    <label class="form-label">Họ và tên</label>
+                                    <input type="text" class="form-control shadow-none">
+                                </div>
+                                <div class="col-md-6 p-0 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control shadow-none">
+                                </div>
+                                <div class="col-md-6 ps-0 mb-3">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="number" class="form-control shadow-none">
+                                </div>
+                                <div class="col-md-6 p-0 mb-3">
+                                    <label class="form-label">Hình nền</label>
+                                    <input type="file" class="form-control shadow-none">
+                                </div>
+                                <div class="col-md-12 ps-0 mb-3">
+                                    <label class="form-label">Địa chỉ thường trú</label>
+                                    <textarea class="form-control shadow-none" rows="1"></textarea>
+                                </div>
+                                <div class="col-md-6 p-0 mb-3">
+                                    <label class="form-label">Số CCCD:</label>
+                                    <input type="number" class="form-control shadow-none">
+                                </div>
+                                <div class="col-md-6 p-0 mb-3">
+                                    <label class="form-label">Ngày tháng năm sinh</label>
+                                    <input type="date" class="form-control shadow-none">
+                                </div>
+                                <div class="col-md-6 ps-0 mb-3">
+                                    <label class="form-label">Mật khẩu</label>
+                                    <input type="password" class="form-control shadow-none">
+                                </div>
+                                <div class="col-md-6 p-0 mb-3">
+                                    <label class="form-label">Xác nhận mật khẩu</label>
+                                    <input type="password" class="form-control shadow-none">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center my-1">
+                            <button type="submit" class="btn btn-info shadow-none">ĐĂNG KÍ</button>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+   
+    <section layout:fragment = "body" id="hotel-list" class="container">
+
+        <div class="row">
+            <!--    Filter-->
+            <div class="col-lg-3 col-md-12 mb-lg-0 mb-4 px-lg-0">
+                <nav class="navbar navbar-expand-lg navbar-light bg-white rounded shadow">
+                    <div class="container-fluid flex-lg-column align-items-stretch">
+                        <h4 class="mt-2 fw-bold">Bộ lọc<i class="bi bi-funnel ms-2"></i></h4>
+                        <button class="navbar-toggler shadow-none" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#filterDropdown" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                            <span><i class="bi bi-funnel"></i></span>
+                        </button>
+                        <div class="collapse navbar-collapse flex-column align-items-stretch mt-2" id="filterDropdown">
+                            <!--    check availability-->
+                            <div class="border bg-light p-3 rounded mb-3">
+                                <label class="form-label fw-bold">Check-in</label>
+                                <input type="date" class="form-control shadow-none mb-3">
+                                <label class="form-label fw-bold">Check-out</label>
+                                <input type="date" class="form-control shadow-none">
+                            </div>
+                            <!--    distance-->
+                            <div class="border bg-light p-3 rounded mb-3">
+                                <h5 style="font-size: 18px;" class="mb-3 fw-bold">Vị trí</h5>
+                                <div class="mb-2">
+                                    <input type="checkbox" id="d1" class="form-check-input shadow-none mb-3 me-1">
+                                    <label class="form-check-label" for="d1">Khoảng cách đến vị trí 1</label>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="checkbox" id="d2" class="form-check-input shadow-none mb-3 me-1">
+                                    <label class="form-check-label" for="d2">Khoảng cách đến vị trí 2</label>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="checkbox" id="d3" class="form-check-input shadow-none mb-3 me-1">
+                                    <label class="form-check-label" for="d3">Khoảng cách đến vị trí 3</label>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="checkbox" id="d4" class="form-check-input shadow-none m    b-3 me-1">
+                                    <label class="form-check-label" for="d4">Khoảng cách đến vị trí 4</label>
+                                </div>
+                            </div>
+                            <!--    facilities-->
+                            <div class="border bg-light p-3 rounded mb-3">
+                                <h5 style="font-size: 18px;" class="mb-3 fw-bold">Tiện ích</h5>
+                                <div class="mb-2">
+                                    <input type="checkbox" id="f1" class="form-check-input shadow-none mb-3 me-1">
+                                    <label class="form-check-label" for="f1">Tiện ích 1</label>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="checkbox" id="f2" class="form-check-input shadow-none mb-3 me-1">
+                                    <label class="form-check-label" for="f2">Tiện ích 2</label>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="checkbox" id="f3" class="form-check-input shadow-none mb-3 me-1">
+                                    <label class="form-check-label" for="f3">Tiện ích 3</label>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="checkbox" id="f4" class="form-check-input shadow-none mb-3 me-1">
+                                    <label class="form-check-label" for="f4">Tiện ích 4</label>
+                                </div>
+                            </div>
+                            <!--    guest-->
+                            <div class="border bg-light p-3 rounded mb-3">
+                                <h5 style="font-size: 18px;" class="mb-3 fw-bold">Khách hàng</h5>
+                                <div class="d-flex">
+                                    <div class="me-3">
+
+                                        <label for="" class="form-label">Người lớn</label>
+                                        <input type="number" class="form-control shadow-none">
+                                    </div>
+                                    <div>
+
+                                        <label for="" class="form-label">Trẻ em</label>
+                                        <input type="number" class="form-control shadow-none">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="col-lg-9 col-md-12 px-4">
+                <!--  card_hotel-->
+                <div th:each="hotel: ${hotels}" class="card mb-4 border-0 shadow">
+                    <div class="row g-0 p-3 align-items-center">
+                        <!--    Image-->
+                        <div class="col-md-5 mb-lg-0 md-md-0 mb-2">
+                            <img th:src="@{'/' + ${hotel.hotelImage}}" class="img-fluid rounded mx-auto d-block">
+                        </div>
+
+                        <div class="col-md-5 px-lg-3 px-md-3 px-0">
+                            <h4 th:text="${hotel.hotelName}" class="mb-2 fw-bold"></h4>
+                            <!--    location-->
+                            <div class="location mb-2">
+                                <h6 class="mb-1">Vị trí</h6>
+                                <span th:text="${hotel.hotelAddress}" style="font-size: 10.5px;"
+                                    class="fw-bold bg-light text-dark text-wrap">
+                                    <i class="bi bi-geo-fill"></i>
+                                </span>
+                            </div>
+
+                            <!--    facilities-->
+                            <div class="Facilities mb-2">
+                                <h6 th:each="facility : ${hotel.hotelFacility}" class="mb-1">Tiện ích</h6>
+                                <span th:text="${hotel.hotelFacility}"
+                                    class="badge rounded-pill bg-light text-dark text-wrap">
+
+                                </span>
+                                <!-- <span class="badge rounded-pill bg-light text-dark text-wrap">
+                                    Hồ bơi
+                                </span>
+                                <span class="badge rounded-pill bg-light text-dark text-wrap">
+                                    AC
+                                </span>
+                                <span class="badge rounded-pill bg-light text-dark text-wrap">
+                                    Điều hòa
+                                </span> -->
+                            </div>
+                            <!-- rating-->
+                            <div class="rating mb-2">
+                                <h6 class="mb-1">Đánh giá</h6>
+                                <span th:text="${hotel.hotelRating}"
+                                    class="badge rounded-pill bg-light text-dark text-wrap">
+                                    <!-- 
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    <i class="bi bi-star-fill text-warning"></i> 
+                                    -->
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 mt-lg-0 mt-md-0 mt-4 text-center">
+                            <h6 th:text="${hotel.hotelLowestPrice} + ' vnđ'" class="mb-4"></h6>
+                            <a href="#"
+                                class="btn btn-sm w-100 btn-info btn-outline-primary text-dark shadow-none mb-2 text-white">Đặt
+                                ngay</a>
+                            <a href="../html/room.html" class="btn btn-sm w-100 btn-outline-info text-dark">Thông tin
+                                chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <div class="more d-flex justify-content-center">
+        <button id="btn-more" onclick="loadMoreHotels()" class="btn border border-2">Xem thêm<i
+                class="bi bi-caret-right-fill"></i><i class="bi bi-caret-right-fill"></i></button>
+    </div>
+</body>
+
+</html>
