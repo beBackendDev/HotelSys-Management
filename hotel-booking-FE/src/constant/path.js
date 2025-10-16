@@ -34,6 +34,7 @@ class Path {
     this.updateUser= this.user + "/update";//Change Password
     this.changePass = this.user + "/password";//Change Pword
     this.purchase = this.user + "/purchase";//Purchase History
+    this.reviewPage = this.user + "/review/:bookingId";// Review Page
     this.review = this.user + "/review";// Review History
     this.notFound = "*";
   }

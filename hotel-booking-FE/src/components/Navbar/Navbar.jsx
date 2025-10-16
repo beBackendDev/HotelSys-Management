@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 const DropDownList = ({ roleId }) => {
   const dispatch = useDispatch();
   const history = useHistory();
+
   const handleLogout = async () => {
     try {
       const res = await dispatch(logout());
@@ -45,6 +46,31 @@ const DropDownList = ({ roleId }) => {
   );
 };
 const Navbar = () => {
+  const [user, setUser] = useState([]);
+  const token = localStorage?.getItem("accessToken");
+  const userStr = localStorage?.getItem("user");
+  const userLocal = JSON.parse(userStr);
+  const userId = userLocal?.userId;
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/user/profile/${userId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          }
+        });
+        const data = await res.json();
+        console.log("(Navbar)API-UserProfile:", data);
+        setUser(data);
+
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách đánh giá:", error);
+
+      }
+    }
+    fetchUser();
+  }, [userId]);
   const profile = useSelector((state) => state.auth.profile);
   const roleName = profile?.user?.roleName;
   const authenticated = useAuthenticated();
@@ -113,7 +139,7 @@ const Navbar = () => {
             <div className="flex items-center">
               <Dropdown overlay={DropDownList({ roleName })} trigger={["click"]}>
                 <a href="/" className="flex items-center">
-                  <Avatar src={profile.user?.image || placeholder }
+                  <Avatar src={user?.urlImg || placeholder}
                   />
 
                 </a>

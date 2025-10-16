@@ -1,5 +1,6 @@
 package com.thoaidev.bookinghotel.model.user.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -19,12 +20,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.dto.OtpData;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.mapper.BookingMapper;
 import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
+import com.thoaidev.bookinghotel.model.image.service.ImageService;
 import com.thoaidev.bookinghotel.model.review.mapper.ReviewMapper;
 import com.thoaidev.bookinghotel.model.role.Role;
 import com.thoaidev.bookinghotel.model.role.RoleRepository;
@@ -42,21 +45,21 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class UserServiceImplement implements UserService {
-
     @Autowired
+    private  ImageService imageService;
+
     private final UserRepository userRepository;
     @Autowired
     private final RoleRepository roleRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
     @Autowired
-    private BookingMapper bookingMapper;
+    private final BookingMapper bookingMapper;
     @Autowired
-    private ReviewMapper reviewMapper;
+    private final ReviewMapper reviewMapper;
     private final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
-
 
     /*
     ------------THAO TÁC VỚI NGƯỜI DÙNG ------------
@@ -90,6 +93,41 @@ public class UserServiceImplement implements UserService {
     public UserDto getUserById(Integer userId) {
         UserEntity user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundException("Đối tượng User không tồn tại"));
         return mapToUserDto(user);
+    }
+
+//UPLOAD HÌNH ẢNH CHO NGƯỜI DÙNG
+    @Override
+    public String uploadUserAvatar(Integer userId, MultipartFile file) {
+        try {
+            //Validate file
+            if (file == null || file.isEmpty()) {
+                throw new IllegalArgumentException("Invalid File Input");
+            }
+
+            //Validate Image Size 
+            if (file.getSize() > 5 * 1024 * 1024) {
+                throw new IllegalArgumentException("Kích thước ảnh không được vượt quá 5MB");
+            }
+
+            //Finding User
+            UserEntity user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User didnt Found"));
+
+            //Replace older Image( if have)
+            // if (user.getImgUrl() != null && !user.getImgUrl().isEmpty()) {
+            //     imageService.delete(user.getImgUrl()); // Xóa file cũ khỏi storage
+            // }
+
+            //Upload 
+            String avatarUrl = imageService.upload(file, "users/" + userId + "/avatar");
+            // Cập nhật user
+            user.setImgUrl(avatarUrl);
+            userRepository.save(user);
+
+            return avatarUrl;
+        } catch (IOException err) {
+            throw new RuntimeException("Error upload Avatar: " + err.getMessage(), err);
+        }
     }
 //CẬP NHẬP THÔNG TIN NGƯỜI DÙNG
 

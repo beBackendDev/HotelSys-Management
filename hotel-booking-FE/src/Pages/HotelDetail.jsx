@@ -43,7 +43,7 @@ const HotelDetail = () => {
 
   const userStr = localStorage.getItem("user");
   const user = JSON.parse(userStr);
-  const userId = user.userId;
+  const userId = user?.userId;
 
 
   // Map icon name (string) -> component

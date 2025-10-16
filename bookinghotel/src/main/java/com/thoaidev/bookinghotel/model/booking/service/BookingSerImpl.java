@@ -78,7 +78,7 @@ public class BookingSerImpl implements BookingSer {
             System.out.println("Canceled  " + expired.size() + " Time out.");
         }
     }
-
+    //Cron job thực hiện set booking_status
     @Scheduled(fixedRate = 60000)//60s/time
     @Transactional
     public void releaseCheckedOutRooms() {

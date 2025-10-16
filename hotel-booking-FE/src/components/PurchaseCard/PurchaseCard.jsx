@@ -1,7 +1,7 @@
-import { Col, Row, Typography } from "antd";
+import { Button, Col, Row, Typography } from "antd";
 import { formatDate, formatMoney } from "../../utils/helper";
 import React, { useEffect, useState } from "react";
-
+import { useHistory } from "react-router-dom";
 const PurchaseCard = ({ purchase }) => {
   const token = localStorage.getItem("accessToken");
   const checkin = formatDate(purchase.checkinDate).slice(-2);
@@ -14,6 +14,10 @@ const PurchaseCard = ({ purchase }) => {
 
   const price = (checkout - checkin) * purchase.totalPrice;//sai
 
+  const history = useHistory();
+  const handleReview = (bookingId) => {
+    history.push(`/user/review/${bookingId}`);
+  };
   useEffect(() => {
     const getHotel = async () => {
       try {
@@ -57,7 +61,7 @@ const PurchaseCard = ({ purchase }) => {
   return (
     <>
       <Row gutter={[24, 24]} className="px-5 py-10 rounded bg-gray-100 mt-4">
-        <Col sm={8}>
+        <Col sm={5}>
           <Typography.Text>{hotel.hotelName}</Typography.Text>
         </Col>
 
@@ -68,7 +72,7 @@ const PurchaseCard = ({ purchase }) => {
           <Typography.Text>
             {formatDate(purchase.checkinDate)}
           </Typography.Text>
-        </Col>        
+        </Col>
         <Col sm={3}>
           <Typography.Text>
             {formatDate(purchase.checkoutDate)}
@@ -79,6 +83,16 @@ const PurchaseCard = ({ purchase }) => {
         </Col>
         <Col sm={3}>
           <Typography.Text>{formatMoney(purchase.totalPrice)} (VNĐ)</Typography.Text>
+        </Col>
+        <Col sm={3}>
+          <Button
+            type="primary"
+            disabled={!purchase.canReview}
+            onClick={() => handleReview(purchase?.bookingId)}
+          >
+            {purchase?.canReview ? "Đánh giá" : "Hết hạn"}
+
+          </Button>
         </Col>
       </Row>
     </>

@@ -1,5 +1,7 @@
 package com.thoaidev.bookinghotel.model.user.service;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
 import com.thoaidev.bookinghotel.model.user.dto.request.ChangePasswordRequest;
 import com.thoaidev.bookinghotel.model.user.dto.request.ResetPasswordRequest;
@@ -17,7 +19,9 @@ public interface UserService {
     UserDto getUserById(Integer userId);
 //POST methods
 
+    String uploadUserAvatar(Integer userId, MultipartFile file);
 //PUT methods
+
     UserDto updateUser(UserDto userDto, Integer userId);
 
     void updateRole(Integer userId, String roleName);

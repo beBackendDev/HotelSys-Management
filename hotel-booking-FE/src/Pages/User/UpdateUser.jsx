@@ -7,7 +7,7 @@ import Icon, {
   SolutionOutlined,//gender
 
 } from "@ant-design/icons";
-import { Avatar, Col, Row, Typography, Descriptions, Divider, Button, Form, Input, Select, Upload, DatePicker } from "antd";
+import { Avatar, Col, Row, Typography, Descriptions, Divider, Button, Form, Input, Select, Upload, DatePicker, message } from "antd";
 
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -63,6 +63,42 @@ const UpdateUser = () => {
       });
     }
   }, [userInf, form]);
+
+ const handleUpload = async (options) => {
+  const { file, onSuccess, onError } = options;
+  const formData = new FormData();
+  formData.append("files", file);
+
+  setLoading(true);
+  try {
+    const res = await fetch(`http://localhost:8080/api/user/image/${userId}/upload`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json();
+    message.success("Upload thành công!");
+    console.log("Avatar URL:", data);
+
+    onSuccess(data); // ✅ dùng data, không phải res.data
+    return data;
+  } catch (error) {
+    console.error("Upload error:", error);
+    message.error("Upload thất bại!");
+    onError(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -144,7 +180,11 @@ const UpdateUser = () => {
             rules={[{ required: true }]}
           >
 
-            <Upload name="logo" action="/upload.do" listType="picture">
+            <Upload
+              name="file"
+              customRequest={handleUpload}
+              listType="picture"
+              showUploadList={false}>
               <Button>
                 <Icon type="upload" /> Click to upload
               </Button>

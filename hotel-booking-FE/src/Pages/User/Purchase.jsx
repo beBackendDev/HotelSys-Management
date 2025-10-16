@@ -61,7 +61,7 @@ const Purchase = () => {
         </Typography.Title>
 
         <Row gutter={[24, 24]} className="bg-orange-200 p-4">
-          <Col sm={8}>
+          <Col sm={5}>
             <Typography.Text className="font-bold">Khách sạn</Typography.Text>
           </Col>
           <Col sm={3}>
@@ -78,6 +78,9 @@ const Purchase = () => {
           </Col>
           <Col sm={3}>
             <Typography.Text className="font-bold">Giá (VNĐ)</Typography.Text>
+          </Col>
+          <Col sm={3}>
+            <Typography.Text className="font-bold">Thao tác</Typography.Text>
           </Col>
         </Row>
 

@@ -22,6 +22,7 @@ import SearchPage from "./Pages/SearchPage";
 import ChangePass from "./Pages/User/ChangePass";
 import Profile from "./Pages/User/Profile";
 import UpdateUser from "./Pages/User/UpdateUser";
+import ReviewPage from "./Pages/User/ReviewPage";
 import ReviewUser from "./Pages/User/ReviewUser";
 import ProfileHotel from "./Pages/Hotel/HotelProfile";
 import RoomProfile from "./Pages/Hotel/RoomProfile";
@@ -100,6 +101,12 @@ const Routes = () => {
       <Route exact path={path.updateUser} >
         <AuthenticatedGuard>
           <UpdateUser />
+        </AuthenticatedGuard>
+      </Route>
+      {/* Thực hiện đánh giá */}
+      <Route exact path={path.reviewPage} >
+        <AuthenticatedGuard>
+          <ReviewPage />
         </AuthenticatedGuard>
       </Route>
       {/* Xem lịch sử đánh giá */}

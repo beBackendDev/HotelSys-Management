@@ -250,12 +250,13 @@ public class HotelServiceImplement implements HotelService {
     @Override
     public List<String> imgUpload(Integer hotelId, List<MultipartFile> files, String hotelName) {
         try {
+            // throw lỗi khi input không chứa giá trị
             if (files == null || files.isEmpty()) {
-                throw new IllegalArgumentException("Danh sách File không hợp lệ");
+                throw new IllegalArgumentException("Invalid Image File");
             }
 
             Hotel hotel = hotelRepository.findById(hotelId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khách sạn"));
+                    .orElseThrow(() -> new RuntimeException("Hotel didnt found"));
 
             // Tạo danh sách chứa tất cả url ảnh được up lên
             List<String> uploadedUrls = new ArrayList<>();

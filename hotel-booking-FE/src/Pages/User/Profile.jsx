@@ -86,7 +86,7 @@ const Profile = () => {
           {/* Avatar */}
           <Col span={8} className="flex flex-col items-center">
             <Avatar
-              src={userAuth?.avatar || avtHolder}
+              src={user?.urlImg || avtHolder}
               size={160}
               icon={<UserOutlined />}
             />

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
@@ -276,6 +277,15 @@ public class UserCtrl {
     }
 //------------------- USER -------------------    
     // Xem thông tin cá nhân thoong qua JWT Token
+
+    @PostMapping("/image/{userId}/upload")
+    public ResponseEntity<String> userAvatar(
+            @PathVariable Integer userId,
+            @RequestParam("files") MultipartFile files
+            ) {
+                String avtUrl = userService.uploadUserAvatar(userId, files);
+                return ResponseEntity.ok(avtUrl);
+    }
 
     @GetMapping("/profile")
     public ResponseEntity<UserDto> userDetail(@AuthenticationPrincipal CustomUserDetail user) {

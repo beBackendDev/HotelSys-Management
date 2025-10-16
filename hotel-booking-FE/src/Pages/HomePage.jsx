@@ -47,7 +47,7 @@ const HomePage = () => {
 
           <Row gutter={[16, 16]}>
             {hotels.map((hotels, index) => (
-              <Col xl={6} key={hotels.id || index}>
+              <Col xl={6} key={hotels?.id || index}>
                 <CardItem data={hotels} />
               </Col>
             ))}

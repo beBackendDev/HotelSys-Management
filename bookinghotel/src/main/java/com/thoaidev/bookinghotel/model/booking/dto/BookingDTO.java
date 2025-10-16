@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @Builder
 public class BookingDTO {
-    // private Integer bookingId;
+    private Integer bookingId;
     private Integer hotelId;
     private Integer roomId;
     // private Integer userId;
@@ -25,5 +25,8 @@ public class BookingDTO {
     private String guestPhone;
     private String guestEmail;
     private String guestCccd;
+
+    //validate review 
+    private boolean canReview;
 
 }
