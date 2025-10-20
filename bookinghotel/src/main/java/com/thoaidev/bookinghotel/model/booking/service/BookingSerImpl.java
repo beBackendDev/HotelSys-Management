@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
@@ -78,6 +79,8 @@ public class BookingSerImpl implements BookingSer {
             System.out.println("Canceled  " + expired.size() + " Time out.");
         }
     }
+    
+    
     //Cron job thực hiện set booking_status
     @Scheduled(fixedRate = 60000)//60s/time
     @Transactional
@@ -173,5 +176,11 @@ public class BookingSerImpl implements BookingSer {
         bookingResponse.setTotalPage(bookings.getTotalPages());
         bookingResponse.setLast(bookings.isLast());
         return bookingResponse;
+    }
+    @Override
+    public BookingDTO getBookingById(Integer id){
+        Booking booking = bookingRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Booking not Foung"));
+            return bookingMapper.toDTO(booking);
     }
 }

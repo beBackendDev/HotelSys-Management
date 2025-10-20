@@ -21,6 +21,7 @@ import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
 import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
 import com.thoaidev.bookinghotel.model.review.mapper.ReviewMapper;
 import com.thoaidev.bookinghotel.model.review.repo.ReviewRepository;
+import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
 import lombok.RequiredArgsConstructor;
@@ -48,25 +49,52 @@ public class ReviewSerImpl implements ReviewSer {
         if (bookings.isEmpty()) {
             throw new RuntimeException("Bạn chưa có quyền đánh giá khách sạn này");
         }
-//Thuc hien luu thong tin nhan xet vao table HotelReview 
-        HotelReview review = new HotelReview();
-        review.setHotel(bookings.get(0).getHotel());
-        review.setUser(bookings.get(0).getUser());
-        review.setRatingPoint(hotelReviewDTO.getRatingPoint());
-        review.setComment(hotelReviewDTO.getComment());
-        review.setCreatedAt(LocalDateTime.now());
 
-        reviewRepository.save(review);
-//
-        // Cập nhật rating trung bình và tổng số review
-        Double avgRating = reviewRepository.getAverageRatingByHotelId(hotelId);
-        Integer totalReviews = reviewRepository.countByHotel_HotelId(hotelId);
-
+        //Kiểm tra người dùng đã từng review trước đó chưa
+        boolean existReview = reviewRepository.existReview(userId, hotelId);
         Hotel hotel = bookings.get(0).getHotel();
-        hotel.setRatingPoint(avgRating);
-        hotel.setTotalReview(totalReviews);
+        UserEntity user = bookings.get(0).getUser();
+        System.out.println("Reviewed Boolean: " + existReview);
+        if (existReview) {
+            //Đưa ra option chho người dùng thực hiện chỉnh sửa thay vì log ra RuntimeException
+            //
+            HotelReview existingReview = reviewRepository
+                    .findOptionalByUserIdAndHotelId(userId, hotelId)
+                    .orElse(null);
+            if (existingReview == null) {
+                throw new RuntimeException("Không tìm thấy đánh giá cũ của người dùng này.");
+            }
+            if (hotelReviewDTO.getRatingPoint() != null) {
+                existingReview.setRatingPoint(hotelReviewDTO.getRatingPoint());
+            }
+            if (hotelReviewDTO.getComment() != null) {
+                existingReview.setComment(hotelReviewDTO.getComment());
+            }
+            if (hotelReviewDTO.getCreatedAt() != null) {
+                existingReview.setCreatedAt(hotelReviewDTO.getCreatedAt());
+            }
+            reviewRepository.save(existingReview);
 
-        hotelRepository.save(hotel);
+        } else {
+            //Thuc hien luu thong tin nhan xet vao table HotelReview 
+            HotelReview review = new HotelReview();
+            review.setHotel(hotel);
+            review.setUser(user);
+            review.setRatingPoint(hotelReviewDTO.getRatingPoint());
+            review.setComment(hotelReviewDTO.getComment());
+            review.setCreatedAt(LocalDateTime.now());
+
+            reviewRepository.save(review);
+//
+            // Cập nhật rating trung bình và tổng số review
+            Double avgRating = reviewRepository.getAverageRatingByHotelId(hotelId);
+            Integer totalReviews = reviewRepository.countByHotel_HotelId(hotelId);
+
+            hotel.setRatingPoint(avgRating);
+            hotel.setTotalReview(totalReviews);
+
+            hotelRepository.save(hotel);
+        }
     }
 
     @Override

@@ -14,7 +14,7 @@ import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 
 public interface BookingRepo extends JpaRepository<Booking, Integer> {
-
+        //Tìm kiếm booking dựa trên userId
     Page<Booking> findByUser(UserEntity user, Pageable pageable);
 
     //kiểm tra tính khả thi khi viết Review của người dùng

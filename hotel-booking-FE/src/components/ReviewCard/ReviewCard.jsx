@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 
 const ReviewCard = ({ review }) => {
   const token = localStorage.getItem("accessToken");
+  const formatDate = new Date(review?.createdAt);
+  const date = formatDate.toLocaleDateString("vi-VN");
   console.log("(ReviewCard) pass values:",review);
   
   // const checkin = formatDate(review.checkinDate).slice(-2);
@@ -28,7 +30,7 @@ const ReviewCard = ({ review }) => {
 
         );
         const data = await res.json();
-        // console.log("(PurchaseCard)API-Hotel:", data);
+        console.log("(ReviewCard)API-Hotel:", data);
         setHotel(data);
       } catch (err) {
         console.error("Lỗi khi lấy thông tin khách sạn:", err);
@@ -46,7 +48,7 @@ const ReviewCard = ({ review }) => {
 
         );
         const data = await res.json();
-        // console.log("(PurchaseCard)API-Room", data);
+        console.log("(ReviewCard)API-Room", data);
         setRooms(data);
       } catch (err) {
         console.error("Lỗi khi lấy thông tin phòng:", err);
@@ -61,22 +63,18 @@ const ReviewCard = ({ review }) => {
         <Col sm={8}>
           <Typography.Text>{hotel?.hotelName}</Typography.Text>
         </Col>
-
-        <Col sm={3}>
-          <Typography.Text>{room?.roomName}</Typography.Text>
-        </Col>
         <Col sm={3}>
           <Typography.Text>
             {review?.ratingPoint}
           </Typography.Text>
         </Col>
-        <Col sm={6}>
+        <Col sm={9}>
           <Typography.Text>
-            {review?.coment}
+            {review?.comment}
           </Typography.Text>
         </Col>
         <Col sm={4}>
-          <Typography.Text>{review?.createAt}</Typography.Text>
+          <Typography.Text>{date}</Typography.Text>
         </Col>
 
       </Row>

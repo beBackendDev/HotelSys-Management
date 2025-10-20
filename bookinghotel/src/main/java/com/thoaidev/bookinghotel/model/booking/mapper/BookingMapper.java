@@ -11,7 +11,6 @@ import com.thoaidev.bookinghotel.model.enums.BookingStatus;
 
 @Component
 public class BookingMapper {
-
     public BookingDTO toDTO(Booking booking) {
         if (booking == null) return null;
         //Thực hiện kiểm tra xem tính khả thi của người dùng khi đánh giá:

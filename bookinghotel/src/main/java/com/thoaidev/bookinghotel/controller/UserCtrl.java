@@ -1,6 +1,7 @@
 package com.thoaidev.bookinghotel.controller;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -158,18 +159,24 @@ public class UserCtrl {
         bookingService.cancelBooking(id);
         return ResponseEntity.ok("Booking cancelled");
     }
-    // Xem lịch sử đặt phòng)(với từng username thì xem lịch sử tương ứng username đó)
+    // Xem toàn bộ lịch sử đặt phòng)(với từng username thì xem lịch sử tương ứng username đó)
 
     @GetMapping("/hotels/booking-management")
     public ResponseEntity<BookingResponse> listBookings(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
-            @AuthenticationPrincipal CustomUserDetail userDetails
-    ) {
+            @AuthenticationPrincipal CustomUserDetail userDetails)
+    {
         return new ResponseEntity<>(bookingService.getAllBookings(userDetails.getId(), pageNo, pageSize), HttpStatus.OK);
 
     }
-
+    @GetMapping("booking/{id}")
+    public ResponseEntity<BookingDTO> getBooking(
+        @PathVariable Integer id
+    ){
+        BookingDTO booking = bookingService.getBookingById(id);
+        return new ResponseEntity<>(booking, HttpStatus.OK);
+    }
 // // Thanh toán VNPay X
 //     @PostMapping("/public/create-payment")
 //     public String submidOrder(  @RequestBody PaymentInitRequest req, 
@@ -219,13 +226,13 @@ public class UserCtrl {
     @PostMapping("/hotels/reviews")
     public ResponseEntity<?> createReview(@RequestBody HotelReviewDTO reviewDTO) {
         reviewSer.createReview(reviewDTO);
-        return ResponseEntity.ok(Map.of(
-                "hotel id: ", reviewDTO.getHotelId(),
-                // "user id: ", reviewDTO.getUserId(),
-                "rating point: ", reviewDTO.getRatingPoint(),
-                "created: ", reviewDTO.getCreatedAt(),
-                "comment: ", reviewDTO.getComment()
-        ));
+        Map<String, Object> response = new HashMap<>();
+        response.put("hotel id", reviewDTO.getHotelId());
+        response.put("user id", reviewDTO.getUserId());
+        response.put("rating point", reviewDTO.getRatingPoint());
+        response.put("created", reviewDTO.getCreatedAt());
+        response.put("comment", reviewDTO.getComment());
+        return ResponseEntity.ok(response);
     }
     // Xem danh sách đánh giá theo hotelId
 

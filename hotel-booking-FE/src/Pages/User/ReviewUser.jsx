@@ -39,7 +39,7 @@ const ReviewUser = () => {
                     }
                 );
                 const data = await res.json();
-                console.log("(ReviewUser)Reviews: ", data);
+                console.log("(ReviewUser)Reviews: ", data.content);
 
                 setReviewList(data?.content || []);
                 setPagination((prev) => ({
@@ -80,12 +80,9 @@ const ReviewUser = () => {
                         <Typography.Text className="font-bold">Khách sạn</Typography.Text>
                     </Col>
                     <Col sm={3}>
-                        <Typography.Text className="font-bold">Phòng đã đặt</Typography.Text>
-                    </Col>
-                    <Col sm={3}>
                         <Typography.Text className="font-bold">Điểm đánh giá</Typography.Text>
                     </Col>
-                    <Col sm={6}>
+                    <Col sm={9}>
                         <Typography.Text className="font-bold">Nội dung</Typography.Text>
                     </Col>
                     <Col sm={4}>
@@ -93,9 +90,9 @@ const ReviewUser = () => {
                     </Col>
                 </Row>
 
-                {reviewList?.map((review) => (
+                {reviewList.map((review) => (
                     <ReviewCard
-                        purchase={review}
+                        review={review}
                         key={review.id}
                     />
                 ))}
