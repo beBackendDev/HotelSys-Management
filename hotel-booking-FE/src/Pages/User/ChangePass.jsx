@@ -13,15 +13,20 @@ const ChangePass = () => {
   const [error, setError] = useState("");
   const { user } = useSelector((state) => state.auth.profile);
   const onFinish = async (values) => {
+    console.log("(ChangePass) Input data: ", values);
+
     delete values.confirm;
     const _data = {
       ...values,
       id: String(user.id),
     };
     try {
+      console.log("(ChangePass) Input data: ", _data);
+
       const res = await dispatch(changePassword(_data));
       unwrapResult(res);
       toast.success("Cập nhập mật khẩu thành công");
+      //Sau khi update new pw thì thực hiện logic logout và chuyển hướng tới trang login
       history.push("/");
     } catch (error) {
       if (error.status === 405) {
@@ -48,7 +53,7 @@ const ChangePass = () => {
         >
           <Form.Item
             label="Mật khẩu cũ"
-            name="old_password"
+            name="oldPassword"
             rules={rules.password}
             help={error || null}
           >
@@ -56,7 +61,7 @@ const ChangePass = () => {
           </Form.Item>
           <Form.Item
             label="Mật khẩu mới"
-            name="new_password"
+            name="newPassword"
             rules={[
               {
                 required: true,
@@ -64,7 +69,7 @@ const ChangePass = () => {
               },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("old_password") === value) {
+                  if (!value || getFieldValue("oldPassword") === value) {
                     return Promise.reject(
                       new Error("Mật khẩu mới trùng với mật khẩu cũ")
                     );
@@ -88,7 +93,7 @@ const ChangePass = () => {
               },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("new_password") === value) {
+                  if (!value || getFieldValue("newPassword") === value) {
                     return Promise.resolve();
                   }
                   return Promise.reject(new Error("Mật khẩu không khớp"));

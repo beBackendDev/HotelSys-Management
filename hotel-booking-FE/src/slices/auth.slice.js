@@ -41,6 +41,7 @@ export const updateMe = createAsyncThunk(
   // "auth/update-profile",
   payloadCreator(authApi.updateProfile)
 );
+//Không dùng
 export const changePassword = createAsyncThunk(
   "auth/changePass",
   payloadCreator(authApi.changePass)

@@ -20,6 +20,7 @@ import Register from "./Pages/Register";
 import RegisterMember from "./Pages/RegisterMember";
 import SearchPage from "./Pages/SearchPage";
 import ChangePass from "./Pages/User/ChangePass";
+import ForgetPw from "./Pages/User/ForgetPw";
 import Profile from "./Pages/User/Profile";
 import UpdateUser from "./Pages/User/UpdateUser";
 import ReviewPage from "./Pages/User/ReviewPage";
@@ -120,6 +121,10 @@ const Routes = () => {
         <AuthenticatedGuard>
           <ChangePass />
         </AuthenticatedGuard>
+      </Route>
+            {/* Quên password */}
+      <Route exact path={path.forgetPw}>
+          <ForgetPw />
       </Route>
       {/* Thanh toán */}
       <Route exact path={path.purchase}>

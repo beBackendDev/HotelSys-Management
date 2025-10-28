@@ -13,15 +13,19 @@ import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
+import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -47,39 +51,37 @@ public class Hotel implements Serializable {
     private Integer hotelId;//Id khach san
 
     @Column(name = "hotel_name")
-    private String hotelName;//ten khach san
+    private String hotelName;//Tên khách sạn
 
     @Column(name = "hotel_address")
-    private String hotelAddress;//dia chi khach san
+    private String hotelAddress;//Địa chỉ khách sạn
 
     @Column(name = "hotel_average_price")
-    private BigDecimal hotelAveragePrice;//gia tien trung binh
-
-
+    private BigDecimal hotelAveragePrice;//Giá tiền trung bình
 
     @Enumerated(EnumType.STRING)
     @Column(name = "hotel_status")
-    private HotelStatus hotalStatus;
+    private HotelStatus hotalStatus;//Tình trạng khách sạn( còn hay hết phòng)
 
     @Column(name = "hotel_contact_mail")
-    private String hotelContactMail;//Email lien he
+    private String hotelContactMail;//Email liên hệ
 
     @Column(name = "hotel_contact_phone")
-    private String hotelContactPhone;//Phone lien he
+    private String hotelContactPhone;//Sđt liên lạc
 
     @Column(name = "hotel_description", columnDefinition = "TEXT")
-    private String hotelDescription;//mo ta khách san
+    private String hotelDescription;//Thông tin mô tả
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> hotelImages = new ArrayList<>();
 
     @Column(name = "hotel_created_at")
     @CreationTimestamp
-    private LocalDateTime hotelCreatedAt;//ngay tao
+    private LocalDateTime hotelCreatedAt;//Ngày được tạo
 
     @Column(name = "hotel_updated_at")
     @UpdateTimestamp
-    private LocalDateTime hotelUpdatedAt;//ngay duoc nang cap
+    private LocalDateTime hotelUpdatedAt;//Ngày được nâng cấp
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
@@ -96,5 +98,10 @@ public class Hotel implements Serializable {
     // Quan hệ 1-N với HotelFacility
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelFacility> facilities = new ArrayList<>();
+
+    //Mở rộng cho role == OWNER
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id") // foreign key
+    private UserEntity owner;
 
 }

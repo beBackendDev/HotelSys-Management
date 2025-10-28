@@ -14,6 +14,7 @@ const authApi = {
   updateProfile(data) {
     return http.put("api/user/profile/update", data);
   },
+  //không dùng
   changePass(data) {
     // return http.put("user/pass", data); //code cũ
     return http.put("api/user/profile/change-password", data);

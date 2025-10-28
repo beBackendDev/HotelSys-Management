@@ -45,6 +45,8 @@ import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
 import com.thoaidev.bookinghotel.model.user.dto.request.ChangePasswordRequest;
+import com.thoaidev.bookinghotel.model.user.dto.request.ForgetPwRequest;
+import com.thoaidev.bookinghotel.model.user.dto.request.OwnerRequest;
 import com.thoaidev.bookinghotel.model.user.dto.request.ResetPasswordRequest;
 import com.thoaidev.bookinghotel.model.user.dto.request.UserUpdateRequest;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
@@ -165,41 +167,19 @@ public class UserCtrl {
     public ResponseEntity<BookingResponse> listBookings(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
-            @AuthenticationPrincipal CustomUserDetail userDetails)
-    {
+            @AuthenticationPrincipal CustomUserDetail userDetails) {
         return new ResponseEntity<>(bookingService.getAllBookings(userDetails.getId(), pageNo, pageSize), HttpStatus.OK);
 
     }
+
     @GetMapping("booking/{id}")
     public ResponseEntity<BookingDTO> getBooking(
-        @PathVariable Integer id
-    ){
+            @PathVariable Integer id
+    ) {
         BookingDTO booking = bookingService.getBookingById(id);
         return new ResponseEntity<>(booking, HttpStatus.OK);
     }
-// // Thanh toán VNPay X
-//     @PostMapping("/public/create-payment")
-//     public String submidOrder(  @RequestBody PaymentInitRequest req, 
-//                                 HttpServletRequest servletRequest) throws Exception {
-//         // String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-//         String vnpayUrl = vnPayService.createOrder(req, servletRequest);
-//         return "redirect:" + vnpayUrl;
-//     }
-// //chưa dùng
-// @PostMapping("/public/query-vnpay")
-// public ResponseEntity<?> queryVNPay(@RequestBody PaymentQueryRequest req,
-//                                      HttpServletRequest servletRequest) {
-//     try {
-//         String ip = VNPayConfig.getIpAddress(servletRequest);
-//         JsonObject result = vnPayService.queryTransaction(req, ip);
-//         // Convert JsonObject to Map for Jackson to serialize
-//         Map<String, Object> map = new Gson().fromJson(result, Map.class);
-//         return ResponseEntity.ok(map);
-//     } catch (Exception e) {
-//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                 .body("Error querying transaction: " + e.getMessage());
-//     }
-// }
+
 // ------------------- PAYMENT -------------------    
     //Trả về kết quả đặt phòng
     @GetMapping("/public/vnpay-payment")
@@ -245,6 +225,7 @@ public class UserCtrl {
         return new ResponseEntity<>(reviewSer.getReviewsByHotelId(id, pageNo, pageSize), HttpStatus.OK);
     }
 
+    // Danh sách đánh giá Pagination
     @GetMapping("/user/{id}/reviews-list")
     public ResponseEntity<ReviewResponse> reviews_list_user(
             @RequestParam(value = "pageNo", defaultValue = "", required = false) int pageNo,
@@ -254,7 +235,6 @@ public class UserCtrl {
         return new ResponseEntity<>(reviewSer.getReviewsByUserId(id, pageNo, pageSize), HttpStatus.OK);
     }
 
-    // Danh sách đánh giá Pagination
 //------------------- FAVORITE -------------------    
     // Yêu thích khách sạn
     @PostMapping("/favorites/add")
@@ -283,15 +263,31 @@ public class UserCtrl {
         return ResponseEntity.ok(dtoList);
     }
 //------------------- USER -------------------    
-    // Xem thông tin cá nhân thoong qua JWT Token
 
+    //Đăng kí thành OWNER 
+    @PostMapping("/owner-request")
+    public ResponseEntity<?> postMethodName(
+            @AuthenticationPrincipal CustomUserDetail user,
+            @RequestBody OwnerRequest ownerRq) {
+
+        userService.updateOnwerRequest(user.getId(), ownerRq);
+        Map<String, Object> response = new HashMap<>();
+        response.put("user id:", user.getId());
+        response.put("Business License Number:", ownerRq.getBusinessLicenseNumber());
+        response.put("Owner Experience:", ownerRq.getExperienceInHospitality());
+        response.put("Owner Description:", ownerRq.getOwnerDescription());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Xem thông tin cá nhân thoong qua JWT Token
     @PostMapping("/image/{userId}/upload")
     public ResponseEntity<String> userAvatar(
             @PathVariable Integer userId,
             @RequestParam("files") MultipartFile files
-            ) {
-                String avtUrl = userService.uploadUserAvatar(userId, files);
-                return ResponseEntity.ok(avtUrl);
+    ) {
+        String avtUrl = userService.uploadUserAvatar(userId, files);
+        return ResponseEntity.ok(avtUrl);
     }
 
     @GetMapping("/profile")
@@ -326,21 +322,14 @@ public class UserCtrl {
 
 // // quên mật khẩu (email)
 // //gửi mã code về email để thực hiện đổi mật khẩu
-    @PostMapping("/auth/forgot-password")
-    public ResponseEntity<String> sendResetCode(@RequestParam String email) {
+    @PostMapping("/public/forgot-password")
+    public ResponseEntity<String> sendResetCode(@RequestBody ForgetPwRequest email) {
         userService.sendResetPasswordCode(email);
         return ResponseEntity.ok("Reset code sent to email.");
     }
 
-    //Thực hiện gửi mã xác nhận Reset Pw
-    @PostMapping("/send-reset-code")
-    public ResponseEntity<String> sendCode(@AuthenticationPrincipal CustomUserDetail user) {
-        userService.sendResetPasswordCode(user.getUsername());
-        return ResponseEntity.ok("Reset code sent to email.");
-    }
-
-    //Thực hiện thao tác Reset
-    @PostMapping("/reset-password")
+    //Thực hiện thao tác reset PW
+    @PostMapping("/public/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
         userService.resetPasswordWithCode(request);
         return ResponseEntity.ok("Password has been reset.");

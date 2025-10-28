@@ -30,18 +30,23 @@ import com.thoaidev.bookinghotel.model.hotel.mapper.HotelMapper;
 import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
 import com.thoaidev.bookinghotel.model.image.service.ImageService;
+import com.thoaidev.bookinghotel.model.role.Role;
+import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
+import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
+
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class HotelServiceImplement implements HotelService {
 
     @Autowired
     private HotelMapper hotelMapper;
     @Autowired
     private final HotelRepository hotelRepository;
+    @Autowired
+    private final UserRepository userRepository;
 
-    public HotelServiceImplement(HotelRepository hotelRepo) {
-        this.hotelRepository = hotelRepo;
-    }
     @Autowired
     private ImageService imageService;
 
@@ -102,7 +107,21 @@ public class HotelServiceImplement implements HotelService {
     //Admin: tạo mởi khách sạn
     @Override
     public HotelDto createHotel(HotelDto hotelDto) {
+        UserEntity user = userRepository.findByUserId(hotelDto.getOwnerId())
+                .orElseThrow(() -> new RuntimeException("User not Found"));
+
+        String roleUser = user.getRoles()
+                    .stream()
+                    .findFirst()
+                    .map(Role::getRoleName)
+                    .orElse(null);
+
+        if(!roleUser.equals("OWNER")) {
+            throw new RuntimeException("Invalid Create with role USER");
+        }
+
         Hotel hotel = new Hotel();
+        hotel.setOwner(user); //  thực hiện cập nhật người sở hữu
         hotel.setHotelName(hotelDto.getHotelName());
         hotel.setHotelAddress(hotelDto.getHotelAddress());
         hotel.setHotelDescription(hotelDto.getHotelDescription());

@@ -37,4 +37,6 @@ public class HotelDto {
         return hotelImageUrls != null ? hotelImageUrls : Collections.emptyList();
 
     }
+
+    private Integer ownerId;
 }

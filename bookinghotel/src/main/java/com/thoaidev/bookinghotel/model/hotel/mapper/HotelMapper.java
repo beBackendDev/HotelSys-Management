@@ -27,7 +27,8 @@ public class HotelMapper {
                 .map((HotelFacility f) -> new HotelFacilityDTO(f.getId(), f.getIcon(), f.getName()))
                 .collect(Collectors.toList());
 
-        return HotelDto.builder()
+                HotelDto hotelDto =  HotelDto
+                .builder()
                 .hotelId(hotel.getHotelId())
                 .hotelName(hotel.getHotelName())
                 .hotelImageUrls(imageUrls)
@@ -42,7 +43,10 @@ public class HotelMapper {
                 .totalReview(hotel.getTotalReview())
                 .hotelCreatedAt(hotel.getHotelCreatedAt())
                 .hotelUpdatedAt(hotel.getHotelUpdatedAt())
+                .ownerId(hotel.getOwner().getUserId())//thực hiện lấy id người dùng <=> id owner
                 .build();
+                
+        return hotelDto;
     }
 
     // Map ngược lại từ DTO → Entity

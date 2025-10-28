@@ -33,6 +33,7 @@ class Path {
     this.user = "/user";//Update user
     this.updateUser= this.user + "/update";//Change Password
     this.changePass = this.user + "/password";//Change Pword
+    this.forgetPw = this.user + "forget-password";//forget Password
     this.purchase = this.user + "/purchase";//Purchase History
     this.reviewPage = this.user + "/review/:bookingId";// Review Page
     this.review = this.user + "/review";// Review History

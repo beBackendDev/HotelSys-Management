@@ -19,11 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
 import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
+import com.thoaidev.bookinghotel.model.role.OwnerResponseDTO;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
@@ -202,13 +204,6 @@ public class AdminCtrl {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/users/{id}/update/role")
-    public ResponseEntity<String> updateRole(@PathVariable("id") Integer userId,
-            @RequestBody UpdateUserRoleRequest request) {
-        userService.updateRole(userId, request.getRoleName());
-        return new ResponseEntity<>("Cập nhật phân quyền thành công", HttpStatus.OK);
-    }
-
 //DELETE methods
     // Xóa khách sạn theo ID
     @DeleteMapping("/users/{id}/delete")
@@ -216,5 +211,16 @@ public class AdminCtrl {
 
         userService.deleteUserById(id);
         return new ResponseEntity<>("User deleted", HttpStatus.OK);
+    }
+
+// Mở rộng cho OWNER
+    //Response Owner
+    @PutMapping("/update-role/user/{id}")
+    public ResponseEntity<String> updateRole(@PathVariable("id") Integer userId,
+            @RequestBody OwnerResponseDTO res) {
+                 System.out.println("===> Controller received: userId=" + userId + ", decision=" + res.getDecision() +"/"+ OwnerResponseStatus.APPROVED.name());
+                //request = {userId, roleName}
+        userService.updateRole(userId, res.getDecision());
+        return new ResponseEntity<>(res.getAdminNote(), HttpStatus.OK);
     }
 }

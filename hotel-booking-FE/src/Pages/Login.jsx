@@ -1,5 +1,5 @@
 import { unwrapResult } from "@reduxjs/toolkit";
-import { Button, Col, Form, Input, Row } from "antd";
+import { Button, Checkbox, Col, Form, Input, Row, Typography } from "antd";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
@@ -11,6 +11,9 @@ import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import styles from "../styles/pages/login.module.scss";
 import { toast } from "react-toastify";
+import Logo from "../assets/images/Logo.png";
+import { path } from "../constant/path";
+
 
 const Login = ({ heading, role }) => {
   const dispatch = useDispatch();
@@ -34,7 +37,7 @@ const Login = ({ heading, role }) => {
       const meResponse = await authApi.getMe();
       const userData = meResponse.data;
       console.log(">>_Login.jsx__thông tin người dùng :", meResponse);
-    
+
       //Lưu vào Redux và localStorage
       // dispatch(setProfile(userData));
       // localStorage.setItem("user", JSON.stringify(userData));
@@ -55,8 +58,8 @@ const Login = ({ heading, role }) => {
         setError(error.data.message);
       }
       else {
-      toast.error("Đăng nhập thất bại, vui lòng thử lại.");
-    }
+        toast.error("Đăng nhập thất bại, vui lòng thử lại.");
+      }
     }
   };
   //Gọi API để lấy thông tin người dùng
@@ -69,71 +72,97 @@ const Login = ({ heading, role }) => {
 
 
   return (
-    <>
-      <div className="overflow-hidden">
-        <Row>
-          <Col xl={role === 1 ? 12 : 24}>
-            <div className={styles.formContainer}>
-              <Form
-                className={styles.form}
-                name="basic"
-                initialValues={{
-                  remember: true,
-                }}
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <Row
+        gutter={0}
+        className="bg-white shadow-lg rounded-2xl overflow-hidden w-[90%] md:w-[70%] lg:w-[60%]"
+      >
+        {/* Cột trái - Form */}
+        <Col
+          xs={24}
+          lg={role !== 2 ? 12 : 24}
+          className="p-8 flex flex-col justify-center bg-slate-200"
+        >
+          <Typography.Title
+            level={2}
+            className="text-center text-blue-600 mb-8"
+          >
+            {heading || "Đăng nhập"}
+          </Typography.Title>
+
+          <Form
+            layout="vertical"
+            name="login"
+            onFinish={onFinish}
+            onFinishFailed={onFinishFailed}
+            autoComplete="off"
+          >
+            {/* Email */}
+            <Form.Item
+              label="Email"
+              name="username"
+              rules={rules?.email || [{ required: true, message: "Vui lòng nhập email!" }]}
+            >
+              <Input placeholder="Nhập email" />
+            </Form.Item>
+
+            {/* Mật khẩu */}
+            <Form.Item
+              label="Mật khẩu"
+              name="password"
+              rules={rules?.password || [{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+              validateStatus={error ? "error" : ""}
+              help={error || ""}
+            >
+              <Input.Password placeholder="Nhập mật khẩu" />
+            </Form.Item>
+
+            {/* Lưu thông tin + Quên mật khẩu */}
+            <div className="flex justify-between items-center mb-4">
+              <Checkbox>Ghi nhớ đăng nhập</Checkbox>
+              <Link
+                to={path.forgetPw}
+                className="text-blue-500 hover:underline"
               >
-                <Form.Item>
-                  <div className="text-center flex items-center flex-col justify-center">
-                    <h1 className={styles.formHeading}>{heading}</h1>
-                  </div>
-                </Form.Item>
-
-                <Form.Item
-                  label="Email"
-                  name="username"
-                  rules={rules.email}>
-                  <Input />
-                </Form.Item>
-
-                <Form.Item
-                  label="Mật khẩu"
-                  name="password"
-                  rules={rules.password}
-                  validateStatus="error"
-                  help={error || null}
-                >
-                  <Input.Password />
-                </Form.Item>
-
-                <div className="flex justify-center mt-6">
-                  <Form.Item>
-                    <Button type="primary" htmlType="submit">
-                      Login
-                    </Button>
-                  </Form.Item>
-                </div>
-                {role !== 2 ? (
-                  <div>
-                    <span>Bạn chưa có tài khoản?.</span>
-                    <Link to="/register">Đăng kí</Link>
-                  </div>
-                ) : null}
-              </Form>
+                Quên mật khẩu?
+              </Link>
             </div>
-          </Col>
-          {role === 1 ? (
-            <Col xl={12}>
-              <div className={styles.loginRight}>
-                <span>Go happy, go anywhere.</span>
-                <h1>Stay here</h1>
+
+            {/* Nút đăng nhập */}
+            <Form.Item className="text-center mt-6">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                Đăng nhập
+              </Button>
+            </Form.Item>
+
+            {/* Link đăng ký */}
+            {role !== 2 && (
+              <div className="text-center mt-4">
+                <span>Chưa có tài khoản? </span>
+                <Link to="/register" className="text-blue-500 hover:underline">
+                  Đăng ký ngay
+                </Link>
               </div>
-            </Col>
-          ) : null}
-        </Row>
-      </div>
-    </>
+            )}
+          </Form>
+        </Col>
+
+        {/* Cột phải - Banner */}
+        {role !== 2 && (
+          <Col
+            lg={12}
+            className="hidden lg:flex flex-col justify-center items-center bg-gradient-to-br from-sky-400 to-sky-500 p-10"
+          >
+            <img src={Logo} alt="Logo" className="w-{100px} h-{100px} object-contain" />
+
+          </Col>
+        )}
+      </Row>
+    </div>
   );
 };
 

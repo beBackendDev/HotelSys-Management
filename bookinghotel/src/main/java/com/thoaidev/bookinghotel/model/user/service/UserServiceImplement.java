@@ -26,17 +26,23 @@ import com.thoaidev.bookinghotel.dto.OtpData;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.mapper.BookingMapper;
+import com.thoaidev.bookinghotel.model.enums.OwnerRequestStatus;
+import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
 import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
 import com.thoaidev.bookinghotel.model.image.service.ImageService;
 import com.thoaidev.bookinghotel.model.review.mapper.ReviewMapper;
+import com.thoaidev.bookinghotel.model.role.OwnerResponseDTO;
 import com.thoaidev.bookinghotel.model.role.Role;
 import com.thoaidev.bookinghotel.model.role.RoleRepository;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
 import com.thoaidev.bookinghotel.model.user.dto.request.ChangePasswordRequest;
+import com.thoaidev.bookinghotel.model.user.dto.request.ForgetPwRequest;
+import com.thoaidev.bookinghotel.model.user.dto.request.OwnerRequest;
 import com.thoaidev.bookinghotel.model.user.dto.request.ResetPasswordRequest;
 import com.thoaidev.bookinghotel.model.user.dto.request.UserUpdateRequest;
 import com.thoaidev.bookinghotel.model.user.dto.response.UserResponse;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
+import com.thoaidev.bookinghotel.model.user.mapper.UserMapper;
 import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -45,8 +51,9 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class UserServiceImplement implements UserService {
+
     @Autowired
-    private  ImageService imageService;
+    private ImageService imageService;
 
     private final UserRepository userRepository;
     @Autowired
@@ -59,6 +66,8 @@ public class UserServiceImplement implements UserService {
     private final BookingMapper bookingMapper;
     @Autowired
     private final ReviewMapper reviewMapper;
+    @Autowired
+    private final UserMapper userMapper;
     private final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
 
     /*
@@ -69,6 +78,38 @@ public class UserServiceImplement implements UserService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với username: " + username));
     }
+
+//CẬP NHẬT NGƯỜI DÙNG THÀNH OWNER 
+    @Override
+    public UserEntity updateOnwerRequest(Integer userId, OwnerRequest ownerRequest) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not Found"));
+
+        String roleName = user.getRoles()
+                .stream()
+                .findFirst()
+                .map(Role::getRoleName)
+                .orElse(null);
+        //Xét role người dùng là USER thì mới thực hiện tác vụ update 
+        if (!roleName.equals("USER")) {
+            throw new RuntimeException("Only USERs can register as OWNERs");
+        }
+
+        //Đăng kí thêm thông tin cho ONWER 
+        if (ownerRequest.getBusinessLicenseNumber() != null) {
+            user.setBusinessLicenseNumber(ownerRequest.getBusinessLicenseNumber());
+        }
+        if (ownerRequest.getExperienceInHospitality() != null) {
+            user.setExperienceInHospitality(ownerRequest.getExperienceInHospitality());
+        }
+        if (ownerRequest.getOwnerDescription() != null) {
+            user.setOwnerDescription(ownerRequest.getOwnerDescription());
+        }
+// Cập nhật tình trạng đơn là đang đợi
+        user.setOwnerRequestStatus(OwnerRequestStatus.PENDING);
+        return userRepository.save(user);
+
+    }
 //DUYỆT TÁT CẢ CÁC USER 
 
     @Override
@@ -76,7 +117,10 @@ public class UserServiceImplement implements UserService {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<UserEntity> users = userRepository.findAll(pageable);
         List<UserEntity> listOfUsers = users.getContent();
-        List<UserDto> content = listOfUsers.stream().map((user) -> mapToUserDto(user)).collect(Collectors.toList());
+        List<UserDto> content = listOfUsers
+                .stream()
+                .map(userMapper::mapToUserDto)
+                .collect(Collectors.toList());
         UserResponse userResponse = new UserResponse();
         userResponse.setContent(content);
         userResponse.setPageNo(users.getNumber());
@@ -92,7 +136,7 @@ public class UserServiceImplement implements UserService {
     @Override
     public UserDto getUserById(Integer userId) {
         UserEntity user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundException("Đối tượng User không tồn tại"));
-        return mapToUserDto(user);
+        return userMapper.mapToUserDto(user);
     }
 
 //UPLOAD HÌNH ẢNH CHO NGƯỜI DÙNG
@@ -117,7 +161,6 @@ public class UserServiceImplement implements UserService {
             // if (user.getImgUrl() != null && !user.getImgUrl().isEmpty()) {
             //     imageService.delete(user.getImgUrl()); // Xóa file cũ khỏi storage
             // }
-
             //Upload 
             String avatarUrl = imageService.upload(file, "users/" + userId + "/avatar");
             // Cập nhật user
@@ -134,6 +177,7 @@ public class UserServiceImplement implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto, Integer userId) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Đối tượng User không tồn tại"));
+
         if (userDto.getFullname() != null) {
             user.setFullname(userDto.getFullname());
 
@@ -155,8 +199,35 @@ public class UserServiceImplement implements UserService {
 
         }
 
+        //role == OWNER 
+        String roleName = user.getRoles()
+                .stream()
+                .findFirst()
+                .map(Role::getRoleName)
+                .orElse(null);
+
+        System.out.println("Check ROle :" + roleName);
+
+        if (roleName.equals("OWNER")) {
+            if (userDto.getBusinessLicenseNumber() != null) {
+                user.setBusinessLicenseNumber(userDto.getBusinessLicenseNumber());
+            }
+
+            if (userDto.getExperienceInHospitality() != null) {
+                user.setExperienceInHospitality(userDto.getExperienceInHospitality());
+            }
+
+            if (userDto.getOwnerDescription() != null) {
+                user.setOwnerDescription(userDto.getOwnerDescription());
+            }
+        } else {
+            user.setBusinessLicenseNumber(null);
+            user.setExperienceInHospitality(null);
+            user.setOwnerDescription(null);
+        }
+
         UserEntity updatedUser = userRepository.save(user);
-        return mapToUserDto(updatedUser);
+        return userMapper.mapToUserDto(user);
     }
 //CẬP NHẬP PROFILE CỦA NGƯỜI DÙNG(  NGƯỜI DÙNG TỰ THỨC HIỆN)
 
@@ -185,7 +256,7 @@ public class UserServiceImplement implements UserService {
 
         UserEntity updatedUser = userRepository.save(user);
 
-        return mapToUserDto(updatedUser);
+        return userMapper.mapToUserDto(user);
     }
 
 //ĐỔI PASSWORD
@@ -201,15 +272,16 @@ public class UserServiceImplement implements UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
-// send request OTP 
-// Tạm lưu OTP và thời gian hết hạn
 
+    // send request OTP 
+// Tạm lưu OTP và thời gian hết hạn
 //GỬI MÃ XÁC THỰC VÀO MAIL ĐỂ ĐỔI MẬT KHẨU
     @Override
-    public void sendResetPasswordCode(String email) {
-        UserEntity user = userRepository.findByUsername(email)
+    public void sendResetPasswordCode(ForgetPwRequest rq) {
+        UserEntity user = userRepository.findByUsername(rq.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
+        //khởi tạo otp để xác thực 
         String otp = String.valueOf(new Random().nextInt(900000) + 100000); // OTP 6 chữ số
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5); // Hết hạn sau 5 phút
 
@@ -217,6 +289,7 @@ public class UserServiceImplement implements UserService {
 
         sendOtpEmail(user.getUsername(), otp);
     }
+//phương thức thực hiện gửi otp qua mail để thực hiện xác thực 
 
     private void sendOtpEmail(String toEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -240,7 +313,7 @@ public class UserServiceImplement implements UserService {
             otpStorage.remove(request.getEmail());
             throw new IllegalArgumentException("OTP has expired.");
         }
-
+        //Tìm kiếm người dùng thông qua username( email)
         UserEntity user = userRepository.findByUsername(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
@@ -271,18 +344,30 @@ public class UserServiceImplement implements UserService {
     // }
 //
     @Override
-    public void updateRole(Integer userId, String roleName) {
+    public void updateRole(Integer userId, String decision) {
+
+        //Cập nhật role_user == OWNER
+        //Cập nhật owner_request_status == APPROVED (chấp thuận)
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Đối tượng User không tồn tại"));
+                .orElseThrow(() -> new NotFoundException("User not Found"));
 
-        Role role = roleRepository.findByRoleName(roleName)
+        Role role = roleRepository.findByRoleName("OWNER")
                 .orElseThrow(() -> new NotFoundException("Đối tượng Role không tồn tại"));
-
         Set<Role> roles = new HashSet<>();
         roles.add(role);
-        user.setRoles(roles);
 
-        UserEntity updatedUser = userRepository.save(user);
+        //check if admin dicision == APPROVED
+        System.out.println("Test decision 1:" + decision);
+        System.out.println("Test decision 2:" + OwnerResponseStatus.APPROVED.name());
+        if (decision.equals(OwnerResponseStatus.APPROVED.name())) {
+            user.setRoles(roles);
+            user.setOwnerRequestStatus(OwnerRequestStatus.APPROVED);
+        } else {
+            user.setOwnerRequestStatus(OwnerRequestStatus.REJECTED);
+        }
+
+        //REJECT
+        userRepository.save(user);
 
     }
 //
@@ -301,38 +386,33 @@ public class UserServiceImplement implements UserService {
 //
 
     //_____________Other Methods_____________
-    @Override
-    public UserDto mapToUserDto(UserEntity user) {
-        String roleName = user.getRoles()
-                .stream()
-                .findFirst()
-                .map(Role::getRoleName)
-                .orElse(null);
-
-        List<BookingDTO> bookingList = user.getBookings().stream()
-                .map(bookingMapper::toDTO)
-                .collect(Collectors.toList());
-
-        List<HotelReviewDTO> reviewList = user.getReviews().stream()
-                .map(reviewMapper::toDTO)
-                .collect(Collectors.toList());
-
-        UserDto userDto = UserDto
-                .builder()
-                .userId(user.getUserId())
-                .username(user.getUsername())
-                .fullname(user.getFullname())
-                .password(user.getPassword())
-                .roleName(roleName)
-                .phone(user.getUserPhone())
-                .birthday(user.getBirthday())
-                .gender(user.getGender())
-                .urlImg(user.getImgUrl())
-                .bookings(bookingList)
-                .reviews(reviewList)
-                .build();
-
-        return userDto;
-    }
-
+    // @Override
+    // public UserDto mapToUserDto(UserEntity user) {
+    //     String roleName = user.getRoles()
+    //             .stream()
+    //             .findFirst()
+    //             .map(Role::getRoleName)
+    //             .orElse(null);
+    //     List<BookingDTO> bookingList = user.getBookings().stream()
+    //             .map(bookingMapper::toDTO)
+    //             .collect(Collectors.toList());
+    //     List<HotelReviewDTO> reviewList = user.getReviews().stream()
+    //             .map(reviewMapper::toDTO)
+    //             .collect(Collectors.toList());
+    //     UserDto userDto = UserDto
+    //             .builder()
+    //             .userId(user.getUserId())
+    //             .username(user.getUsername())
+    //             .fullname(user.getFullname())
+    //             .password(user.getPassword())
+    //             .roleName(roleName)
+    //             .phone(user.getUserPhone())
+    //             .birthday(user.getBirthday())
+    //             .gender(user.getGender())
+    //             .urlImg(user.getImgUrl())
+    //             .bookings(bookingList)
+    //             .reviews(reviewList)
+    //             .build();
+    //     return userDto;
+    // }
 }
