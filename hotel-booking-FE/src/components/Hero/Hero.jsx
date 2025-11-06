@@ -23,11 +23,11 @@ const Hero = () => {
         ],
       };
       const _filters = {
-        checkin_date: _val.date[0],
-        checkout_date: _val.date[1],
-        location: _val.province_name,
-        type_room_id: _val.type_room_id,
-        bed_quantity: _val.bed_quantity,
+        checkin_date: _val.date[0] || [],
+        checkout_date: _val.date[1] || [],
+        location: _val.province_name || [],
+        type_room_id: _val.type_room_id || [],
+        bed_quantity: _val.bed_quantity || [],
         page: 1,
       };
       // Gửi POST request

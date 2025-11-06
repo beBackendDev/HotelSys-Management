@@ -32,6 +32,7 @@ const HotelDetail = () => {
   const [hotelInfo, setHotelInfo] = useState([]); // thông tin khách sạn
   const [hotelReviews, setHotelReviews] = useState([]); // thông tin danh gia
   const [rooms, setRooms] = useState([]); // danh sách phòng
+  const [owner, setOwner] = useState([]); // thoong tin Owner
   const [pagination, setPagination] = useState({
     pageNo: 1,
     pageSize: 5,
@@ -44,7 +45,7 @@ const HotelDetail = () => {
   const userStr = localStorage.getItem("user");
   const user = JSON.parse(userStr);
   const userId = user?.userId;
-
+  const ownerId = hotelInfo?.ownerId;
 
   // Map icon name (string) -> component
   const iconMap = {
@@ -92,7 +93,7 @@ const HotelDetail = () => {
     fetchReviews(page, pageSize);
   };
   useEffect(() => {
-    // Goi API lay thong tin nguoi dung 
+    // Goi API lay thong tin nguoi dung da danh gia 
     const fetchUser = async () => {
       if (hotelReviews.length > 0) {
         try {
@@ -141,6 +142,29 @@ const HotelDetail = () => {
     fetchRooms();
   }, [id, hotelReviews]);
 
+  //Gọi API lấy thông tin Owner <=> phụ thuộc vào thông tin ownerId trong hotel
+  useEffect(() => {
+    const fetchOwner = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/user/profile/${ownerId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            }
+          }
+        );//api lấy thông tin người dùng( owner)
+        const data = await res.json();
+        console.log("(HotelDetail)API-User:", data);
+        setOwner(data || []);
+      } catch (err) {
+        console.error("Lỗi khi lấy thông tin người sở hữu.");
+      }
+    };
+    fetchOwner();
+  },
+    [ownerId]);
+
   const defaultImage = "../assets/images/image.png";
   const rating = hotelInfo?.ratingPoint >= 1.0 ? hotelInfo?.ratingPoint : "Chưa có đánh giá nào";
 
@@ -153,10 +177,6 @@ const HotelDetail = () => {
             {/* Địa chỉ */}
             <Typography.Text className="pb-4 italic">
               {hotelInfo.hotelAddress || "no Address"}
-            </Typography.Text>
-            {/* Đánh giá */}
-            <Typography.Text className="pb-4 italic">
-              {rating || "no rating"}
             </Typography.Text>
 
             {/* Mô tả + Hình ảnh */}
@@ -179,6 +199,22 @@ const HotelDetail = () => {
                 </p>
               </div>
             </div>
+            {/* Owner Information */}
+            <div className="flex items-center gap-3 pt-2">
+              <img
+                src={owner?.urlImg || userplaceholder}
+                alt="avatar"
+                className="w-12 h-12 rounded-full object-cover"
+              />
+              <div className="flex flex-col">
+                <span className="font-semibold text-slate-900">
+                  Host: {owner?.fullname || "Unknown User"}
+                </span>
+                <span className="text-sm text-gray-500">
+                  Superhost · Với {owner?.experienceInHospitality} năm kinh nghiệm đón tiếp khách
+                </span>
+              </div>
+            </div>
 
             {/* Tiện ích */}
             <Typography.Title level={2} className="mt-8 border-t-2">
@@ -193,7 +229,7 @@ const HotelDetail = () => {
                     {/* Icon (ở đây đang dùng CheckOutlined làm placeholder, 
                         bạn có thể map facility.icon -> fontawesome hoặc ant icon khác) */}
                     {iconMap[facility.icon]}
-                    <Typography.Text className="italic" style={{ color: "black" }}>
+                    <Typography.Text  style={{ color: "black" }}>
                       {facility.name}
                     </Typography.Text>
                   </div>
