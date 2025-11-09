@@ -1,10 +1,12 @@
 package com.thoaidev.bookinghotel.model.hotel.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
@@ -23,7 +25,7 @@ public interface HotelService {
 
     public List<Hotel> getHotelsByName(String name);
 
-    public HotelResponse getAllHotels(FilterRequest filter);
+    public HotelResponse filterHotels(String hotelName, String hotelAddress, BigDecimal hotelAveragePrice, HotelFacility hotelFacilities, Double ratingPoint, Integer ownerId);
 
     //Get in rapidApi
     public List<HotelDto> fetchHotelsFromRapidAPI(LocalDate checkin, LocalDate checkout);

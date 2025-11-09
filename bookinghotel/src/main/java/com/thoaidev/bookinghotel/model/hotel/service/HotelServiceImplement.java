@@ -1,6 +1,7 @@
 package com.thoaidev.bookinghotel.model.hotel.service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -81,8 +82,13 @@ public class HotelServiceImplement implements HotelService {
     }
 
     @Override
-    public HotelResponse getAllHotels(FilterRequest filter) {
-        List<Hotel> hotels = hotelRepository.findAll(HotelSpecification.filter(filter));
+    public HotelResponse filterHotels(  String hotelName, 
+                                        String hotelAddress, 
+                                        BigDecimal hotelAveragePrice, 
+                                        HotelFacility hotelFacilities, 
+                                        Double ratingPoint, 
+                                        Integer ownerId) {
+        List<Hotel> hotels = hotelRepository.findAll(HotelSpecification.filter(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId));
         List<HotelDto> content = hotels.stream()
                 .map(hotelMapper::mapToHotelDto)
                 .collect(Collectors.toList());

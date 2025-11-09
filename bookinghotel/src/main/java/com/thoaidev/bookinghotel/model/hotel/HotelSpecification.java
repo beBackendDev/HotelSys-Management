@@ -1,48 +1,70 @@
 package com.thoaidev.bookinghotel.model.hotel;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 
 import jakarta.persistence.criteria.Predicate;
 
 public class HotelSpecification {
-     public static Specification<Hotel> filter(FilterRequest filter) {
+     public static Specification<Hotel> filter(String hotelName, 
+                                        String hotelAddress, 
+                                        BigDecimal hotelAveragePrice, 
+                                        HotelFacility hotelFacilities, 
+                                        Double ratingPoint, 
+                                        Integer ownerId) {
+
+        //Specification là một Interface trong JavaSpring
+        //root( Root<T>) tương đương với entity đang thao tác
+        //query( CriteriaQuery<?>) tương đương với câu query trong sql
+        //cb( CriteriaBuilder) tương đương trình tạo điều kiện 
+        //predicate tương đương điều kiện lọc( mệnh đề quan hệ trong sql)
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
-            // Lọc theo giá tối thiểu
-            if (filter.getMinPrice() != null) {
-                predicates.add(cb.ge(root.get("hotelAveragePrice"), filter.getMinPrice()));
+            Predicate predicate ;
+            // Lọc theo giá trung bình
+            if (hotelAveragePrice != null) {
+                predicate =  cb.ge(root.get("hotelAveragePrice"), hotelAveragePrice);
+                predicates.add(predicate);
             }
+            // // Lọc theo giá tối thiểu
+            // if (filter.getMinPrice() != null) {
+            //     predicate =  cb.ge(root.get("hotelAveragePrice"), filter.getMinPrice());
+            //     predicates.add(predicate);
+            // }
 
-            // Lọc theo giá tối đa
-            if (filter.getMaxPrice() != null) {
-                predicates.add(cb.le(root.get("hotelAveragePrice"), filter.getMaxPrice()));
-            }
+            // // Lọc theo giá tối đa
+            // if (filter.getMaxPrice() != null) {
+            //     predicate =  cb.le(root.get("hotelAveragePrice"), filter.getMaxPrice());
+            //     predicates.add(predicate);
+            // }
 
             // Lọc theo tiện nghi
-            if (filter.getFacility() != null && !filter.getFacility().isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("hotelFacility")), "%" + filter.getFacility().toLowerCase() + "%"));
+            if (hotelFacilities != null ) {
+                predicates.add(cb.like(cb.lower(root.get("hotelFacility")), "%" + hotelFacilities.getName().toLowerCase() + "%"));
             }
 
             // Lọc theo đánh giá
-            if (filter.getRating() != null) {
-                predicates.add(cb.ge(root.get("hotelRating"), filter.getRating()));
+            if (ratingPoint != null) {
+                predicates.add(cb.ge(root.get("hotelRating"), ratingPoint));
             }
 
             // Lọc theo thành phố
-            if (filter.getLocation() != null && !filter.getLocation().isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("hotelAddress")), "%" + filter.getLocation().toLowerCase() + "%"));
+            if (hotelAddress != null && !hotelAddress.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("hotelAddress")), "%" + hotelAddress.toLowerCase() + "%"));
             }
             // Lọc theo tên
-            if (filter.getName() != null && !filter.getName().isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("hotelName")), "%" + filter.getName().toLowerCase() + "%"));
+            if (hotelName != null && !hotelName.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("hotelName")), "%" + hotelName.toLowerCase() + "%"));
             }
-            return cb.and(predicates.toArray(new Predicate[0]));
+            Predicate predicated = cb.and(predicates.toArray(new Predicate[0]));
+            System.out.println("Filter result: "+ predicated);
+            return predicated;
         };
     }
 }

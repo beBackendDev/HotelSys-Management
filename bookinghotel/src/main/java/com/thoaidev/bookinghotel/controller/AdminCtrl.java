@@ -1,5 +1,6 @@
 package com.thoaidev.bookinghotel.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
 import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
@@ -91,8 +93,15 @@ public class AdminCtrl {
 
     //lấy thông tin dựa theo nhiều tiêu chí(tên, đánh giá...)
     @PostMapping("/hotels/filter")
-    public ResponseEntity<HotelResponse> getAllHotels(@RequestBody FilterRequest request) {
-        HotelResponse hotels = hotelService.getAllHotels(request);
+    public ResponseEntity<HotelResponse> getAllHotels(
+            @RequestParam(value = "hotelName", required = false) String hotelName,
+            @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
+            @RequestParam(value = "hotelAveragePrice", required = false) BigDecimal hotelAveragePrice,
+            @RequestParam(value = "hotelFacilities", required = false) HotelFacility hotelFacilities,
+            @RequestParam(value = "ratingPoint", required = false) Double ratingPoint,
+            @RequestParam(value = "ownerId", required = false) Integer ownerId
+    ) {
+        HotelResponse hotels = hotelService.filterHotels(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId);
         return ResponseEntity.ok(hotels);
     }
     // Lấy khách sạn theo tên
@@ -218,8 +227,8 @@ public class AdminCtrl {
     @PutMapping("/update-role/user/{id}")
     public ResponseEntity<String> updateRole(@PathVariable("id") Integer userId,
             @RequestBody OwnerResponseDTO res) {
-                 System.out.println("===> Controller received: userId=" + userId + ", decision=" + res.getDecision() +"/"+ OwnerResponseStatus.APPROVED.name());
-                //request = {userId, roleName}
+        System.out.println("===> Controller received: userId=" + userId + ", decision=" + res.getDecision() + "/" + OwnerResponseStatus.APPROVED.name());
+        //request = {userId, roleName}
         userService.updateRole(userId, res.getDecision());
         return new ResponseEntity<>(res.getAdminNote(), HttpStatus.OK);
     }

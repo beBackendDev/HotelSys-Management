@@ -1,5 +1,6 @@
 package com.thoaidev.bookinghotel.controller;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
+import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.favorite.FavoriteSer;
 import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
@@ -120,8 +122,15 @@ public class UserCtrl {
 
     // Tìm kiếm( lọc) khách sạn theo từ khóa, địa điểm(filter)
     @PostMapping("/public/hotels/filter")
-    public ResponseEntity<HotelResponse> getAllHotels(@RequestBody FilterRequest request) {
-        HotelResponse hotels = hotelService.getAllHotels(request);
+    public ResponseEntity<HotelResponse> getAllHotels(
+        @RequestParam (value = "hotelName", required = false) String hotelName,
+        @RequestParam (value = "hotelAddress", required = false) String hotelAddress,
+        @RequestParam (value = "hotelAveragePrice", required = false) BigDecimal hotelAveragePrice,
+        @RequestParam (value = "hotelFacilities", required = false) HotelFacility hotelFacilities,
+        @RequestParam (value = "ratingPoint", required = false) Double ratingPoint,
+        @RequestParam (value = "ownerId", required = false) Integer ownerId
+        ) {
+        HotelResponse hotels = hotelService.filterHotels(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId);
         return ResponseEntity.ok(hotels);
     }
 

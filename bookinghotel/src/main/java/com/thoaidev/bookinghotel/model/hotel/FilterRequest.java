@@ -1,5 +1,5 @@
 package com.thoaidev.bookinghotel.model.hotel;
-
+//khong dung
 import java.math.BigDecimal;
 
 import lombok.Builder;
