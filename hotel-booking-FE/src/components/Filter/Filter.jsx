@@ -1,43 +1,37 @@
-import { Button, Col, DatePicker, Form, InputNumber, Row, Select } from "antd";
-import qs from "query-string"; import { FilterOutlined } from "@ant-design/icons";
+import { Button, Col, Form, Radio, Row, Select } from "antd";
+import { FilterOutlined, MenuFoldOutlined, StarFilled } from "@ant-design/icons";
+import styles from "./style.module.scss";
+import { province } from "../../constant/province";
+import qs from "query-string";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
-import { province } from "../../constant/province";
-import axios from "axios";
-import styles from "./style.module.scss";
+import FormItem from "antd/lib/form/FormItem";
+const { Option } = Select;
 
-const { Option, OptGroup } = Select;
-
-export default function Filter({ filters }) {
+const Filter = ({ toggleFilter, showFilter, onFilterChange }) => {
+  const provinceData = province;
   const history = useHistory();
-
-  const onFinish = async (values) => {
+  const onFinish = (values) => {
     try {
       const rangeValue = values["date"];
       const _val = {
         ...values
       };
       const _filters = {
-        location: _val.province_name,
-        type_room_id: _val.type_room_id,
-        price: _val.price,
-        rating: _val.rating,
-        facility: _val.facility,
+        hotelAddress: _val.province_name,
+        // type_room_id: _val.type_room_id,
+        // price: _val.price,
+        ratingPoint: _val.ratingPoint,
+        // facility: _val.facility
       };
-      Object.entries(values).forEach(([key, value]) => {
-        console.log("-->Thông tin:", `${key}: ${value}`);
-      });
 
-      // Gửi POST request
-      await axios.post("/api/user/public/hotels/filter", _filters);
 
-      // Điều hướng đến trang tìm kiếm kèm theo query string
-      // history.push({
-      //   pathname: "/hotel/search",
-      //   search: qs.stringify(_filters),
-      // });
+      // Điều hướng sang trang /search
+      console.log("data sent(Filter.jsx): ", qs.stringify(_filters));
+
+      onFilterChange(_filters);
+
     } catch (error) {
-      console.error("Lỗi khi lọc dữ liệu từ Filter.jsx", error);
       toast.error("Đã xảy ra lỗi khi lọc khách sạn");
     }
   };
@@ -48,169 +42,128 @@ export default function Filter({ filters }) {
 
   return (
     <div className={styles.filterWrapper}>
-      <div className="py-3 flex">
-        <FilterOutlined />
-        <span className="text-xl ml-2">Bộ lọc</span>
+      {/* HEADER */}
+      <div
+        className="py-3 flex items-center justify-between cursor-pointer select-none border-b"
+        onClick={toggleFilter}
+      >
+        <div className="flex items-center">
+          <FilterOutlined />
+          <span className="text-xl ml-2 font-semibold">Bộ lọc</span>
+        </div>
+        <MenuFoldOutlined />
       </div>
 
-      <Row>
-        <Col span={24} className="m-auto items-center flex flex-col">
-          <Form
-            name="filter-form"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
+      {/* FORM */}
+      <div className="p-4">
+        <Form
+          layout="vertical"
+          onFinish={onFinish}
+        >
+          <Form.Item
+            name="province_name"
+            label={<span style={{ color: "black" }}>Địa điểm</span>}
+
           >
-            {/*Khoảng cách đến điểm du lịch */}
-            <div className="border-b-2">
-              <Form.Item
-                name="province_name"
-              >
-                <span className="text-lg">
-                  Điểm đến:
-                </span>
-                <Select placeholder="Địa điểm" style={{ width: "100%" }}>
-                  {province.map((province) => (
-                    <Option value={province.name} key={province.id}>
-                      {province.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </div>
+            <Select placeholder="Địa điểm" style={{ width: "180px" }}>
+              {provinceData.map((province) => (
+                <Option value={province.name} key={province.id}>
+                  {province.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
 
-            {/* Giá phòng */}
-            <div className="border-b-2" >
-              <Form.Item
-                name="price"
-                >
-                <span className="text-lg">
-                  Giá Phòng:
-                </span>
+          <Form.Item
+            name="price"
+            label={<span className="text-lg font-medium">Giá phòng</span>}
+          >
+            <Radio.Group className="flex flex-col space-y-2">
+              <Radio value="under500">&lt; 500.000đ / đêm</Radio>
+              <Radio value="500to1000">500.000đ - 1.000.000đ</Radio>
+              <Radio value="1000000">&gt; 1.000.000đ</Radio>
+            </Radio.Group>
+          </Form.Item>
 
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="price"
-                    value="under500"
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>&lt; 500.000đ/ đêm</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="price"
-                    value="500to1000"
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>500.000đ - 1.000.000đ/ đêm</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="price"
-                    value="over1000"
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>&gt; 1.000.000đ/ đêm</span>
-                </label>
+          {/* Rating */}
+          <Form.Item
+            name="ratingPoint"
+            label={<span className="text-lg font-medium">Đánh giá</span>}
+          >
+            <Radio.Group className="flex flex-col space-y-2">
+              <Radio value="5" >
+                <div className="flex flex-row">
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                </div>
+              </Radio>
+              <Radio value="4" >
+                <div className="flex flex-row">
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                </div>
+              </Radio>
+              <Radio value="3" >
+                <div className="flex flex-row">
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                </div>
+              </Radio>
+              <Radio value="2" >
+                <div className="flex flex-row">
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                </div>
+              </Radio>
+              <Radio value="0" >
+                <div className="flex flex-row">
+                  <StarFilled style={{ color: "gold" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                  <StarFilled style={{ color: "gray" }} />
+                </div>
+              </Radio>
+            </Radio.Group>
 
-              </Form.Item>
-            </div>
-            {/* Đánh Giá */}
-            <div className="border-b-2" >
-              <Form.Item
-                name="rating"
-              >
-                <span className="text-lg">
-                  Đánh giá:
-                </span>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="rating"
-                    value="1sao"
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>1 sao</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="rating"
-                    value="2sao"
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>2 sao</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="rating"
-                    value="3sao"
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>3 sao</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="rating"
-                    value="4sao"
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>4 sao</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="rating"
-                    value="5sao"
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>5 sao</span>
-                </label>
-              </Form.Item>
-            </div>
-            {/* Tiện nghi */}
-            <div className="border-b-2" >
-              <Form.Item
-                name = "facility"
-              >
-                <span className="text-lg">
-                  Tiện nghi:
-                </span>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="facility"
-                    value=""
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>Tiện nghi 1</span>
-                </label>
 
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="facility"
-                    value=""
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span>Tiện nghi 2</span>
-                </label>
-              </Form.Item>
-            </div>
+          </Form.Item>
+          {/* Facilities */}
+          <Form.Item
+            name="facility"
+            label={<span className="text-lg font-medium">Tiện ích</span>}
+          >
+            <Radio.Group className="flex flex-col space-y-2">
+              <Radio value="">Truy cập miễn phí Wifi</Radio>
+              <Radio value="">Bãi giữ xe miễn phí</Radio>
+              <Radio value="">Hồ bơi</Radio>
+              <Radio value="">Ban công rộng rãi</Radio>
+            </Radio.Group>
 
-            <div className="grid justify-items-end">
-              <Button type="primary" className="  my-8 h-10" htmlType="submit">
-                Áp dụng
-              </Button>
-            </div>
-          </Form>
-        </Col>
-      </Row>
+          </Form.Item>
+
+          <Button
+            type="primary"
+            className="w-full mt-4"
+            htmlType="submit"
+          >
+            Áp dụng
+          </Button>
+        </Form>
+      </div>
     </div>
   );
-}
+};
+export default Filter;

@@ -25,7 +25,7 @@ import Footer from "../components/Footer/Footer";
 
 const HotelDetail = () => {
   const { id } = useParams(); // lấy id từ URL
-  console.log("(HotelDetail) Hotel_Id: ", id);
+
 
   const [userInfo, setUserInfo] = useState([]); // thông tin nguoi dung
 
@@ -40,7 +40,7 @@ const HotelDetail = () => {
     totalElements: 0,
   });
   const token = localStorage.getItem("accessToken");
-  console.log("(HotelDetail) Token: ", token);
+
 
   const userStr = localStorage.getItem("user");
   const user = JSON.parse(userStr);

@@ -46,12 +46,12 @@ public class HotelSpecification {
 
             // Lọc theo tiện nghi
             if (hotelFacilities != null ) {
-                predicates.add(cb.like(cb.lower(root.get("hotelFacility")), "%" + hotelFacilities.getName().toLowerCase() + "%"));
+                predicates.add(cb.like(cb.lower(root.get("hotelFacilities")), "%" + hotelFacilities.getName().toLowerCase() + "%"));
             }
 
             // Lọc theo đánh giá
             if (ratingPoint != null) {
-                predicates.add(cb.ge(root.get("hotelRating"), ratingPoint));
+                predicates.add(cb.ge(root.get("ratingPoint"), ratingPoint));
             }
 
             // Lọc theo thành phố

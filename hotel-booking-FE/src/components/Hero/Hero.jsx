@@ -13,14 +13,18 @@ const Hero = () => {
 
   const onFinish = (values) => {
     const rangeValue = values["date"];
-    const params = new URLSearchParams({
+    const params ={
       checkin_date: rangeValue?.[0]?.format("YYYY-MM-DD"),
       checkout_date: rangeValue?.[1]?.format("YYYY-MM-DD"),
       hotelAddress: values.province_name,
       guestCount: values.guestCount,
-    }).toString();
+    };
 
-    // 👉 Điều hướng sang trang /search
+    // Điều hướng sang trang /search
+    console.log("data sent: ", qs.stringify(params));
+    
+
+    //thực hiện đẩy các key của location gồm có pathname & search đến pathname có route là /hotel/search
     history.push({
       pathname: "/hotel/search",
       search: qs.stringify(params),

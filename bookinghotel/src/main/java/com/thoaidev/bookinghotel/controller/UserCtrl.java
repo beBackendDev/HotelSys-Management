@@ -121,7 +121,7 @@ public class UserCtrl {
     }
 
     // Tìm kiếm( lọc) khách sạn theo từ khóa, địa điểm(filter)
-    @PostMapping("/public/hotels/filter")
+    @GetMapping("/public/hotels/filter")
     public ResponseEntity<HotelResponse> getAllHotels(
         @RequestParam (value = "hotelName", required = false) String hotelName,
         @RequestParam (value = "hotelAddress", required = false) String hotelAddress,

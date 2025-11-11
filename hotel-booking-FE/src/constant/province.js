@@ -39,8 +39,12 @@ export const province = [
     id: 10,
     name: "Bảo Tàng Quang Trung",
   },
-    {
+  {
     id: 11,
     name: "Tân Dương 1",
+  },
+  {
+    id: 12,
+    name: "Quy Nhon",
   },
 ];

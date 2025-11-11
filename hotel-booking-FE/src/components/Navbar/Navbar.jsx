@@ -114,7 +114,7 @@ const Navbar = () => {
         <Link to="/destinations" className="font-medium">
           Khám phá
         </Link>
-        <Link to="/agents" className="font-medium">
+        <Link to="/hotel/search" className="font-medium">
           Khách sạn
         </Link>
         <Link to="/contact" className="font-medium">
