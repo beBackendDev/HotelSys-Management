@@ -20,9 +20,9 @@ const Filter = ({ toggleFilter, showFilter, onFilterChange }) => {
       const _filters = {
         hotelAddress: _val.province_name,
         // type_room_id: _val.type_room_id,
-        // price: _val.price,
+        hotelAveragePrice: _val.price,
         ratingPoint: _val.ratingPoint,
-        // facility: _val.facility
+        hotelFacilities: _val.hotelFacilities
       };
 
 
@@ -79,7 +79,7 @@ const Filter = ({ toggleFilter, showFilter, onFilterChange }) => {
             label={<span className="text-lg font-medium">Giá phòng</span>}
           >
             <Radio.Group className="flex flex-col space-y-2">
-              <Radio value="under500">&lt; 500.000đ / đêm</Radio>
+              <Radio value="500000">&lt; 500.000đ / đêm</Radio>
               <Radio value="500to1000">500.000đ - 1.000.000đ</Radio>
               <Radio value="1000000">&gt; 1.000.000đ</Radio>
             </Radio.Group>
@@ -142,13 +142,13 @@ const Filter = ({ toggleFilter, showFilter, onFilterChange }) => {
           </Form.Item>
           {/* Facilities */}
           <Form.Item
-            name="facility"
+            name="hotelFacilities"
             label={<span className="text-lg font-medium">Tiện ích</span>}
           >
             <Radio.Group className="flex flex-col space-y-2">
-              <Radio value="">Truy cập miễn phí Wifi</Radio>
-              <Radio value="">Bãi giữ xe miễn phí</Radio>
-              <Radio value="">Hồ bơi</Radio>
+              <Radio value="wifi">Truy cập miễn phí Wifi</Radio>
+              <Radio value="Bãi giữ xe miễn phí">Bãi giữ xe miễn phí</Radio>
+              <Radio value={"100"}>facility of hotel id 100</Radio>
               <Radio value="">Ban công rộng rãi</Radio>
             </Radio.Group>
 

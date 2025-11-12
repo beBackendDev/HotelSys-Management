@@ -9,15 +9,18 @@ import org.springframework.data.jpa.domain.Specification;
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 
 public class HotelSpecification {
-     public static Specification<Hotel> filter(String hotelName, 
-                                        String hotelAddress, 
-                                        BigDecimal hotelAveragePrice, 
-                                        HotelFacility hotelFacilities, 
-                                        Double ratingPoint, 
-                                        Integer ownerId) {
+
+    public static Specification<Hotel> filter(String hotelName,
+            String hotelAddress,
+            BigDecimal hotelAveragePrice,
+            List<String> hotelFacilities,
+            Double ratingPoint,
+            Integer ownerId) {
 
         //Specification là một Interface trong JavaSpring
         //root( Root<T>) tương đương với entity đang thao tác
@@ -26,10 +29,10 @@ public class HotelSpecification {
         //predicate tương đương điều kiện lọc( mệnh đề quan hệ trong sql)
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            Predicate predicate ;
+            Predicate predicate;
             // Lọc theo giá trung bình
             if (hotelAveragePrice != null) {
-                predicate =  cb.ge(root.get("hotelAveragePrice"), hotelAveragePrice);
+                predicate = cb.ge(root.get("hotelAveragePrice"), hotelAveragePrice);
                 predicates.add(predicate);
             }
             // // Lọc theo giá tối thiểu
@@ -43,10 +46,27 @@ public class HotelSpecification {
             //     predicate =  cb.le(root.get("hotelAveragePrice"), filter.getMaxPrice());
             //     predicates.add(predicate);
             // }
-
             // Lọc theo tiện nghi
-            if (hotelFacilities != null ) {
-                predicates.add(cb.like(cb.lower(root.get("hotelFacilities")), "%" + hotelFacilities.getName().toLowerCase() + "%"));
+            if (hotelFacilities != null && !hotelFacilities.isEmpty()) {
+                Join<Hotel, HotelFacility> facilityJoin = root.join("facilities", JoinType.INNER);
+//Cach1:
+                //Lay danh sach facility( String)
+
+                // List<String> facilityNames = hotelFacilities.stream()
+                //     .map(String::toLowerCase)
+                //     .toList();
+                // //Tao Predicate: facility.name IN (:facilityNames)
+                // predicates.add(facilityJoin.get("name").in(facilityNames));
+// //Cach 2:
+                List<Predicate> facilityPredicates = new ArrayList<>();
+                for(String facility : hotelFacilities){
+                    String keyword = "%" + facility.toLowerCase() + "%";
+                    facilityPredicates.add(
+                        cb.like(cb.lower(facilityJoin.get("name")), keyword)
+                    );
+                }
+                //Gop OR: (facility.name LIKE '%wifi%' OR facility.name LIKE '%pool%')
+                predicates.add(cb.or(facilityPredicates.toArray(new Predicate[0])));
             }
 
             // Lọc theo đánh giá
@@ -63,7 +83,7 @@ public class HotelSpecification {
                 predicates.add(cb.like(cb.lower(root.get("hotelName")), "%" + hotelName.toLowerCase() + "%"));
             }
             Predicate predicated = cb.and(predicates.toArray(new Predicate[0]));
-            System.out.println("Filter result: "+ predicated);
+            System.out.println("Filter result: " + predicated);
             return predicated;
         };
     }

@@ -250,9 +250,7 @@ const HotelDetail = () => {
         <Typography.Title level={2} className="mt-8 border-t-2">
           Danh sách các phòng
         </Typography.Title>
-        <div className="flex flex-row gap-6 mt-6">
-          {/* Cột trái: Danh sách phòng */}
-          <div className="w-3/4">
+        <div className="flex flex-col gap-6 mt-6">
             {rooms.length > 0 ? (
               rooms.map((room) => <RoomCardItem key={room.id} room={room} />)
             ) : (
@@ -261,12 +259,7 @@ const HotelDetail = () => {
                 <p className="ml-2">Không có phòng nào được tìm thấy.</p>
               </div>
             )}
-          </div>
 
-          {/* Cột phải: Bộ lọc */}
-          <div className="w-1/4 border-t-2">
-            <Filter />
-          </div>
         </div>
 
         {/* Đánh giá */}

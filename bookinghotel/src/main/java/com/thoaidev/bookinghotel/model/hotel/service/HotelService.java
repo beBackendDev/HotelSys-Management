@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
-import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -25,7 +24,7 @@ public interface HotelService {
 
     public List<Hotel> getHotelsByName(String name);
 
-    public HotelResponse filterHotels(String hotelName, String hotelAddress, BigDecimal hotelAveragePrice, HotelFacility hotelFacilities, Double ratingPoint, Integer ownerId);
+    public HotelResponse filterHotels(String hotelName, String hotelAddress, BigDecimal hotelAveragePrice, List<String> hotelFacilities, Double ratingPoint, Integer ownerId);
 
     //Get in rapidApi
     public List<HotelDto> fetchHotelsFromRapidAPI(LocalDate checkin, LocalDate checkout);

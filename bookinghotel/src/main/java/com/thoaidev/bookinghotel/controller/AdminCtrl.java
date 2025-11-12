@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
-import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -31,7 +30,6 @@ import com.thoaidev.bookinghotel.model.role.OwnerResponseDTO;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
-import com.thoaidev.bookinghotel.model.user.dto.request.UpdateUserRoleRequest;
 import com.thoaidev.bookinghotel.model.user.dto.response.UserResponse;
 import com.thoaidev.bookinghotel.model.user.service.UserService;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
@@ -97,7 +95,7 @@ public class AdminCtrl {
             @RequestParam(value = "hotelName", required = false) String hotelName,
             @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
             @RequestParam(value = "hotelAveragePrice", required = false) BigDecimal hotelAveragePrice,
-            @RequestParam(value = "hotelFacilities", required = false) HotelFacility hotelFacilities,
+            @RequestParam(value = "hotelFacilities", required = false) List<String> hotelFacilities,
             @RequestParam(value = "ratingPoint", required = false) Double ratingPoint,
             @RequestParam(value = "ownerId", required = false) Integer ownerId
     ) {

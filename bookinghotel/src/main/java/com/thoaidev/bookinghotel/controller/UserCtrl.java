@@ -31,7 +31,6 @@ import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.favorite.FavoriteSer;
-import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -126,7 +125,7 @@ public class UserCtrl {
         @RequestParam (value = "hotelName", required = false) String hotelName,
         @RequestParam (value = "hotelAddress", required = false) String hotelAddress,
         @RequestParam (value = "hotelAveragePrice", required = false) BigDecimal hotelAveragePrice,
-        @RequestParam (value = "hotelFacilities", required = false) HotelFacility hotelFacilities,
+        @RequestParam (value = "hotelFacilities", required = false) List<String> hotelFacilities,
         @RequestParam (value = "ratingPoint", required = false) Double ratingPoint,
         @RequestParam (value = "ownerId", required = false) Integer ownerId
         ) {

@@ -85,7 +85,7 @@ public class HotelServiceImplement implements HotelService {
     public HotelResponse filterHotels(  String hotelName, 
                                         String hotelAddress, 
                                         BigDecimal hotelAveragePrice, 
-                                        HotelFacility hotelFacilities, 
+                                        List<String> hotelFacilities, 
                                         Double ratingPoint, 
                                         Integer ownerId) {
         List<Hotel> hotels = hotelRepository.findAll(HotelSpecification.filter(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId));
