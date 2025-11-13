@@ -228,6 +228,6 @@ public class AdminCtrl {
         System.out.println("===> Controller received: userId=" + userId + ", decision=" + res.getDecision() + "/" + OwnerResponseStatus.APPROVED.name());
         //request = {userId, roleName}
         userService.updateRole(userId, res.getDecision());
-        return new ResponseEntity<>(res.getAdminNote(), HttpStatus.OK);
+        return new ResponseEntity<>(res.getAdminNote(), HttpStatus.OK); 
     }
 }

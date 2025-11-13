@@ -1,137 +1,259 @@
+// @import "../_colors.scss";
+// .loginRight,
+// .registerLeft {
+//   height: 100vh;
+//   background-size: cover;
+//   object-fit: cover;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   flex-direction: column;
+//   text-align: center;
+//   span {
+//     font-size: 36px;
+//     color: #fff;
+//     font-weight: 500;
+//     display: block;
+//   }
+//   h1 {
+//     font-size: 48px;
+//     font-weight: 700;
+//     color: $--color-secondary;
+//   }
+// }
+// .loginRight {
+//   background-image: linear-gradient(
+//       90deg,
+//       #0e0d0d 2.04%,
+//       rgba(43, 43, 43, 0.77) 47.03%,
+//       rgba(226, 226, 226, 0.77) 98.02%
+//     ),
+//     url("https://images.unsplash.com/photo-1583765410274-5b16fcfcdae0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1936&q=80");
+// }
+// .registerLeft {
+//   background-image: linear-gradient(
+//       234deg,
+//       #0e0d0d 2.04%,
+//       rgba(39, 39, 39, 0.77) 47.03%,
+//       rgba(74, 74, 74, 0.77) 98.02%
+//     ),
+//     url("https://images.unsplash.com/photo-1621275471769-e6aa344546d5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2073&q=80");
+// }
+// .formContainer {
+//   background-color: #f0f0f0;
+// }
+// .formContainer,
+// .formRegisterMemberContainer {
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   width: 100%;
+//   height: 100vh;
+//   :global {
+//     .a {
+//     }
+//     .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+//     .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover,
+//     .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+//     .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+//       background: #f0f0f0;
+//     }
+//     .ant-input-affix-wrapper {
+//       padding: 0 12px;
+//     }
+//     .ant-form-item {
+//       display: flex;
+//       width: 80%;
+//       justify-content: space-between;
+//     }
+//     .ant-input {
+//       height: 36px;
+//     }
+//     .ant-input,
+//     .ant-input-password {
+//       border-radius: 8px;
+//       border: none;
+//       background: #f0f0f0;
+//     }
+//     .ant-form-item-label
+//       > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+//       position: absolute;
+//       right: -15px;
+//     }
+//     .ant-form-item-label {
+//       text-align: left;
+//     }
+//     .ant-form-item-required::after,
+//     .ant-form-item-label > label::after {
+//       content: none;
+//     }
+
+//     .ant-form-item-control-input .ant-form-item-control-input-content {
+//       textarea {
+//         height: 150px !important;
+//       }
+//     }
+//   }
+// }
+// .form {
+//   background-color: #fff;
+//   border-radius: 12px;
+//   padding: 24px;
+//   width: 60%;
+
+//   box-shadow: 7px 6px 29px -7px rgba(0, 0, 0, 0.25);
+// }
+// .formRegisterMember {
+//   width: 80%;
+// }
+// .form,
+// .formRegisterMember {
+//   height: 85vh;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+
+//   margin: 0 auto;
+//   .formHeading {
+//     font-size: 36px;
+//     color: $--color-primary;
+//     font-weight: 700;
+//     margin-bottom: 12px;
+//     span {
+//       color: $--color-secondary;
+//       font-weight: 700;
+//       font-size: 68px;
+//     }
+//   }
+//   .formInputName {
+//     display: flex;
+//     :global {
+//       .ant-form-item {
+//         margin-bottom: 0;
+//       }
+//     }
+//   }
+// }
+
+
+//file mới
+
 @import "../_colors.scss";
-.loginRight,
-.registerLeft {
-  height: 100vh;
-  background-size: cover;
-  object-fit: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  text-align: center;
-  span {
-    font-size: 36px;
-    color: #fff;
-    font-weight: 500;
-    display: block;
-  }
-  h1 {
-    font-size: 48px;
-    font-weight: 700;
-    color: $--color-secondary;
-  }
-}
-.loginRight {
-  background-image: linear-gradient(
-      90deg,
-      #0e0d0d 2.04%,
-      rgba(43, 43, 43, 0.77) 47.03%,
-      rgba(226, 226, 226, 0.77) 98.02%
-    ),
-    url("https://images.unsplash.com/photo-1583765410274-5b16fcfcdae0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1936&q=80");
-}
-.registerLeft {
-  background-image: linear-gradient(
-      234deg,
-      #0e0d0d 2.04%,
-      rgba(39, 39, 39, 0.77) 47.03%,
-      rgba(74, 74, 74, 0.77) 98.02%
-    ),
-    url("https://images.unsplash.com/photo-1621275471769-e6aa344546d5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2073&q=80");
-}
-.formContainer {
-  background-color: #f0f0f0;
-}
-.formContainer,
+
+/* Tổng thể layout */
 .formRegisterMemberContainer {
   display: flex;
-  align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100vh;
-  :global {
-    .a {
-    }
-    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
-    .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper:hover,
-    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
-    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
-      background: #f0f0f0;
-    }
-    .ant-input-affix-wrapper {
-      padding: 0 12px;
-    }
-    .ant-form-item {
-      display: flex;
-      width: 80%;
-      justify-content: space-between;
-    }
-    .ant-input {
-      height: 36px;
-    }
-    .ant-input,
-    .ant-input-password {
-      border-radius: 8px;
-      border: none;
-      background: #f0f0f0;
-    }
-    .ant-form-item-label
-      > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
-      position: absolute;
-      right: -15px;
-    }
-    .ant-form-item-label {
-      text-align: left;
-    }
-    .ant-form-item-required::after,
-    .ant-form-item-label > label::after {
-      content: none;
-    }
-
-    .ant-form-item-control-input .ant-form-item-control-input-content {
-      textarea {
-        height: 150px !important;
-      }
-    }
-  }
+  align-items: center;
+  background: #fafafa;
+  min-height: 100vh;
+  padding: 40px 0;
 }
-.form {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 24px;
-  width: 60%;
-
-  box-shadow: 7px 6px 29px -7px rgba(0, 0, 0, 0.25);
+.formRegisterMemberContainer Form{
+  padding: 50px;
 }
+/* Form chính */
 .formRegisterMember {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 60px;
   width: 80%;
-}
-.form,
-.formRegisterMember {
-  height: 85vh;
+  max-width: 900px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+}
 
-  margin: 0 auto;
-  .formHeading {
-    font-size: 36px;
-    color: $--color-primary;
-    font-weight: 700;
-    margin-bottom: 12px;
-    span {
-      color: $--color-secondary;
-      font-weight: 700;
-      font-size: 68px;
-    }
+/* Tiêu đề */
+.formRegisterMember h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: $--color-primary;
+  text-align: center;
+  margin-bottom: 40px;
+}
+.formRegisterMember
+/* Ant Design Form custom */
+:global {
+  .ant-form-item {
+    margin-bottom: 20px;
   }
-  .formInputName {
-    display: flex;
-    :global {
-      .ant-form-item {
-        margin-bottom: 0;
-      }
+
+  .ant-form-item-label > label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .ant-input,
+  .ant-select-selector,
+  textarea.ant-input {
+    border-radius: 8px !important;
+    border: 1px solid #ddd !important;
+    background: #f9f9f9;
+    transition: all 0.3s ease;
+  }
+
+  .ant-input:hover,
+  .ant-select-selector:hover,
+  textarea.ant-input:hover {
+    border-color: $--color-primary !important;
+  }
+
+  .ant-input:focus,
+  .ant-select-focused .ant-select-selector {
+    border-color: $--color-primary !important;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+  }
+
+  textarea.ant-input {
+    min-height: 120px !important;
+  }
+
+  .ant-btn-primary {
+    background: $--color-primary;
+    border-radius: 8px;
+    padding: 10px 24px;
+    height: auto;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .ant-btn-primary[disabled] {
+    background: #c2c2c2 !important;
+    border-color: #c2c2c2 !important;
+  }
+}
+
+/* Upload section */
+.uploadSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* Button căn giữa */
+.submitContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .formRegisterMember {
+    width: 95%;
+    padding: 30px;
+  }
+
+  :global {
+    .ant-form-item {
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
     }
   }
 }
