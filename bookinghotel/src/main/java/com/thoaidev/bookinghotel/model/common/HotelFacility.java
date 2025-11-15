@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -20,7 +22,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "hotel-facility")
-@Data
+@Getter
+@Setter
 public class HotelFacility {
 
     @Id

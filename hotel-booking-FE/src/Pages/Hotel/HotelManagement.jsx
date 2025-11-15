@@ -123,9 +123,10 @@ const HotelManagement = () => {
                     );
                 } else {
                     // 🟩 GET nếu không lọc
-                    res = await api.get("/admin/hotels", {
+                    // res = await api.get("/admin/hotels", {
+                         res = await api.get("/hotels", {
                         params: {
-                            pageNo: payload.page - 1,
+                            pageNo: payload.page,
                             pageSize: payload.per_page,
                             sortBy: payload.sort_by,
                             order: payload.order,

@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 
 const AdminGuard = ({ children }) => {
   const isAdmin = useSelector((state) => state.auth.profile.user.id);
+  console.log("AdminHuard-id: ",isAdmin);
+  
   if (isAdmin !== 0) {
     toast.error("Bạn không phải là admin");
     return <Redirect to="/" />;

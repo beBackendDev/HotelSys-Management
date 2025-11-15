@@ -11,7 +11,8 @@ import {
   LikeFilled,
   ClockCircleFilled,
   DingdingOutlined,
-  ScheduleFilled
+  ScheduleFilled,
+  SmileFilled
 } from "@ant-design/icons";
 import { Content } from "antd/lib/layout/layout";
 import ratinglayout from "../assets/images/ratinglayout.avif"
@@ -57,7 +58,8 @@ const HotelDetail = () => {
     LikeFilled: <LikeFilled />,
     ClockCircleFilled: <ClockCircleFilled />,
     ScheduleFilled: <ScheduleFilled />,
-    CheckOutlined: <CheckOutlined />
+    CheckOutlined: <CheckOutlined />,
+    SmileFilled: <SmileFilled />
   };
   //fetch Reviews
   const fetchReviews = async (pageNo, pageSize) => {

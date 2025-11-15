@@ -22,7 +22,6 @@ import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.common.HotelFacilityDTO;
 import com.thoaidev.bookinghotel.model.enums.HotelStatus;
-import com.thoaidev.bookinghotel.model.hotel.FilterRequest;
 import com.thoaidev.bookinghotel.model.hotel.HotelSpecification;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
@@ -54,7 +53,8 @@ public class HotelServiceImplement implements HotelService {
     //User: TÌm toàn bộ danh sách các khách sạn
     @Override
     public HotelResponse getAllHotels(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Hotel> hotels = hotelRepository.findAll(pageable);
         List<Hotel> listOfHotels = hotels.getContent();
 
@@ -72,7 +72,34 @@ public class HotelServiceImplement implements HotelService {
         hotelResponse.setLast(hotels.isLast());
         return hotelResponse;
     }
+//
+    @Override
+    public HotelResponse getAllHotels(Integer ownerId, int pageNo, int pageSize) {
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        System.out.println("response Pageable: "+pageable);
+        Page<Hotel> hotels = hotelRepository.findByOwner_UserId(ownerId, pageable);
+        System.out.println("response Hotels: "+hotels);
 
+        List<Hotel> listOfHotels = hotels.getContent();
+        System.out.println("response listOfHotels: "+listOfHotels);
+
+        List<HotelDto> content = listOfHotels.stream()
+                .map(hotelMapper::mapToHotelDto)
+                // .map((hotel) -> mapToHotelDto(hotel))
+                .collect(Collectors.toList());
+        System.out.println("response content: "+content);
+
+        HotelResponse hotelResponse = new HotelResponse();
+        hotelResponse.setContent(content);
+        hotelResponse.setPageNo(hotels.getNumber());
+        hotelResponse.setPageSize(hotels.getSize());
+        hotelResponse.setTotalElements(hotels.getTotalElements());
+        hotelResponse.setTotalPage(hotels.getTotalPages());
+        hotelResponse.setLast(hotels.isLast());
+        System.out.println("HotelResponse : " +  hotelResponse);
+        return hotelResponse;
+    }
     //User: lấy thông tin khách sạn theo ID
     @Override
     public HotelDto getHotelById(Integer id) {

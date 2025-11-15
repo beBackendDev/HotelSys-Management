@@ -32,6 +32,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;//SU dung de xu li loi StackOverflowError khi entity tu dong goi ham toString giua cac moi quan he
 
 @Entity
 @Table(name = "user")
@@ -74,6 +75,7 @@ public class UserEntity {
     @UpdateTimestamp
     private LocalDateTime updateAt;
 
+     @ToString.Exclude
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 
     @JoinTable(name = "user_role",
@@ -83,12 +85,15 @@ public class UserEntity {
                     referencedColumnName = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+     @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Booking> bookings;
 
+     @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelReview> reviews;
 
+     @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "user_favorites",
@@ -98,6 +103,7 @@ public class UserEntity {
     private Set<Hotel> favoriteHotels = new HashSet<>();
 
     //Mở rộng cho role == OWNER
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "owner_request_status")
     private OwnerRequestStatus ownerRequestStatus = OwnerRequestStatus.NONE; //status, auto NONE when User is created
@@ -112,6 +118,7 @@ public class UserEntity {
     private String ownerDescription; //Mô tả về chủ sở hữu
 
     //Một OWNER có thể sở hữu nhiều khách sạn
+     @ToString.Exclude
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Hotel> hotels;
 

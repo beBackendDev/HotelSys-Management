@@ -31,6 +31,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;//SU dung de xu li loi StackOverflowError khi entity tu dong goi ham toString giua cac moi quan he
 
 // //Sử dụng @Getter @Setter thay vì @Data bởi vì @Data có thể gây lỗi khi sử dụng JPA
 @NoArgsConstructor
@@ -92,14 +93,17 @@ public class Hotel implements Serializable {
     @Column(name = "total_review")
     private Integer totalReview;//danh gia
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelReview> reviews = new ArrayList<>();
 
     // Quan hệ 1-N với HotelFacility
+    @ToString.Exclude
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelFacility> facilities = new ArrayList<>();
 
     //Mở rộng cho role == OWNER
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id") // foreign key
     private UserEntity owner;

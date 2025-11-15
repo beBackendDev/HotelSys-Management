@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
@@ -34,8 +33,10 @@ import com.thoaidev.bookinghotel.model.user.dto.response.UserResponse;
 import com.thoaidev.bookinghotel.model.user.service.UserService;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
+import jakarta.websocket.server.PathParam;
+
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AdminCtrl {
 
@@ -71,6 +72,18 @@ public class AdminCtrl {
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
         return new ResponseEntity<>(hotelService.getAllHotels(pageNo, pageSize), HttpStatus.OK);
+
+    }
+    //
+
+    @GetMapping("/user/public/owner/{ownerId}/hotels")
+    public ResponseEntity<HotelResponse> hotelsOfOwner(
+            @AuthenticationPrincipal CustomUserDetail user,
+            @PathVariable Integer ownerId,
+            @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
+    ) {
+        return new ResponseEntity<>(hotelService.getAllHotels(ownerId, pageNo, pageSize), HttpStatus.OK);
 
     }
     //lấy thông tin khách sạn theo id
@@ -228,6 +241,6 @@ public class AdminCtrl {
         System.out.println("===> Controller received: userId=" + userId + ", decision=" + res.getDecision() + "/" + OwnerResponseStatus.APPROVED.name());
         //request = {userId, roleName}
         userService.updateRole(userId, res.getDecision());
-        return new ResponseEntity<>(res.getAdminNote(), HttpStatus.OK); 
+        return new ResponseEntity<>(res.getAdminNote(), HttpStatus.OK);
     }
 }

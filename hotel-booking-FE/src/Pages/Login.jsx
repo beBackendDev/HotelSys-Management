@@ -46,9 +46,9 @@ const Login = ({ heading, role }) => {
       // localStorage.setItem("role", role_decoded);
 
       // Điều hướng theo role
-      if (role_decoded === "ADMIN") {
+      if (role_decoded === "ADMIN" || "OWNER") {
         history.push("/dashboard");//admin
-      } else if (role_decoded === "OWNER") {
+      } else if (role_decoded === "OWNERR") {
         history.push("/owner/dashboard");
       } else {
         history.push("/");
