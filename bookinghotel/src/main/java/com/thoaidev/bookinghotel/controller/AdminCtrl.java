@@ -33,8 +33,6 @@ import com.thoaidev.bookinghotel.model.user.dto.response.UserResponse;
 import com.thoaidev.bookinghotel.model.user.service.UserService;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
-import jakarta.websocket.server.PathParam;
-
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
@@ -200,7 +198,7 @@ public class AdminCtrl {
     //lấy toàn bộ thông tin khách sạn
     //http://localhost:8080/api/admin/nguoi-dung?pageNo=0&pageSize=5
 
-    @GetMapping("/users")
+    @GetMapping("/admin/users")
     public ResponseEntity<UserResponse> listUsers(
             @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
@@ -210,7 +208,7 @@ public class AdminCtrl {
     }
 
     //lấy thông tin user theo id
-    @GetMapping("/users/{id}")
+    @GetMapping("/admin/users/{id}")
     public ResponseEntity<UserDto> userDetail(@PathVariable Integer id) {
         UserDto userDto = userService.getUserById(id);
         return ResponseEntity.ok(userDto);

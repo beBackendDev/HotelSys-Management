@@ -29,7 +29,6 @@ import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
-import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.favorite.FavoriteSer;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
@@ -202,7 +201,7 @@ public class UserCtrl {
         String url = vnPayService.createOrder(req, servletRequest);
         PaymentResDTO response = new PaymentResDTO(
                 req.getBookingId(),
-                req.getAmount(),
+                req.getAmount(), 
                 "Payment created successfully", // message mô tả hoặc req.getOrderInfo()
                 url // link VNPay trả về
         );
