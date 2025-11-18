@@ -32,6 +32,7 @@ import api from "../../api/api";
 const { Option } = Select;
 
 const HotelManagement = () => {
+    const token = localStorage?.getItem("accessToken");
     const [filters, setFilters] = useState({
         //phát triển thêm
         status: "all",
@@ -50,93 +51,60 @@ const HotelManagement = () => {
         per_page: 10,
     });
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [hotels, setHotels] = useState([]);
     const [owners, setOwners] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
-    const [error, setError] = useState(null);
 
     //   const debouncedQ = useDebounce(filters.q, 300);
 
 
 
-    // fetch owners for filter dropdown
-    //   useEffect(() => {
-    //     const fetchOwners = async () => {
-    //       try {
-    //         const res = await api.get("/admin/owners", {
-    //           params: { per_page: 100 }, // tuỳ chỉnh paginate nếu cần
-    //         });
-    //         setOwners(res.data.items || []);
-    //       } catch (e) {
-    //         // im lặng hoặc log
-    //         console.warn("Không lấy được owners", e);
-    //       }
-    //     };
-    //     fetchOwners();
-    //   }, [api]);
+
 
     // fetch hotels whenever filters change
+    // --- Trong state ---
+    const [hotels, setHotels] = useState([]); // hotel đã có owner gắn sẵn
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // --- Fetch hotels + owners cùng lúc, gắn owner vào từng hotel ---
     useEffect(() => {
-        const fetch = async () => {
+        const fetchHotels = async () => {
             setLoading(true);
             setError(null);
             try {
-                const payload = {
-                    ...filters,
-                };
+                // fetch danh sách hotels
+                const res = await api.get("/hotels", {
+                    params: {
+                        pageNo: filters.page,
+                        pageSize: filters.per_page,
+                        sortBy: filters.sort_by,
+                        order: filters.order,
+                    },
+                });
 
-                // xoá các filter không cần thiết khi dùng API POST
-                if (payload.status === "all") {
-                    delete payload.status;
-                }
-                if (!payload.owner_id) {
-                    delete payload.owner_id;
-                }
+                let hotelList = res.data.content || [];
 
-                let res;
+                // fetch owner cho từng hotel
+                const updatedHotels = await Promise.all(
+                    hotelList.map(async (hotel) => {
+                        if (!hotel.ownerId) return { ...hotel, owner: null };
 
-                // xác định có lọc hay không
-                const hasFilters =
-                    payload.q?.trim() ||
-                    payload.status ||
-                    payload.owner_id;
+                        const ownerRes = await fetch(
+                            `http://localhost:8080/api/admin/users/${hotel.ownerId}`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                },
+                            }
+                        );
+                        const ownerData = await ownerRes.json();
+                        console.log("(HotelManagement.jsx) owner: ", ownerData);
+                        
+                        return { ...hotel, owner: ownerData }; // gắn owner
+                    })
+                );
 
-                if (hasFilters) {
-                    // 🟨 POST nếu có lọc
-                    res = await api.post(
-                        `/admin/hotels/filter`,
-                        {
-                            name: payload.q?.trim() || "",
-                            // location: payload.q?.trim() || "",
-                            // rating: payload.q?.trim() || "",
-                            // minPrice: payload.q?.trim() || "",
-                            // maxPrice: payload.q?.trim() || "",
-                            // facility: payload.q?.trim() || "",
-
-                            status: payload.status,
-                            ownerId: payload.owner_id,
-                            sortBy: payload.sort_by,
-                            order: payload.order,
-                        }
-
-                    );
-                } else {
-                    // 🟩 GET nếu không lọc
-                    // res = await api.get("/admin/hotels", {
-                         res = await api.get("/hotels", {
-                        params: {
-                            pageNo: payload.page,
-                            pageSize: payload.per_page,
-                            sortBy: payload.sort_by,
-                            order: payload.order,
-                        },
-                    });
-                }
-                console.log("response: ", res);
-
-                setHotels(res.data.content || []);
-                setTotal(res.data.totalElements || 0);
+                setHotels(updatedHotels);
             } catch (err) {
                 console.error(err);
                 setError("Tải danh sách khách sạn thất bại.");
@@ -144,9 +112,9 @@ const HotelManagement = () => {
                 setLoading(false);
             }
         };
-        fetch();
-    }, [filters, api]);
 
+        fetchHotels();
+    }, [filters, token]);
 
     const history = useHistory();
     const handleViewDetail = (hotelId) => {
@@ -156,47 +124,48 @@ const HotelManagement = () => {
         history.push(path.hotelProfileAdmin(hotelId))
 
     }
-    const handleCreateHotel = ()=>{
+    const handleCreateHotel = () => {
         history.push(path.createHotel)
 
     }
-    
+
     const columns = [
         {
             title: "Tên khách sạn",
             dataIndex: "hotelName",
             key: "hotelName",
             render: (v, row) => (
-                <Typography.Link onClick={()=> handleChangeHotel(row.hotelId)}> {v} </Typography.Link>
+                <Typography.Link onClick={() => handleChangeHotel(row.hotelId)}> {v} </Typography.Link>
             ),
             sorter: true,
         },
-        {
-            title: "Vị trí",
-            dataIndex: "hotelAddress",
-            key: "hotelAddress",
-        },
+        // {
+        //     title: "Vị trí",
+        //     dataIndex: "hotelAddress",
+        //     key: "hotelAddress",
+        // },
         {
             title: "Chủ sở hữu",
-            dataIndex: "owner",
             key: "owner",
-            render: (owner) =>
-                owner ? (
+            render: (_, record) => {
+                const owner = record.owner;
+                return owner ? (
                     <div>
-                        <div>{owner.name}</div>
-                        <div className="text-xs text-gray-500">{owner.email}</div>
+                        <div>{owner.fullname}</div>
+                        <div className="text-xs text-gray-500">{owner.username}</div>
                     </div>
                 ) : (
                     <Tag color="orange">Chưa gán</Tag>
-                ),
+                );
+            },
         },
         {
             title: "Trạng thái",
-            dataIndex: "status",
-            key: "status",
+            dataIndex: "hotelStatus",
+            key: "hotelStatus",
             render: (s) => {
                 const colorMap = {
-                    active: "green",
+                    AVAILABLE: "green",
                     inactive: "default",
                     pending: "gold",
                     archived: "red",
@@ -219,17 +188,17 @@ const HotelManagement = () => {
         },
         {
             title: "Đánh giá",
-            dataIndex: "rating",
-            key: "rating",
+            dataIndex: "ratingPoint",
+            key: "ratingPoint",
             render: (r) => <span>{r != null ? r.toFixed(1) : "-"} ⭐</span>,
             align: "center",
         },
-        {
-            title: "Ngày được nâng cấp",
-            dataIndex: "hotelUpdatedAt",
-            key: "hotelUpdatedAt",
-            render: (d) => humanDate(d),
-        },
+        // {
+        //     title: "Ngày được nâng cấp",
+        //     dataIndex: "hotelUpdatedAt",
+        //     key: "hotelUpdatedAt",
+        //     render: (d) => humanDate(d),
+        // },
         {
             title: "Hành động",
             key: "actions",
@@ -239,7 +208,7 @@ const HotelManagement = () => {
                         <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetail(row.hotelId)} />
                     </Tooltip>
                     <Tooltip title="Chỉnh sửa">
-                        <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeHotel(row.hotelId)}/>
+                        <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeHotel(row.hotelId)} />
                     </Tooltip>
                     <Dropdown
                         overlay={
@@ -299,12 +268,12 @@ const HotelManagement = () => {
                             value={filters.owner_id}
                             onChange={(v) => setFilters((f) => ({ ...f, owner_id: v, page: 1 }))}
                         >
-                            <Option value={undefined}>Tất cả owner</Option>
+                            {/* <Option value={undefined}>Tất cả owner</Option>
                             {owners.map((o) => (
                                 <Option key={o.id} value={o.id}>
                                     {o.name}
                                 </Option>
-                            ))}
+                            ))} */}
                         </Select>
                     </div>
 
