@@ -99,7 +99,8 @@ public class ReviewSerImpl implements ReviewSer {
 
     @Override
     public ReviewResponse getReviewsByHotelId(Integer hotelId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<HotelReview> reviews = reviewRepository.findByHotel_HotelId(hotelId, pageable);
 
         List<HotelReviewDTO> content = reviewMapper.toDTOList(reviews.getContent());
@@ -117,8 +118,28 @@ public class ReviewSerImpl implements ReviewSer {
 
     @Override
     public ReviewResponse getReviewsByUserId(Integer userId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<HotelReview> reviews = reviewRepository.findByUser_UserId(userId, pageable);
+
+        List<HotelReviewDTO> content = reviewMapper.toDTOList(reviews.getContent());
+
+        ReviewResponse reviewResponse = new ReviewResponse();
+        reviewResponse.setContent(content);
+        reviewResponse.setPageNo(reviews.getNumber());
+        reviewResponse.setPageSize(reviews.getSize());
+        reviewResponse.setTotalElements(reviews.getTotalElements());
+        reviewResponse.setTotalPage(reviews.getTotalPages());
+        reviewResponse.setLast(reviews.isLast());
+
+        return reviewResponse;
+    }
+
+    @Override
+    public ReviewResponse getAllReviews(int pageNo, int pageSize) {
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        Page<HotelReview> reviews = reviewRepository.findAll(pageable);
 
         List<HotelReviewDTO> content = reviewMapper.toDTOList(reviews.getContent());
 

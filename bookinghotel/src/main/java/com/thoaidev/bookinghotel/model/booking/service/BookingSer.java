@@ -10,6 +10,7 @@ import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 public interface BookingSer {
     public BookingDTO getBookingById(Integer id);
     public BookingResponse getAllBookings(Integer userId, int pageNo, int pageSize);
+    public BookingResponse getAllBookings(int pageNo, int pageSize);
     public boolean isRoomAvailable(Integer roomId, LocalDate checkin, LocalDate checkout);// kiểm tra phòng có sẵn không hay đã được đặt( giữ chỗ)
     public void cancelExpiredBookings();//tự độngg kiểm tra xem booking nào đã hết hạn thanh toán( >15p)
     public Booking bookRoom(BookingDTO bookingDTO, UserEntity user);

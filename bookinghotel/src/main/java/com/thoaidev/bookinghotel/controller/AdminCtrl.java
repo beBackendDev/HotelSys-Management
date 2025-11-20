@@ -20,11 +20,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
+import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
+import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
 import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
+import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
+import com.thoaidev.bookinghotel.model.review.entity.Review;
+import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.role.OwnerResponseDTO;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
@@ -34,7 +40,7 @@ import com.thoaidev.bookinghotel.model.user.service.UserService;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/dashboard")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AdminCtrl {
 
@@ -44,11 +50,20 @@ public class AdminCtrl {
     private final RoomService roomService;
     @Autowired
     private final UserService userService;
+    private final BookingSer bookingService;
+    private final ReviewSer reviewSer;
 
-    public AdminCtrl(HotelService hotelService, RoomService roomService, UserService userService) {
+    public AdminCtrl(
+            HotelService hotelService,
+            RoomService roomService,
+            UserService userService,
+            ReviewSer reviewSer,
+            BookingSer bookingService) {
         this.hotelService = hotelService;
         this.roomService = roomService;
         this.userService = userService;
+        this.reviewSer = reviewSer;
+        this.bookingService = bookingService;
     }
 //Example
 
@@ -62,8 +77,7 @@ public class AdminCtrl {
 //------------------- HOTEL -------------------    
 //-- GET methods
     //lấy toàn bộ thông tin khách sạn
-    //http://localhost:8080/api/khach-san?pageNo=0&pageSize=5
-    @GetMapping("/hotels")
+    @GetMapping("/admin/hotels")
     public ResponseEntity<HotelResponse> listHotels(
             @AuthenticationPrincipal CustomUserDetail user,
             @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
@@ -72,9 +86,10 @@ public class AdminCtrl {
         return new ResponseEntity<>(hotelService.getAllHotels(pageNo, pageSize), HttpStatus.OK);
 
     }
-    //
 
-    @GetMapping("/user/public/owner/{ownerId}/hotels")
+    //
+//Lấy thông tin khách sạn theo từng owner
+    @GetMapping("/admin/user/public/owner/{ownerId}/hotels")
     public ResponseEntity<HotelResponse> hotelsOfOwner(
             @AuthenticationPrincipal CustomUserDetail user,
             @PathVariable Integer ownerId,
@@ -86,7 +101,7 @@ public class AdminCtrl {
     }
     //lấy thông tin khách sạn theo id
 
-    @GetMapping("/hotels/{id}")
+    @GetMapping("/admin/hotels/{id}")
     public ResponseEntity<HotelDto> hotelDetail(
             @AuthenticationPrincipal CustomUserDetail user,
             @PathVariable Integer id) {
@@ -95,13 +110,13 @@ public class AdminCtrl {
     }
     //Lấy khách sạn theo vị trí
 
-    @GetMapping("/hotels/search/{location}")
+    @GetMapping("/admin/hotels/search/{location}")
     public List<Hotel> getHotelsByAddress(@PathVariable String location) {
         return hotelService.getHotelsByAddress(location);
     }
 
     //lấy thông tin dựa theo nhiều tiêu chí(tên, đánh giá...)
-    @PostMapping("/hotels/filter")
+    @PostMapping("/admin/hotels/filter")
     public ResponseEntity<HotelResponse> getAllHotels(
             @RequestParam(value = "hotelName", required = false) String hotelName,
             @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
@@ -115,20 +130,20 @@ public class AdminCtrl {
     }
     // Lấy khách sạn theo tên
 
-    @GetMapping("/hotels/search/{name}")
+    @GetMapping("/admin/hotels/search/{name}")
     public List<Hotel> getHotelsByName(@RequestParam String name) {
         return hotelService.getHotelsByName(name);
     }
 //-- POST methods
     // Tạo khách sạn mới
 
-    @PostMapping("/hotels/create")
+    @PostMapping("/admin/hotels/create")
     public HotelDto createHotel(@RequestBody HotelDto hotelDto) {
         return hotelService.createHotel(hotelDto);
     }
 
 //PUT methods
-    @PutMapping("/hotels/{id}/update")
+    @PutMapping("/admin/hotels/{id}/update")
     public ResponseEntity<HotelDto> updateHotel(@RequestBody HotelDto hotelDto, @PathVariable("id") Integer hotelId) {
         HotelDto response = hotelService.updateHotel(hotelDto, hotelId);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -136,7 +151,7 @@ public class AdminCtrl {
 
 //DELETE methods
     // Xóa khách sạn theo ID
-    @DeleteMapping("/hotels/{id}/delete")
+    @DeleteMapping("/admin/hotels/{id}/delete")
     public ResponseEntity<String> deleteHotel(@PathVariable Integer id) {
         hotelService.deleteHotelById(id);
         return new ResponseEntity<>("Hotel deleted", HttpStatus.OK);
@@ -144,39 +159,39 @@ public class AdminCtrl {
 //------------------- ROOM -------------------   
 //GET methods
 
-    @GetMapping("/hotels/{hotelId}/rooms")
+    @GetMapping("/admin/hotels/{hotelId}/rooms")
     public List<RoomDto> getRoomByHotelId(@PathVariable(value = "hotelId") Integer hotelId) {
         return roomService.getRoomByHotelId(hotelId);
     }
 
-    @GetMapping("/hotels/{hotelId}/rooms/{roomId}")
+    @GetMapping("/admin/hotels/{hotelId}/rooms/{roomId}")
     public ResponseEntity<RoomDto> getRoomById(@PathVariable(value = "hotelId") Integer hotelId, @PathVariable(value = "roomId") Integer roomId) {
         RoomDto roomDto = roomService.getRoomById(roomId, hotelId);
         return new ResponseEntity<>(roomDto, HttpStatus.OK);
     }
 //POST methods
 
-    @PostMapping("/hotels/{hotelId}/create-room")
+    @PostMapping("/admin/hotels/{hotelId}/create-room")
     public RoomDto createRoomDto(@PathVariable(value = "hotelId") Integer hotelId, @RequestBody RoomDto roomDto) {
         return roomService.createRoom(hotelId, roomDto);
     }
 //PUT methods
 
-    @PutMapping("/hotels/{hotelId}/update-room/{roomId}")
+    @PutMapping("/admin/hotels/{hotelId}/update-room/{roomId}")
     public ResponseEntity<RoomDto> updateRoom(@RequestBody RoomDto roomDto, @PathVariable("hotelId") Integer hotelId, @PathVariable("roomId") Integer roomId) {
         RoomDto response = roomService.updateRoom(hotelId, roomId, roomDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 //DELETE methods
 
-    @DeleteMapping("/hotels/{hotelId}/delete-room/{roomId}")
+    @DeleteMapping("/admin/hotels/{hotelId}/delete-room/{roomId}")
     public ResponseEntity<String> deleteRoom(@PathVariable(value = "hotelId") Integer hotelId, @PathVariable(value = "roomId") Integer roomId) {
         roomService.deleteRoombyId(hotelId, roomId);
         return new ResponseEntity<>("Room id =  + {roomId} + đã xóa", HttpStatus.OK);
     }
 //IMAGE UPLOAD
 
-    @PostMapping("/room/{roomId}/upload-image")
+    @PostMapping("/admin/room/{roomId}/upload-image")
     public ResponseEntity<List<String>> uploadImageToRoom(
             @PathVariable Integer roomId,
             @RequestParam("files") List<MultipartFile> files,
@@ -185,7 +200,7 @@ public class AdminCtrl {
         return ResponseEntity.ok(imageUrls);
     }
 
-    @PostMapping("/hotel/{hotelId}/upload-image")
+    @PostMapping("/admin/hotel/{hotelId}/upload-image")
     public ResponseEntity<List<String>> uploadImageToHotel(
             @PathVariable Integer hotelId,
             @RequestParam("files") List<MultipartFile> files,
@@ -215,7 +230,7 @@ public class AdminCtrl {
     }
 
     //PUT methods
-    @PutMapping("/users/{id}/update")
+    @PutMapping("/admin/users/{id}/update")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto,
             @PathVariable("id") Integer userId) {
         UserDto response = userService.updateUser(userDto, userId);
@@ -224,16 +239,52 @@ public class AdminCtrl {
 
 //DELETE methods
     // Xóa khách sạn theo ID
-    @DeleteMapping("/users/{id}/delete")
+    @DeleteMapping("/admin/users/{id}/delete")
     public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
 
         userService.deleteUserById(id);
         return new ResponseEntity<>("User deleted", HttpStatus.OK);
     }
+//------------------- BOOKING -------------------   
 
+    //Xem toàn bộ booking
+    @GetMapping("/admin/hotels/bookings-management")
+    public ResponseEntity<BookingResponse> listBookings(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
+        return new ResponseEntity<>(bookingService.getAllBookings(pageNo, pageSize), HttpStatus.OK);
+
+    }
+
+    //Xem chi tiết booking
+    @GetMapping("/admin/hotels/booking/{id}")
+    public ResponseEntity<BookingDTO> getBooking(
+            @PathVariable Integer id
+    ) {
+        BookingDTO booking = bookingService.getBookingById(id);
+        return new ResponseEntity<>(booking, HttpStatus.OK);
+    }
+
+    //Hủy/ Xóa booking
+    @DeleteMapping("/admin/hotels/cancel-booking/{id}")
+    public ResponseEntity<?> cancelBooking(@PathVariable Integer id) {
+        bookingService.cancelBooking(id);
+        return ResponseEntity.ok("Booking cancelled");
+    }
+
+//------------------- BOOKING -------------------   
+    // Danh sách đánh giá Pagination
+    @GetMapping("/admin/reviews-list")
+    public ResponseEntity<ReviewResponse> reviews_list_user(
+            @RequestParam(value = "pageNo", defaultValue = "", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "", required = false) int pageSize
+    ) {
+        return new ResponseEntity<>(reviewSer.getAllReviews(pageNo, pageSize), HttpStatus.OK);
+    }
 // Mở rộng cho OWNER
     //Response Owner
-    @PutMapping("/update-role/user/{id}")
+
+    @PutMapping("/admin/update-role/user/{id}")
     public ResponseEntity<String> updateRole(@PathVariable("id") Integer userId,
             @RequestBody OwnerResponseDTO res) {
         System.out.println("===> Controller received: userId=" + userId + ", decision=" + res.getDecision() + "/" + OwnerResponseStatus.APPROVED.name());

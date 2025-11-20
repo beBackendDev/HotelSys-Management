@@ -24,14 +24,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.dto.OtpData;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
-import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.mapper.BookingMapper;
 import com.thoaidev.bookinghotel.model.enums.OwnerRequestStatus;
 import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
-import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
 import com.thoaidev.bookinghotel.model.image.service.ImageService;
 import com.thoaidev.bookinghotel.model.review.mapper.ReviewMapper;
-import com.thoaidev.bookinghotel.model.role.OwnerResponseDTO;
 import com.thoaidev.bookinghotel.model.role.Role;
 import com.thoaidev.bookinghotel.model.role.RoleRepository;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
@@ -114,7 +111,8 @@ public class UserServiceImplement implements UserService {
 
     @Override
     public UserResponse getAllUser(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<UserEntity> users = userRepository.findAll(pageable);
         List<UserEntity> listOfUsers = users.getContent();
         List<UserDto> content = listOfUsers

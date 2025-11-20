@@ -13,4 +13,5 @@ public interface ReviewSer {
 
     public ReviewResponse getReviewsByUserId(Integer userId, int pageNo, int pageSize);
 
+    public ReviewResponse getAllReviews(int pageNo, int pageSize);
 }

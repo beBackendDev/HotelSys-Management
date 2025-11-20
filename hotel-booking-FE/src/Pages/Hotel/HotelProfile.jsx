@@ -41,7 +41,7 @@ const Profile = () => {
   );
   const role = (user?.role || "").toUpperCase(); // "ADMIN" hoặc "OWNER"
 
-  const isAdmin = role === "ADMIN";
+  const isAdmin = role === "ADMIN" || role === "OWNER";
   const { hotelId } = useParams();
   const [hotel, setHotel] = useState(authHotel);
   const [loading, setLoading] = useState(false);

@@ -178,8 +178,8 @@ public class UserCtrl {
         return new ResponseEntity<>(bookingService.getAllBookings(userDetails.getId(), pageNo, pageSize), HttpStatus.OK);
 
     }
-
-    @GetMapping("booking/{id}")
+    //Xem chi tiết booking
+    @GetMapping("/hotels/booking/{id}")
     public ResponseEntity<BookingDTO> getBooking(
             @PathVariable Integer id
     ) {

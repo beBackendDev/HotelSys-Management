@@ -79,8 +79,7 @@ public class BookingSerImpl implements BookingSer {
             System.out.println("Canceled  " + expired.size() + " Time out.");
         }
     }
-    
-    
+
     //Cron job thực hiện set booking_status
     @Scheduled(fixedRate = 60000)//60s/time
     @Transactional
@@ -157,12 +156,12 @@ public class BookingSerImpl implements BookingSer {
         bookingRepository.delete(booking);
     }
 
-    // Get Booking List
+    // Get Booking List with detailed user 
     @Override
     public BookingResponse getAllBookings(Integer userId, int pageNo, int pageSize) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
-
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Booking> bookings = bookingRepository.findByUser(user, pageable);
 
         // List<BookingDTO> content = listOfBookings.stream().map((booking) -> mapToBookingDto(booking)).collect(Collectors.toList());
@@ -177,10 +176,30 @@ public class BookingSerImpl implements BookingSer {
         bookingResponse.setLast(bookings.isLast());
         return bookingResponse;
     }
+    
+    // Get All Booking List
     @Override
-    public BookingDTO getBookingById(Integer id){
+    public BookingResponse getAllBookings(int pageNo, int pageSize) {
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        Page<Booking> bookings = bookingRepository.findAll(pageable);
+
+        // List<BookingDTO> content = listOfBookings.stream().map((booking) -> mapToBookingDto(booking)).collect(Collectors.toList());
+        List<BookingDTO> content = bookingMapper.toDTOList(bookings.getContent());
+
+        BookingResponse bookingResponse = new BookingResponse();
+        bookingResponse.setContent(content);
+        bookingResponse.setPageNo(bookings.getNumber());
+        bookingResponse.setPageSize(bookings.getSize());
+        bookingResponse.setTotalElements(bookings.getTotalElements());
+        bookingResponse.setTotalPage(bookings.getTotalPages());
+        bookingResponse.setLast(bookings.isLast());
+        return bookingResponse;
+    }
+    @Override
+    public BookingDTO getBookingById(Integer id) {
         Booking booking = bookingRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Booking not Foung"));
-            return bookingMapper.toDTO(booking);
+                .orElseThrow(() -> new NotFoundException("Booking not Foung"));
+        return bookingMapper.toDTO(booking);
     }
 }
