@@ -30,7 +30,7 @@ const DashboardLayout = ({ children }) => {
 
   const adminMenu = [
     { key: path.overview, icon: <HomeTwoTone />, label: "Tổng quan", link: path.overview },
-    { key: "/dashboard/users", icon: <UserOutlined />, label: "Quản lý người dùng", link: "/dashboard/users" },
+    { key: path.userManagement, icon: <UserOutlined />, label: "Quản lý người dùng", link: path.userManagement},
     { key: path.hotelManagement, icon: <HomeOutlined />, label: "Quản lý khách sạn", link: path.hotelManagement },
     { key: path.bookingManagement, icon: <HomeOutlined />, label: "Quản lý đặt phòng", link: "#" },
     { key: "invoiceManagement", icon: <FileSearchOutlined />, label: "Quản lý hóa đơn", link: "#" },

@@ -14,6 +14,8 @@ import {
     Tooltip,
     Spin,
     Alert,
+    Modal,
+    List,
 } from "antd";
 import {
     SearchOutlined,
@@ -21,6 +23,7 @@ import {
     EditOutlined,
     EyeOutlined,
     UserSwitchOutlined,
+    DeleteOutlined,
 } from "@ant-design/icons";
 import DashboardLayout from "../../core/layout/Dashboard";
 // import useDebounce from "../../core/hooks/useDebounce";
@@ -31,7 +34,7 @@ import api from "../../api/api";
 
 const { Option } = Select;
 
-const HotelManagement = () => {
+const UserManagement = () => {
     const token = localStorage?.getItem("accessToken");
     const [filters, setFilters] = useState({
         //phát triển thêm
@@ -51,29 +54,21 @@ const HotelManagement = () => {
         per_page: 10,
     });
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [owners, setOwners] = useState([]);
     const [total, setTotal] = useState(0);
-
+    const [user, setUser] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     //   const debouncedQ = useDebounce(filters.q, 300);
 
 
-
-
-
-    // fetch hotels whenever filters change
+    // fetch users whenever filters change
     // --- Trong state ---
-    const [hotels, setHotels] = useState([]); // hotel đã có owner gắn sẵn
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-
-    // --- Fetch hotels + owners cùng lúc, gắn owner vào từng hotel ---
     useEffect(() => {
-        const fetchHotels = async () => {
+        const fetchUsers = async () => {
             setLoading(true);
             setError(null);
             try {
-                // fetch danh sách hotels
-                const res = await fetch(`http://localhost:8080/api/dashboard/admin/hotels`, {
+                const res = await fetch(`http://localhost:8080/api/dashboard/admin/users`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -81,48 +76,56 @@ const HotelManagement = () => {
                     }
                 });
                 const data = await res.json();
-                let hotelList = await data?.content || [];
-                console.log("hotel: ", hotelList);
+                let usersList = data?.content;
+                
+                //fetch review cho tung user 
+                const updateUsers = await Promise.all(
+                    usersList.map(async (user) => {
+                        if (user.review == []) return { ...user, review: [] };
 
-
-                // fetch owner cho từng hotel
-                const updatedHotels = await Promise.all(
-                    hotelList.map(async (hotel) => {
-                        if (!hotel.ownerId) return { ...hotel, owner: null };
-
-                        const ownerRes = await fetch(
-                            `http://localhost:8080/api/dashboard/admin/users/${hotel.ownerId}`,
-                            {
-                                headers: {
-                                    "Authorization": `Bearer ${token}`,
-                                },
+                        const reviewList = await fetch(`http://localhost:8080/api/dashboard/admin/user-review/${user.userId}/reviews-list`, {
+                            method: "GET",
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
                             }
-                        );
-                        const ownerData = await ownerRes.json();
-                        console.log("(HotelManagement.jsx) owner: ", ownerData);
+                        });
+                        const reviewData = await reviewList.json();
+                        console.log("Review List: ", reviewData);
 
-                        return { ...hotel, owner: ownerData }; // gắn owner
+                        const bookingList = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/bookings-management`, {
+                            method: "GET",
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
+                            }
+                        });
+
+                        const bookingData = await bookingList.json();
+                        //Thuc hien update lai thong tin thong tin User
+                        return { ...user, reviews: reviewData, bookings: bookingData};
+
                     })
                 );
+                setUser(updateUsers);
+                console.log(updateUsers);
 
-                setHotels(updatedHotels);
             } catch (err) {
                 console.error(err);
-                setError("Tải danh sách khách sạn thất bại.");
+                setError("Tải danh sách người dùng thất bại.");
             } finally {
                 setLoading(false);
             }
         };
+        fetchUsers();
+    }, [token]);
 
-        fetchHotels();
-    }, [filters, token]);
+
 
     const history = useHistory();
-    const handleViewDetail = (hotelId) => {
-        history.push(path.hotelDetailAdminPath(hotelId))
+    const handleViewDetail = (userId) => {
+        history.push(path.hotelDetailAdminPath(userId))
     }
-    const handleChangeHotel = (hotelId) => {
-        history.push(path.hotelProfileAdmin(hotelId))
+    const handleChangeHotel = (userId) => {
+        history.push(path.hotelProfileAdmin(userId))
 
     }
     const handleCreateHotel = () => {
@@ -131,25 +134,14 @@ const HotelManagement = () => {
     }
 
     const columns = [
+
         {
-            title: "Tên khách sạn",
-            dataIndex: "hotelName",
-            key: "hotelName",
-            render: (v, row) => (
-                <Typography.Link onClick={() => handleChangeHotel(row.hotelId)}> {v} </Typography.Link>
-            ),
-            sorter: true,
-        },
-        // {
-        //     title: "Vị trí",
-        //     dataIndex: "hotelAddress",
-        //     key: "hotelAddress",
-        // },
-        {
-            title: "Chủ sở hữu",
-            key: "owner",
+            title: "Tên người dùng",
+            key: "userName",
             render: (_, record) => {
-                const owner = record.owner;
+                console.log("record: ", _);
+
+                const owner = record;
                 return owner ? (
                     <div>
                         <div>{owner.fullname}</div>
@@ -159,75 +151,116 @@ const HotelManagement = () => {
                     <Tag color="orange">Chưa gán</Tag>
                 );
             },
+            sorter: "true"
         },
         {
-            title: "Trạng thái",
-            dataIndex: "hotelStatus",
-            key: "hotelStatus",
+            title: "Giới tính",
+            dataIndex: "gender",
+            key: "gender",
             render: (s) => {
-                const colorMap = {
-                    AVAILABLE: "green",
-                    inactive: "default",
-                    pending: "gold",
-                    archived: "red",
+                const genderMapper = {
+                    true: "Nam",
+                    false: "Nữ",
+
                 };
-                return <Tag color={colorMap[s] || "default"}>{(s || "").toUpperCase()}</Tag>;
+                const tagColor = {
+                    true: "green",
+                    false: "orange",
+                }
+                return <Tag color={tagColor[s] || "default"}> {(genderMapper[s] || "")}</Tag>;
             },
         },
-        {
-            title: "Doanh thu (tháng)",
-            dataIndex: "revenue_monthly",
-            key: "revenue_monthly",
-            render: (r) => `${formatMoney(r)} VND`,
-            align: "right",
-        },
+
         {
             title: "Tổng booking",
-            dataIndex: "total_bookings",
+            dataIndex: "bookings",
             key: "total_bookings",
+            align: "center",
+            render: (bookings) => {
+                return <span>{bookings.totalElements}</span>;
+            },
+
+        },
+        {
+            title: "Danh sách đánh giá",
+            dataIndex: "reviews",
+            key: "reviews",
+            render: (reviews) => <ReviewsColumnStatic reviews={reviews} />,
+
             align: "center",
         },
         {
-            title: "Đánh giá",
-            dataIndex: "ratingPoint",
-            key: "ratingPoint",
-            render: (r) => <span>{r != null ? r.toFixed(1) : "-"} ⭐</span>,
+            title: "Tình trạng thành viên",
+            dataIndex: "ownerRequestStatus",
+            key: "ownerRequestStatus",
+            render: (r) => {
+                const tagColor = {
+                    NONE: "gray",
+                    PENDING: "orange",
+                    APPROVED: "green",
+                    REJECTED: "red",
+                }
+                const ownerStatus = {
+                    NONE: "Chưa đăng ký",
+                    PENDING: "Đợi duyệt",
+                    APPROVED: "Chủ sở hữu",
+                    REJECTED: "Từ chối",
+                }
+                return <Tag color={tagColor[r] || "default"}> {(ownerStatus[r] || "")}</Tag>
+            },
             align: "center",
         },
-        // {
-        //     title: "Ngày được nâng cấp",
-        //     dataIndex: "hotelUpdatedAt",
-        //     key: "hotelUpdatedAt",
-        //     render: (d) => humanDate(d),
-        // },
         {
             title: "Hành động",
             key: "actions",
             render: (_, row) => (
                 <Space size="middle">
                     <Tooltip title="Xem chi tiết">
-                        <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetail(row.hotelId)} />
+                        {/* <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetail(row.hotelId)} /> */}
+                        <Button type="text" icon={<EyeOutlined />} />
                     </Tooltip>
                     <Tooltip title="Chỉnh sửa">
-                        <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeHotel(row.hotelId)} />
+                        {/* <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeHotel(row.hotelId)} /> */}
+                        <Button type="text" icon={<EditOutlined />} />
                     </Tooltip>
-                    <Dropdown
-                        overlay={
-                            <Menu>
-                                <Menu.Item key="manage-rooms">Quản lý phòng</Menu.Item>
-                                <Menu.Item key="stats">Thống kê</Menu.Item>
-                                <Menu.Item key="toggle-status">
-                                    {row.status === "active" ? "Vô hiệu hóa" : "Kích hoạt"}
-                                </Menu.Item>
-                            </Menu>
-                        }
-                    >
-                        <Button type="text" icon={<MoreOutlined />} />
-                    </Dropdown>
+                      <Tooltip title="Xóa">
+                        {/* <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeHotel(row.hotelId)} /> */}
+                        <Button type="text" icon={<DeleteOutlined />} />
+                    </Tooltip>
                 </Space>
             ),
         },
     ];
+    const ReviewsColumnStatic = ({ reviews }) => {
+        const [visible, setVisible] = useState(false);
+
+        return (
+            <>
+                <Button type="link" onClick={() => setVisible(true)}>
+                    Xem đánh giá ({reviews?.length || 0})
+                </Button>
+
+                <Modal
+                    open={visible}
+                    title="Danh sách đánh giá"
+                    footer={null}
+                    onCancel={() => setVisible(false)}
+                    width={700}
+                >
+                    <List
+                        dataSource={reviews}
+                        renderItem={(item) => (
+                            <List.Item>
+                                <b>{item.hotelName || "hotel name"}</b>
+                                <p>{item.comment}</p>
+                                <Tag>⭐ {item.rating}</Tag>
+                            </List.Item>
+                        )}
+                    />
+                </Modal>
+            </>
+        );
+    };
 
     const rowSelection = {
         selectedRowKeys,
@@ -279,7 +312,7 @@ const HotelManagement = () => {
                     </div>
 
                     <div className="flex gap-2">
-                        <Button type="primary" onClick={() => handleCreateHotel()} >Tạo khách sạn mới</Button>
+                        {/* <Button type="primary" onClick={() => handleCreateHotel()} >Tạo khách sạn mới</Button> */}
                     </div>
                 </div>
 
@@ -306,7 +339,7 @@ const HotelManagement = () => {
                 <Spin spinning={loading}>
                     <Table
                         rowKey="id"
-                        dataSource={hotels}
+                        dataSource={user}
                         columns={columns}
                         rowSelection={rowSelection}
                         pagination={{
@@ -333,4 +366,4 @@ const HotelManagement = () => {
     );
 };
 
-export default HotelManagement;
+export default UserManagement;

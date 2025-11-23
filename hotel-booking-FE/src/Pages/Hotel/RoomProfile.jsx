@@ -24,7 +24,7 @@ import { updateRoomById } from "../../slices/room.slice"; // bạn cần tạo s
 const fetchRoomById = async (hotelId, roomId) => {
   const token = localStorage.getItem("accessToken");
   const res = await fetch(
-    `http://localhost:8080/api/admin/hotels/${hotelId}/rooms/${roomId}`,
+    `http://localhost:8080/api/dashboard/admin/hotels/${hotelId}/rooms/${roomId}`,
     {
       headers: {
         "Content-Type": "application/json",

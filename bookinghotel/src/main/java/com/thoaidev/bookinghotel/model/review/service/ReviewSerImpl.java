@@ -3,7 +3,6 @@ package com.thoaidev.bookinghotel.model.review.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -100,6 +99,7 @@ public class ReviewSerImpl implements ReviewSer {
     @Override
     public ReviewResponse getReviewsByHotelId(Integer hotelId, int pageNo, int pageSize) {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        System.out.println("pageNo: "+ pageIndex + ""  + pageNo);
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<HotelReview> reviews = reviewRepository.findByHotel_HotelId(hotelId, pageable);
 

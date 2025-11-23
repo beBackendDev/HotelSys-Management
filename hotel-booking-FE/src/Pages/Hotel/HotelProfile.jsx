@@ -22,7 +22,7 @@ import { updateProfileHotel } from "../../slices/hotel.slice";
 
 const fetchHotelById = async (hotelId) => {
   const token = localStorage.getItem("accessToken"); // hoặc chỗ bạn lưu
-  const res = await fetch(`http://localhost:8080/api/admin/hotels/${hotelId}`, {
+  const res = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${hotelId}`, {
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,

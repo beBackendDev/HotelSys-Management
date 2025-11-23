@@ -29,8 +29,10 @@ import ProfileHotel from "./Pages/Hotel/HotelProfile";
 import RoomProfile from "./Pages/Hotel/RoomProfile";
 import Purchase from "./Pages/User/Purchase";
 import HotelManagement from "./Pages/Hotel/HotelManagement";
+import UserManagement from "./Pages/User/UserManagement";
 import RoomManagement from "./Pages/Hotel/RoomManagement";
 import HotelDetailAdmin from "./Pages/Hotel/HotelDetailAdmin";
+import UserDetailAdmin from "./Pages/User/UserDetailAdmin";
 import RoomDetailAdmin from "./Pages/Hotel/RoomDetailAdmin";
 import CreateHotel from "./Pages/Hotel/CreateHotel";
 
@@ -122,13 +124,19 @@ const Routes = () => {
           <ChangePass />
         </AuthenticatedGuard>
       </Route>
-            {/* Quên password */}
+      {/* Quên password */}
       <Route exact path={path.forgetPw}>
-          <ForgetPw />
+        <ForgetPw />
       </Route>
       {/* Thanh toán */}
       <Route exact path={path.purchase}>
         <Purchase />
+      </Route>
+      {/* Quản lý User(Admin) */}
+      <Route exact path={path.userManagement}>
+        <HotelManagerGuard>
+          <UserManagement />
+        </HotelManagerGuard>
       </Route>
       {/* Quản lý khách sạn(Admin/ Owner) */}
       <Route exact path={path.hotelManagement}>
@@ -150,6 +158,11 @@ const Routes = () => {
       <Route exact path={path.hotelDetailAdmin}>
         <HotelManagerGuard>
           <HotelDetailAdmin />
+        </HotelManagerGuard>
+      </Route>
+          <Route exact path={path.userDetailAdmin}>
+        <HotelManagerGuard>
+          <UserDetailAdmin />
         </HotelManagerGuard>
       </Route>
       {/* tạo phòng(Admin/ Owner) */}

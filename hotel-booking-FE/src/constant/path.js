@@ -22,7 +22,10 @@ class Path {
     this.hotelManagement = this.dashboard + "/hotel-management";
     this.roomManagement = this.dashboard + "/room-management";
     this.hotelDetailAdmin = this.dashboard + "/hotel/:hotelId";
+    this.userManagement = this.dashboard + "/user-management";
+    this.userDetailAdmin = this.dashboard + "/user/:userId";
     this.hotelDetailAdminPath = (hotelId) => this.dashboard + `/hotel/${hotelId}`; // thực hiện sử dụng tham số hotelId để truyền vào path
+    this.userDetailAdminPath = (userId) => this.dashboard + `/user/${userId}`; // thực hiện sử dụng tham số userId để truyền vào path
 
     this.roomDetailAdmin = this.dashboard + "/hotel/:hotelId/room/:roomId";  // pattern cho route
 

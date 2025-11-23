@@ -13,7 +13,7 @@ const RoomDetailAdmin = () => {
     useEffect(() => {
         const fetchRoom = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/admin/hotels/${hotelId}/rooms/${roomId}`, {
+                const res = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${hotelId}/rooms/${roomId}`, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`,

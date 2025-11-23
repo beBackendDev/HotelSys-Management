@@ -29,7 +29,6 @@ import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
 import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
-import com.thoaidev.bookinghotel.model.review.entity.Review;
 import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.role.OwnerResponseDTO;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
@@ -276,10 +275,19 @@ public class AdminCtrl {
     // Danh sách đánh giá Pagination
     @GetMapping("/admin/reviews-list")
     public ResponseEntity<ReviewResponse> reviews_list_user(
-            @RequestParam(value = "pageNo", defaultValue = "", required = false) int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "", required = false) int pageSize
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
         return new ResponseEntity<>(reviewSer.getAllReviews(pageNo, pageSize), HttpStatus.OK);
+    }
+
+        @GetMapping("/admin/user-review/{id}/reviews-list")
+    public ResponseEntity<ReviewResponse> reviews_list_user(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @PathVariable Integer id
+    ) {
+        return new ResponseEntity<>(reviewSer.getReviewsByUserId(id, pageNo, pageSize), HttpStatus.OK);
     }
 // Mở rộng cho OWNER
     //Response Owner
