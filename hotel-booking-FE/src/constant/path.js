@@ -32,6 +32,7 @@ class Path {
     // hàm build URL thật để navigate
     this.roomDetailAdminPath = (hotelId, roomId) => this.dashboard + `/hotel/${hotelId}/room/${roomId}`; // thực hiện sử dụng tham số hotelId để truyền vào path
     this.bookingManagement = this.dashboard + "/booking-management";
+    this.paymentManagement = this.dashboard + "/payment-management";
 
     this.user = "/user";//Update user
     this.updateUser= this.user + "/update";//Change Password

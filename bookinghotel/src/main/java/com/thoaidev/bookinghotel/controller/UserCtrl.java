@@ -189,14 +189,14 @@ public class UserCtrl {
 
 // ------------------- PAYMENT -------------------    
     //Trả về kết quả đặt phòng
-    @GetMapping("/public/vnpay-payment")
+    @GetMapping("/result/vnpay-payment")
     public String GetMapping(HttpServletRequest request) {
         int paymentStatus = vnPayService.orderReturn(request);
         return paymentStatus == 1 ? "ordersuccess" : "orderfail";
     }
 
     //Thực hiện thanh toán (Thanh toán VNPay)
-    @PostMapping("/public/create")
+    @PostMapping("/VNPay/create-payment")
     public ResponseEntity<?> createPayment(@RequestBody PaymentInitRequest req, HttpServletRequest servletRequest) throws Exception {
         String url = vnPayService.createOrder(req, servletRequest);
         PaymentResDTO response = new PaymentResDTO(

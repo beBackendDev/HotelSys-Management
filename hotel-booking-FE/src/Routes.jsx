@@ -11,6 +11,7 @@ import Payment from "./Pages/Payment";
 import HomePage from "./Pages/HomePage";
 import Destinations from "./Pages/Destinations";
 import BookingManagement from "./Pages/Hotel/BookingManagement";
+import PaymentManagement from "./Pages/Hotel/PaymentManagement";
 import CreateRoom from "./Pages/Hotel/CreateRoom";
 import Overview from "./Pages/Hotel/Overview";
 import HotelDetail from "./Pages/HotelDetail";
@@ -161,7 +162,7 @@ const Routes = () => {
           <HotelDetailAdmin />
         </HotelManagerGuard>
       </Route>
-          <Route exact path={path.userDetailAdmin}>
+      <Route exact path={path.userDetailAdmin}>
         <HotelManagerGuard>
           <UserDetailAdmin />
         </HotelManagerGuard>
@@ -182,6 +183,12 @@ const Routes = () => {
       <Route exact path={path.bookingManagement}>
         <HotelManagerGuard>
           <BookingManagement />
+        </HotelManagerGuard>
+      </Route>
+
+      <Route exact path={path.paymentManagement}>
+        <HotelManagerGuard>
+          <PaymentManagement />
         </HotelManagerGuard>
       </Route>
       {/* QUản lý thông tin ks(Admin/ Owner) || có thể không cần dùng*/}

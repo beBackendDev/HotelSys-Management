@@ -32,10 +32,8 @@ const DashboardLayout = ({ children }) => {
     { key: path.overview, icon: <HomeTwoTone />, label: "Tổng quan", link: path.overview },
     { key: path.userManagement, icon: <UserOutlined />, label: "Quản lý người dùng", link: path.userManagement},
     { key: path.hotelManagement, icon: <HomeOutlined />, label: "Quản lý khách sạn", link: path.hotelManagement },
-    { key: path.bookingManagement, icon: <HomeOutlined />, label: "Quản lý đặt phòng", link: "#" },
-    { key: "invoiceManagement", icon: <FileSearchOutlined />, label: "Quản lý hóa đơn", link: "#" },
-    { key: "reviewManagement", icon: <FileDoneOutlined />, label: "Quản lý đánh giá", link: "#" },
-    { key: "tourManagement", icon: <EnvironmentOutlined />, label: "Quản lý điểm du lịch", link: "#" },
+    { key: path.bookingManagement, icon: <HomeOutlined />, label: "Quản lý đặt phòng", link: path.bookingManagement },
+    { key: "invoiceManagement", icon: <FileSearchOutlined />, label: "Quản lý hóa đơn", link: path.paymentManagement },
     { key: "settings", icon: <SettingOutlined />, label: "Cài đặt hệ thống", link: "#" },
   ];
 
