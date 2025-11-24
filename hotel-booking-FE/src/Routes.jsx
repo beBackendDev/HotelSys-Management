@@ -60,6 +60,7 @@ const Routes = () => {
         <RoomDetail />
       </Route>
       {/* Phân quyền */}
+      {/* Thực hiện booknghotel */}
       <Route exact path={path.bookingDetail}>
         <AuthenticatedGuard>
           <Booking />

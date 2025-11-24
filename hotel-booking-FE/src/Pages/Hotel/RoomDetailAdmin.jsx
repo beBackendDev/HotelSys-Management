@@ -1,25 +1,46 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { EditOutlined, ArrowLeftOutlined, } from "@ant-design/icons";
+import {
+    EditOutlined,
+    ArrowLeftOutlined,
+    DollarOutlined,
+    TeamOutlined,
+    ApartmentOutlined,
+    CheckCircleOutlined,
+    CloseCircleOutlined,
+} from "@ant-design/icons";
+import {
+    Card,
+    Descriptions,
+    Tag,
+    Button,
+    Divider,
+    Image,
+    Typography,
+} from "antd";
 import DashboardLayout from "../../core/layout/Dashboard";
+import moment from "moment";
+
+const { Title } = Typography;
 
 const RoomDetailAdmin = () => {
-    const { hotelId } = useParams();
-    const { roomId } = useParams();
+    const { hotelId, roomId } = useParams();
     const history = useHistory();
-    const [room, setRoom] = useState(null);
+    const [room, setRoom] = useState([]);
+    const [hotel, setHotel] = useState([]);
     const token = localStorage.getItem("accessToken");
 
     useEffect(() => {
         const fetchRoom = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${hotelId}/rooms/${roomId}`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
-                    },
-                });
-
+                const res = await fetch(
+                    `http://localhost:8080/api/dashboard/admin/hotels/${hotelId}/rooms/${roomId}`,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                        },
+                    }
+                );
                 if (!res.ok) throw new Error("Failed to fetch room");
                 const data = await res.json();
                 setRoom(data);
@@ -27,71 +48,110 @@ const RoomDetailAdmin = () => {
                 console.error("Fetch error:", err);
             }
         };
-        fetchRoom();
-    }, [roomId, token]);
 
-    if (!room) return <div>Đang tải...</div>;
+        const fetchHotel = async () => {
+            try {
+                const res = await fetch(
+                    `http://localhost:8080/api/dashboard/admin/hotels/${hotelId}`,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                        },
+                    }
+                );
+                if (!res.ok) throw new Error("Failed to fetch room");
+                const data = await res.json();
+                setHotel(data);
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        };
+        fetchRoom();
+        fetchHotel();
+    }, [hotelId, roomId, token]);
+
+    if (!room) return <div style={{ padding: 20 }}>Đang tải...</div>;
 
     return (
         <DashboardLayout>
-            <div className="p-6 max-w-5xl mx-auto">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => history.goBack()}
-                            className="px-3 py-1 bg-gray-300 text-black rounded hover:bg-gray-400"
+            <div className="p-6">
+                <Button
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => history.goBack()}
+                    style={{ marginBottom: 16 }}
+                >
+                    Quay lại
+                </Button>
+
+                <Card
+                    title={<Title level={3}>{room.roomName}</Title>}
+                    extra={
+                        <Button
+                            type="primary"
+                            icon={<EditOutlined />}
+                            onClick={() => history.push(`/dashboard/admin/hotels/${hotelId}/edit-room/${roomId}`)}
                         >
-                            <div className="flex flex-row">
-                                <ArrowLeftOutlined />
-                                <span>Quay lại</span>
-                            </div>
-                        </button>
-                        <h1 className="text-2xl font-bold">
-                            {room.roomName} (ID: {room.roomId})
-                        </h1>
-                    </div>
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded">
-                        <EditOutlined /> Sửa phòng
-                    </button>
-                </div>
+                            Chỉnh sửa phòng
+                        </Button>
+                    }
+                >
+                    <Descriptions bordered column={2}>
+                        <Descriptions.Item label="ID Phòng">{room.roomId}</Descriptions.Item>
+                        <Descriptions.Item label="Thuộc khách sạn">{hotel.hotelName}</Descriptions.Item>
 
-                {/* Room details */}
-                <p>
-                    <strong>Loại phòng:</strong> {room.roomType}
-                </p>
-                <p>
-                    <strong>Sức chứa:</strong> {room.roomOccupancy} người
-                </p>
-                <p>
-                    <strong>Giá/đêm:</strong>{" "}
-                    {room.roomPricePerNight?.toLocaleString()} VND
-                </p>
-                <p>
-                    <strong>Trạng thái:</strong> {room.roomStatus}
-                </p>
-                <p>
-                    <strong>Hotel ID:</strong> {room.hotelId}
-                </p>
+                        <Descriptions.Item label="Loại phòng">
+                            <ApartmentOutlined /> {room.roomType}
+                        </Descriptions.Item>
 
-                {/* Images */}
-                <div className="mt-4">
-                    <strong>Hình ảnh phòng:</strong>
-                    {room.roomImageUrls && room.roomImageUrls.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-4 mt-2">
-                            {room.roomImageUrls.map((url, index) => (
-                                <img
+                        <Descriptions.Item label="Giá / Đêm">
+                            <DollarOutlined /> {room.roomPricePerNight?.toLocaleString()} VND
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Sức chứa">
+                            <TeamOutlined /> {room.roomOccupancy} người
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Trạng thái">
+                            {room.roomStatus === "AVAILABLE" ? (
+                                <Tag icon={<CheckCircleOutlined />} color="green">
+                                    {room.roomStatus}
+                                </Tag>
+                            ) : (
+                                <Tag icon={<CloseCircleOutlined />} color="volcano">
+                                    {room.roomStatus}
+                                </Tag>
+                            )}
+                        </Descriptions.Item>
+                    </Descriptions>
+                </Card>
+
+                <Divider />
+
+                {/* Tiện ích khách sạn */}
+                <Card title="Tiện ích phòng">
+                    {hotel.hotelFacilities?.map((f, i) => (
+                        <Tag key={i} color="blue">{f.name}</Tag>
+                    ))}
+                </Card>
+                <Divider />
+
+                {/* Hình ảnh phòng */}
+                <Card title="Hình ảnh phòng">
+                    <Image.PreviewGroup>
+                        {room.roomImageUrls?.length > 0 ? (
+                            room.roomImageUrls.map((img, index) => (
+                                <Image
                                     key={index}
-                                    src={url}
-                                    alt={`Room ${index}`}
-                                    className="w-full h-32 object-cover rounded border"
+                                    width={250}
+                                    src={img}
+                                    style={{ marginRight: 15, borderRadius: 8 }}
                                 />
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-gray-500">Không có ảnh</p>
-                    )}
-                </div>
+                            ))
+                        ) : (
+                            <p>Phòng này chưa có hình ảnh.</p>
+                        )}
+                    </Image.PreviewGroup>
+                </Card>
             </div>
         </DashboardLayout>
     );
