@@ -139,7 +139,6 @@ const UserManagement = () => {
             title: "Tên người dùng",
             key: "userName",
             render: (_, record) => {
-                console.log("record: ", _);
 
                 const owner = record;
                 return owner ? (

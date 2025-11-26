@@ -28,6 +28,10 @@ import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
+import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
+import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
+import com.thoaidev.bookinghotel.model.payment.service.PaymentSerImpl;
+import com.thoaidev.bookinghotel.model.payment.service.PaymentService;
 import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
 import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.role.OwnerResponseDTO;
@@ -38,9 +42,12 @@ import com.thoaidev.bookinghotel.model.user.dto.response.UserResponse;
 import com.thoaidev.bookinghotel.model.user.service.UserService;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
+import lombok.AllArgsConstructor;
+
 @RestController
 @RequestMapping("/api/dashboard")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@AllArgsConstructor
 public class AdminCtrl {
 
     @Autowired
@@ -51,21 +58,9 @@ public class AdminCtrl {
     private final UserService userService;
     private final BookingSer bookingService;
     private final ReviewSer reviewSer;
+    private final PaymentService paymentService;
 
-    public AdminCtrl(
-            HotelService hotelService,
-            RoomService roomService,
-            UserService userService,
-            ReviewSer reviewSer,
-            BookingSer bookingService) {
-        this.hotelService = hotelService;
-        this.roomService = roomService;
-        this.userService = userService;
-        this.reviewSer = reviewSer;
-        this.bookingService = bookingService;
-    }
 //Example
-
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/dashboard")
     public ResponseEntity<String> adminDashboard() {
@@ -270,8 +265,28 @@ public class AdminCtrl {
         bookingService.cancelBooking(id);
         return ResponseEntity.ok("Booking cancelled");
     }
+//------------------- PAYMENT -------------------   
+    //Lấy toàn bộ danh sách Payment
 
-//------------------- BOOKING -------------------   
+    @GetMapping("/admin/hotels/payment-management")
+    public ResponseEntity<?> getAllPayment(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
+        PaymentResponse paymentResponse = paymentService.getAllPayments(pageNo, pageSize);
+
+        return new ResponseEntity<>(paymentResponse, HttpStatus.OK);
+    }
+
+    //Lấy chi tiết payment
+    @GetMapping("/admin/hotels/payment/{id}")
+    public ResponseEntity<?> getMethodName(
+        @PathVariable("id") Integer paymentId) {
+
+            PaymentDto payment = paymentService.getPaymentById(paymentId);
+        return new ResponseEntity<>(payment, HttpStatus.OK);
+    }
+
+//------------------- REVIEW -------------------   
     // Danh sách đánh giá Pagination
     @GetMapping("/admin/reviews-list")
     public ResponseEntity<ReviewResponse> reviews_list_user(
@@ -281,7 +296,7 @@ public class AdminCtrl {
         return new ResponseEntity<>(reviewSer.getAllReviews(pageNo, pageSize), HttpStatus.OK);
     }
 
-        @GetMapping("/admin/user-review/{id}/reviews-list")
+    @GetMapping("/admin/user-review/{id}/reviews-list")
     public ResponseEntity<ReviewResponse> reviews_list_user(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
@@ -293,7 +308,8 @@ public class AdminCtrl {
     //Response Owner
 
     @PutMapping("/admin/update-role/user/{id}")
-    public ResponseEntity<String> updateRole(@PathVariable("id") Integer userId,
+    public ResponseEntity<String> updateRole(
+            @PathVariable("id") Integer userId,
             @RequestBody OwnerResponseDTO res) {
         System.out.println("===> Controller received: userId=" + userId + ", decision=" + res.getDecision() + "/" + OwnerResponseStatus.APPROVED.name());
         //request = {userId, roleName}

@@ -26,7 +26,7 @@ const PaymentManagement = () => {
         setLoading(true);
         try {
             const res = await fetch(
-                `http://localhost:8080/api/dashboard/admin/payments-management`,
+                `http://localhost:8080/api/dashboard/admin/hotels/payment-management`,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -41,10 +41,9 @@ const PaymentManagement = () => {
             // Gọi API lấy thêm thông tin Booking nếu cần
             const updatedPayments = await Promise.all(
                 paymentList.map(async (payment) => {
-                    if (!payment.booking?.bookingId) return payment;
-
+                    if (!payment?.bookingId) return payment;
                     const bookingRes = await fetch(
-                        `http://localhost:8080/api/dashboard/admin/bookings/${payment.booking.bookingId}`,
+                        `http://localhost:8080/api/dashboard/admin/hotels/booking/${payment.bookingId}`,
                         {
                             headers: {
                                 "Authorization": `Bearer ${token}`,
@@ -72,9 +71,19 @@ const PaymentManagement = () => {
     const columns = [
         {
             title: "Payment ID",
-            dataIndex: "paymentId",
             key: "paymentId",
-            render: (id) => <Tag color="blue">{id}</Tag>,
+            // render: (id) => <Tag color="blue">{id}</Tag>,
+            render: (_, payments) => {
+                const payment = payments;
+                return payment ? (
+                    <Tag color="purple">
+                        <div>{payment.paymentId}</div>
+                        <div className="text-xs text-gray-500">{payment.transactionId}</div>
+                    </Tag>
+                ) : (
+                    <Tag color="orange">Trống</Tag>
+                )
+            },
             fixed: "left",
         },
         {
@@ -112,8 +121,8 @@ const PaymentManagement = () => {
                 <Tag
                     color={
                         status === "SUCCESS" ? "green" :
-                        status === "PENDING" ? "orange" :
-                        status === "FAILED" ? "volcano" : "blue"
+                            status === "PENDING" ? "orange" :
+                                status === "FAILED" ? "volcano" : "blue"
                     }
                 >
                     {status}
@@ -154,7 +163,7 @@ const PaymentManagement = () => {
                     columns={columns}
                     dataSource={payments}
                     pagination={false}
-                
+
                 />
             </div>
         </DashboardLayout>

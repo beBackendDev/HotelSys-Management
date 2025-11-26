@@ -179,7 +179,7 @@ public class BookingSerImpl implements BookingSer {
     
     // Get All Booking List
     @Override
-    public BookingResponse getAllBookings(int pageNo, int pageSize) {
+    public BookingResponse getAllBookings(int pageNo,  int pageSize) {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Booking> bookings = bookingRepository.findAll(pageable);

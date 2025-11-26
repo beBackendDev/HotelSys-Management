@@ -5,19 +5,34 @@ import {
   FileDoneOutlined,
   FileSearchOutlined,
   EnvironmentOutlined,
+  LogoutOutlined,
   SettingOutlined,
   HomeTwoTone,
 } from "@ant-design/icons";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/Logo.png";
 import { path } from "../../constant/path";
+import { logout } from "../../slices/auth.slice";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+
 
 const DashboardLayout = ({ children }) => {
   const location = useLocation();
-  const role = useSelector((state) => state.auth.profile.user.role);
+  const dispatch = useDispatch();
+  const history = useHistory();
 
-  console.log("Role Dashboard: ", role);
+  const role = useSelector((state) => state.auth.profile.user.role);
+  const handleLogout = async () => {
+    try {
+      const res = await dispatch(logout());
+      unwrapResult(res);
+      history.push("login");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Menu theo role
   const ownerMenu = [
@@ -30,11 +45,11 @@ const DashboardLayout = ({ children }) => {
 
   const adminMenu = [
     { key: path.overview, icon: <HomeTwoTone />, label: "Tổng quan", link: path.overview },
-    { key: path.userManagement, icon: <UserOutlined />, label: "Quản lý người dùng", link: path.userManagement},
+    { key: path.userManagement, icon: <UserOutlined />, label: "Quản lý người dùng", link: path.userManagement },
     { key: path.hotelManagement, icon: <HomeOutlined />, label: "Quản lý khách sạn", link: path.hotelManagement },
     { key: path.bookingManagement, icon: <HomeOutlined />, label: "Quản lý đặt phòng", link: path.bookingManagement },
     { key: "invoiceManagement", icon: <FileSearchOutlined />, label: "Quản lý hóa đơn", link: path.paymentManagement },
-    { key: "settings", icon: <SettingOutlined />, label: "Cài đặt hệ thống", link: "#" },
+    { key: "settings", icon: <LogoutOutlined />, label: "Đăng xuất", link: path.login, onclick: handleLogout },
   ];
 
   // Chọn menu theo role
