@@ -19,6 +19,7 @@ const Payment = () => {
   const { bookingId } = useParams();
   const dispatch = useDispatch();
   const history = useHistory();
+  const token = localStorage.getItem("accessToken");
 
   const [method, setMethod] = useState(null);
 
@@ -28,17 +29,27 @@ const Payment = () => {
       bookingId: Number(bookingId),
       method: method || "VNPAY",
     };
+    console.log("data payment in:", paymentData);
 
     try {
       console.log("(Payment.jsx) data before sent: ", paymentData);
 
-      const res = await dispatch(processPayment(paymentData));
-      const result = unwrapResult(res);
+      // const res = await dispatch(processPayment(paymentData));
+      const res = await fetch(`http://localhost:8080/api/user/VNPay/create-payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(paymentData)
+      })
+      
+      const result = await res.json();
       console.log("Payment.jsx) response payment: ", result);
 
 
-      if (result.paymentURL) {
-        window.location.href = result.paymentURL;
+      if (result?.url) {
+        window.location.href = result?.url;
       } else {
         // Trường hợp thanh toán tại quầy (CASH) hoặc ví MoMo có confirm ngay
         if (result.paymentStatus === "SUCCESS") {
