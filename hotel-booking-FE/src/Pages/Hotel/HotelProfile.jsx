@@ -152,7 +152,7 @@ const Profile = () => {
             <Alert
               type="info"
               message={`Bạn đang ${canEdit ? "chỉnh sửa" : "xem"} khách sạn "${hotel.hotelName
-                }"${hotel.user_id ? ` thuộc owner ID: ${hotel.user_id}` : ""
+                }"${hotel.userId ? ` thuộc owner ID: ${hotel.userId}` : ""
                 } với quyền Admin.`}
               showIcon
             />

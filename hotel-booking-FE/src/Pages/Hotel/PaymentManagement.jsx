@@ -65,7 +65,7 @@ const PaymentManagement = () => {
     };
 
     const handleViewDetail = (paymentId) => {
-        history.push(`/dashboard/payment-management/${paymentId}`);
+        history.push(`/dashboard/payment-detail/${paymentId}`);
     };
 
     const columns = [

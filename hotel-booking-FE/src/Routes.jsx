@@ -11,7 +11,9 @@ import Payment from "./Pages/Payment";
 import HomePage from "./Pages/HomePage";
 import Destinations from "./Pages/Destinations";
 import BookingManagement from "./Pages/Hotel/BookingManagement";
+import BookingDetail from "./Pages/Hotel/BookingDetailAdmin";
 import PaymentManagement from "./Pages/Hotel/PaymentManagement";
+import PaymentDetail from "./Pages/Hotel/PaymentDetailAdmin";
 import CreateRoom from "./Pages/Hotel/CreateRoom";
 import Overview from "./Pages/Hotel/Overview";
 import HotelDetail from "./Pages/HotelDetail";
@@ -27,6 +29,7 @@ import UpdateUser from "./Pages/User/UpdateUser";
 import ReviewPage from "./Pages/User/ReviewPage";
 import ReviewUser from "./Pages/User/ReviewUser";
 import ProfileHotel from "./Pages/Hotel/HotelProfile";
+import UserUpdate from "./Pages/User/UserUpdate";
 import RoomProfile from "./Pages/Hotel/RoomProfile";
 import Purchase from "./Pages/User/Purchase";
 import HotelManagement from "./Pages/Hotel/HotelManagement";
@@ -84,7 +87,7 @@ const Routes = () => {
           <Login heading="Hello admin" role={"admin"} />
         </UnAuth>
       </Route>
-
+      {/* role == USER */}
       <Route exact path={path.registerMember}>
         <AuthenticatedGuard>
           <RegisterMember />
@@ -134,6 +137,8 @@ const Routes = () => {
       <Route exact path={path.purchase}>
         <Purchase />
       </Route>
+
+      {/* role == ADMIN */}
       {/* Quản lý User(Admin) */}
       <Route exact path={path.userManagement}>
         <HotelManagerGuard>
@@ -167,6 +172,11 @@ const Routes = () => {
           <UserDetailAdmin />
         </HotelManagerGuard>
       </Route>
+      <Route exact path={path.userUpdate}>
+        <HotelManagerGuard>
+          <UserUpdate />
+        </HotelManagerGuard>
+      </Route>
       {/* tạo phòng(Admin/ Owner) */}
       <Route exact path={path.createRoom(":hotelId")}>
         <HotelManagerGuard>
@@ -185,10 +195,19 @@ const Routes = () => {
           <BookingManagement />
         </HotelManagerGuard>
       </Route>
-
+      <Route exact path={path.bookingDetailAdmin}>
+        <HotelManagerGuard>
+          <BookingDetail />
+        </HotelManagerGuard>
+      </Route>
       <Route exact path={path.paymentManagement}>
         <HotelManagerGuard>
           <PaymentManagement />
+        </HotelManagerGuard>
+      </Route>
+      <Route exact path={path.paymentDetailAdmin}>
+        <HotelManagerGuard>
+          <PaymentDetail />
         </HotelManagerGuard>
       </Route>
       {/* QUản lý thông tin ks(Admin/ Owner) || có thể không cần dùng*/}

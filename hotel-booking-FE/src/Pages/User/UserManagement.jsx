@@ -77,8 +77,9 @@ const UserManagement = () => {
                 });
                 const data = await res.json();
                 let usersList = data?.content;
+                console.log("user: ", usersList);
                 
-                //fetch review cho tung user 
+                //fetch thong tin review va booking  cho tung user 
                 const updateUsers = await Promise.all(
                     usersList.map(async (user) => {
                         if (user.review == []) return { ...user, review: [] };
@@ -92,7 +93,7 @@ const UserManagement = () => {
                         const reviewData = await reviewList.json();
                         console.log("Review List: ", reviewData);
 
-                        const bookingList = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/bookings-management`, {
+                        const bookingList = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${user.userId}/bookings-management`, {
                             method: "GET",
                             headers: {
                                 "Authorization": `Bearer ${token}`,
@@ -122,13 +123,13 @@ const UserManagement = () => {
 
     const history = useHistory();
     const handleViewDetail = (userId) => {
-        history.push(path.hotelDetailAdminPath(userId))
+        history.push(path.userDetailAdminPath(userId))
     }
-    const handleChangeHotel = (userId) => {
-        history.push(path.hotelProfileAdmin(userId))
+    const handleChangeUser = (userId) => {
+        history.push(path.userUpdateAdmin(userId))
 
     }
-    const handleCreateHotel = () => {
+    const handleCreateUser = () => {
         history.push(path.createHotel)
 
     }
@@ -176,7 +177,7 @@ const UserManagement = () => {
             key: "total_bookings",
             align: "center",
             render: (bookings) => {
-                return <span>{bookings.totalElements}</span>;
+                return <span>{bookings?.totalElements}</span>;
             },
 
         },
@@ -215,15 +216,13 @@ const UserManagement = () => {
             render: (_, row) => (
                 <Space size="middle">
                     <Tooltip title="Xem chi tiết">
-                        {/* <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetail(row.hotelId)} /> */}
-                        <Button type="text" icon={<EyeOutlined />} />
+                        <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetail(row?.userId)} />
                     </Tooltip>
                     <Tooltip title="Chỉnh sửa">
-                        {/* <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeHotel(row.hotelId)} /> */}
-                        <Button type="text" icon={<EditOutlined />} />
+                        <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeUser(row?.userId)} />
                     </Tooltip>
                       <Tooltip title="Xóa">
-                        {/* <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeHotel(row.hotelId)} /> */}
+                        {/* <Button type="text" icon={<EditOutlined />} onClick={() => handleChangeUser(row.hotelId)} /> */}
                         <Button type="text" icon={<DeleteOutlined />} />
                     </Tooltip>
                 </Space>
@@ -311,7 +310,7 @@ const UserManagement = () => {
                     </div>
 
                     <div className="flex gap-2">
-                        {/* <Button type="primary" onClick={() => handleCreateHotel()} >Tạo khách sạn mới</Button> */}
+                        {/* <Button type="primary" onClick={() => handleCreateUser()} >Tạo khách sạn mới</Button> */}
                     </div>
                 </div>
 

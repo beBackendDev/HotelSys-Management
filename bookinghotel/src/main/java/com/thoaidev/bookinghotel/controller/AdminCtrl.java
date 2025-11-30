@@ -30,7 +30,6 @@ import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
 import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
-import com.thoaidev.bookinghotel.model.payment.service.PaymentSerImpl;
 import com.thoaidev.bookinghotel.model.payment.service.PaymentService;
 import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
 import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
@@ -249,7 +248,16 @@ public class AdminCtrl {
         return new ResponseEntity<>(bookingService.getAllBookings(pageNo, pageSize), HttpStatus.OK);
 
     }
+        //Xem toàn bộ booking cua User
+    @GetMapping("/admin/hotels/{userId}/bookings-management")
+    public ResponseEntity<BookingResponse> userBookings(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @PathVariable Integer userId
+        ) {
+        return new ResponseEntity<>(bookingService.getAllBookings(userId, pageNo, pageSize), HttpStatus.OK);
 
+    }
     //Xem chi tiết booking
     @GetMapping("/admin/hotels/booking/{id}")
     public ResponseEntity<BookingDTO> getBooking(

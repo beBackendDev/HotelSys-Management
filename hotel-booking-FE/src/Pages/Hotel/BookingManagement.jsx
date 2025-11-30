@@ -79,7 +79,7 @@ const BookingManagement = () => {
 
 
     const handleViewDetail = (bookingId) => {
-        history.push(`/dashboard/booking-management/${bookingId}`);
+        history.push(`/dashboard/booking-detail/${bookingId}`);
     };
 
     const columns = [
