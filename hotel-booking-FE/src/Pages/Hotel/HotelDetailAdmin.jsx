@@ -37,12 +37,23 @@ const HotelDetailAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const token = localStorage.getItem("accessToken");
+  const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
+  const role = decodedToken.role; // ADMIN, OWNER, USER
   const history = useHistory();
-
+  const getUrlByRole = (role) => {
+    switch (role) {
+      case "ADMIN":
+        return "admin";
+      case "OWNER":
+        return "owner";
+      default:
+        return "user"; // USER or guest
+    }
+  };
   // Fetch rooms
   const fetchRooms = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${hotelId}/rooms`, {
+      const res = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}/rooms`, {
         headers: { "Authorization": `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch rooms");
@@ -59,7 +70,7 @@ const HotelDetailAdmin = () => {
 
     const fetchHotel = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${hotelId}`, {
+        const res = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}`, {
           headers: { "Authorization": `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch hotel");

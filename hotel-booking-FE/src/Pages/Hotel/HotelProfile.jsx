@@ -19,10 +19,21 @@ import UploadImage from "../../common/UploadImage";
 import { rules } from "../../constant/rules";
 import DashboardLayout from "../../core/layout/Dashboard";
 import { updateProfileHotel } from "../../slices/hotel.slice";
-
+const token = localStorage.getItem("accessToken"); // hoặc chỗ bạn lưu
+const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
+const role = decodedToken.role; // ADMIN, OWNER, USER
+const getUrlByRole = (role) => {
+  switch (role) {
+    case "ADMIN":
+      return "admin";
+    case "OWNER":
+      return "owner";
+    default:
+      return "user"; // USER or guest
+  }
+};
 const fetchHotelById = async (hotelId) => {
-  const token = localStorage.getItem("accessToken"); // hoặc chỗ bạn lưu
-  const res = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${hotelId}`, {
+  const res = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}`, {
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,
@@ -36,37 +47,35 @@ const fetchHotelById = async (hotelId) => {
 };
 
 const Profile = () => {
-  const { user, hotel: authHotel } = useSelector(
+  const { user } = useSelector(
     (state) => state.auth.profile
   );
+  console.log("user redux: ", user);
+
   const role = (user?.role || "").toUpperCase(); // "ADMIN" hoặc "OWNER"
 
   const isAdmin = role === "ADMIN" || role === "OWNER";
   const { hotelId } = useParams();
-  const [hotel, setHotel] = useState(authHotel);
   const [loading, setLoading] = useState(false);
+  const [hotel, setHotel] = useState([]);
   const [error, setError] = useState(null);
   const [banner, setBanner] = useState("");
   const [progress, setProgress] = useState(0);
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const isOwnHotel = String(authHotel?.id) === String(hotelId || authHotel?.id);
-  const canEdit = isAdmin || (role === "OWNER" && isOwnHotel); //check role để thực hện cập nhật thông tin
+  const canEdit = isAdmin || role === "OWNER"; //check role để thực hện cập nhật thông tin
 
 
 
   useEffect(() => {
     const load = async () => {
       if (hotelId) {
-        if (role === "OWNER" && !isOwnHotel) {
-          setError("Bạn không có quyền xem/sửa khách sạn này.");
-          return;
-        }
-        if (isAdmin || isOwnHotel) {
+        if (isAdmin || role === "OWNER") {
           setLoading(true);
           try {
             const data = await fetchHotelById(hotelId);
+            console.log("hotel data: ", data);            
             setHotel(data);
           } catch (e) {
             setError(e.message);
@@ -75,23 +84,21 @@ const Profile = () => {
           }
         }
       } else {
-        setHotel(authHotel);
+        setError("Bạn không có quyền xem/sửa khách sạn này.");
+        return;
       }
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hotelId, authHotel]);
+  }, [hotelId]);
 
   const onFinish = async (values) => {
     if (!canEdit) return;
-    const ownerId = hotel.userId || authHotel.userId || user.userId;
-    console.log("member Id: ", ownerId);
+    const ownerId = user?.userId;
     const _data = {
       ...values,
-      image: banner?.url || hotel?.image,
-      id: hotel?.id,
+      image: banner?.url,
       user_id: ownerId,
-      province_id: hotel?.province_id,
     };
     try {
       const res = await dispatch(updateProfileHotel(_data));
@@ -240,8 +247,12 @@ const Profile = () => {
             <Col sm={6}>
               <Avatar
                 className="ml-8 mt-12 border border-orange-400"
-                src={`http://localhost:8080${hotel?.hotelImageUrls[0]}`}
                 size={{ lg: 130, xl: 180, xxl: 200 }}
+                src={
+                  hotel?.hotelImageUrls?.lenth > 0
+                  ? `http://localhost:8080${hotel.hotelImageUrls[0]}`
+                  : null
+                }
                 icon={<UserOutlined />}
               />
               {canEdit && (

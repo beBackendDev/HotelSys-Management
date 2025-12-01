@@ -55,8 +55,11 @@ public class AdminCtrl {
     private final RoomService roomService;
     @Autowired
     private final UserService userService;
+    @Autowired
     private final BookingSer bookingService;
+    @Autowired
     private final ReviewSer reviewSer;
+    @Autowired
     private final PaymentService paymentService;
 
 //Example

@@ -12,6 +12,7 @@ import com.thoaidev.bookinghotel.model.common.HotelFacilityDTO;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
+import com.thoaidev.bookinghotel.model.user.dto.OwnerDto;
 
 @Component
 public class HotelMapper {
@@ -26,7 +27,16 @@ public class HotelMapper {
                 .stream()
                 .map((HotelFacility f) -> new HotelFacilityDTO(f.getId(), f.getIcon(), f.getName()))
                 .collect(Collectors.toList());
-
+        OwnerDto ownerDto = null;
+        if(hotel.getOwner() != null){
+            ownerDto = new OwnerDto(
+                hotel.getOwner().getUsername(),
+                hotel.getOwner().getFullname(),
+                hotel.getOwner().getBusinessLicenseNumber(),
+                hotel.getOwner().getExperienceInHospitality(),
+                hotel.getOwner().getOwnerDescription()
+            );
+        }
                 HotelDto hotelDto =  HotelDto
                 .builder()
                 .hotelId(hotel.getHotelId())
@@ -44,6 +54,7 @@ public class HotelMapper {
                 .hotelCreatedAt(hotel.getHotelCreatedAt())
                 .hotelUpdatedAt(hotel.getHotelUpdatedAt())
                 .ownerId(hotel.getOwner().getUserId())//thực hiện lấy id người dùng <=> id owner
+                .owner(ownerDto)
                 .build();
                 
         return hotelDto;

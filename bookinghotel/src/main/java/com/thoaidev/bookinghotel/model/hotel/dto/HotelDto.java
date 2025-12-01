@@ -8,6 +8,7 @@ import java.util.List;
 import com.thoaidev.bookinghotel.model.common.HotelFacilityDTO;
 import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.hotel.entity.HotelReview;
+import com.thoaidev.bookinghotel.model.user.dto.OwnerDto;
 
 import lombok.Builder;
 import lombok.Data;
@@ -39,4 +40,5 @@ public class HotelDto {
     }
 
     private Integer ownerId;
+    OwnerDto owner;// Thong tin Owner
 }

@@ -73,6 +73,7 @@ public class Hotel implements Serializable {
     @Column(name = "hotel_description", columnDefinition = "TEXT")
     private String hotelDescription;//Thông tin mô tả
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> hotelImages = new ArrayList<>();
 
@@ -84,6 +85,7 @@ public class Hotel implements Serializable {
     @UpdateTimestamp
     private LocalDateTime hotelUpdatedAt;//Ngày được nâng cấp
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
 

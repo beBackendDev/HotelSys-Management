@@ -15,6 +15,7 @@ public interface HotelService {
     //xu li thuc hien lay du lieu trong database de dien vao thymeleaf
 //GET methods
     HotelResponse getAllHotels(int pageNo, int pageSize);
+
     HotelResponse getAllHotels(Integer ownerId, int pageNo, int pageSize);
 
     // HotelResponse filterHotels(FilterRequest fiter);
@@ -31,6 +32,8 @@ public interface HotelService {
 //POST methods
 
     public HotelDto createHotel(HotelDto hotelDto);
+
+    public HotelDto createHotel(Integer ownerId, HotelDto hotelDto);
 
     public List<String> imgUpload(Integer roomId, List<MultipartFile> files, String hotelName);
     //PUT methods

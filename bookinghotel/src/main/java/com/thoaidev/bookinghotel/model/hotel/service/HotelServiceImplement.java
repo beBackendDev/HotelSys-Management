@@ -50,6 +50,20 @@ public class HotelServiceImplement implements HotelService {
     @Autowired
     private ImageService imageService;
 
+    //Kiểm tra role
+    public String checkRole(Integer userId) {
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not Found"));
+
+        String roleUser = user.getRoles()
+                .stream()
+                .findFirst()
+                .map(Role::getRoleName)
+                .orElse(null);
+
+        return roleUser;
+    }
+
     //User: TÌm toàn bộ danh sách các khách sạn
     @Override
     public HotelResponse getAllHotels(int pageNo, int pageSize) {
@@ -73,22 +87,22 @@ public class HotelServiceImplement implements HotelService {
         return hotelResponse;
     }
 //
+
     @Override
     public HotelResponse getAllHotels(Integer ownerId, int pageNo, int pageSize) {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
-        System.out.println("response Pageable: "+pageable);
+        System.out.println("response Pageable: " + pageable);
         Page<Hotel> hotels = hotelRepository.findByOwner_UserId(ownerId, pageable);
-        System.out.println("response Hotels: "+hotels);
+        System.out.println("response Hotels: " + hotels);
 
         List<Hotel> listOfHotels = hotels.getContent();
-        System.out.println("response listOfHotels: "+listOfHotels);
+        System.out.println("response listOfHotels: " + listOfHotels);
 
         List<HotelDto> content = listOfHotels.stream()
                 .map(hotelMapper::mapToHotelDto)
-                // .map((hotel) -> mapToHotelDto(hotel))
                 .collect(Collectors.toList());
-        System.out.println("response content: "+content);
+        System.out.println("response content: " + content);
 
         HotelResponse hotelResponse = new HotelResponse();
         hotelResponse.setContent(content);
@@ -97,9 +111,10 @@ public class HotelServiceImplement implements HotelService {
         hotelResponse.setTotalElements(hotels.getTotalElements());
         hotelResponse.setTotalPage(hotels.getTotalPages());
         hotelResponse.setLast(hotels.isLast());
-        System.out.println("HotelResponse : " +  hotelResponse);
+        System.out.println("HotelResponse : " + hotelResponse);
         return hotelResponse;
     }
+
     //User: lấy thông tin khách sạn theo ID
     @Override
     public HotelDto getHotelById(Integer id) {
@@ -109,12 +124,12 @@ public class HotelServiceImplement implements HotelService {
     }
 
     @Override
-    public HotelResponse filterHotels(  String hotelName, 
-                                        String hotelAddress, 
-                                        BigDecimal hotelAveragePrice, 
-                                        List<String> hotelFacilities, 
-                                        Double ratingPoint, 
-                                        Integer ownerId) {
+    public HotelResponse filterHotels(String hotelName,
+            String hotelAddress,
+            BigDecimal hotelAveragePrice,
+            List<String> hotelFacilities,
+            Double ratingPoint,
+            Integer ownerId) {
         List<Hotel> hotels = hotelRepository.findAll(HotelSpecification.filter(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId));
         List<HotelDto> content = hotels.stream()
                 .map(hotelMapper::mapToHotelDto)
@@ -144,12 +159,69 @@ public class HotelServiceImplement implements HotelService {
                 .orElseThrow(() -> new RuntimeException("User not Found"));
 
         String roleUser = user.getRoles()
-                    .stream()
-                    .findFirst()
-                    .map(Role::getRoleName)
-                    .orElse(null);
+                .stream()
+                .findFirst()
+                .map(Role::getRoleName)
+                .orElse(null);
 
-        if(!roleUser.equals("OWNER")) {
+        if (!roleUser.equals("OWNER")) {
+            throw new RuntimeException("Invalid Create with role USER");
+        }
+
+        Hotel hotel = new Hotel();
+        hotel.setOwner(user); //  thực hiện cập nhật người sở hữu
+        hotel.setHotelName(hotelDto.getHotelName());
+        hotel.setHotelAddress(hotelDto.getHotelAddress());
+        hotel.setHotelDescription(hotelDto.getHotelDescription());
+        hotel.setRatingPoint(0.0);// mặc định khách sạn được tạo mới có điểm đánh giá 0.0 -> chưa đánh giá
+        hotel.setTotalReview(0);// mặc định khách sạn được tạo mới có điểm đánh giá 0.0 -> chưa đánh giá
+        hotel.setHotalStatus(HotelStatus.AVAILABLE);// AVAILABLE cho khách sạn tạo mới chưa được booked
+        hotel.setHotelContactMail(hotelDto.getHotelContactMail());
+        hotel.setHotelContactPhone(hotelDto.getHotelContactPhone());
+        hotel.setHotelAveragePrice(hotelDto.getHotelAveragePrice());
+
+        // Facilities (FacilityDto → Facility entity)
+        if (hotelDto.getHotelFacilities() != null) {
+            hotel.setFacilities(
+                    hotelDto.getHotelFacilities().stream()
+                            .map(f -> {
+                                HotelFacility facility = new HotelFacility();
+                                facility.setId(f.getId());
+                                facility.setIcon(f.getIcon());
+                                facility.setName(f.getName());
+                                facility.setHotel(hotel); // Quan trọng: gán hotel cho facility
+                                return facility;
+                            })
+                            .collect(Collectors.toList())
+            );
+        }
+
+        List<Image> imageEntities = Optional.ofNullable(hotelDto.getHotelImageUrls())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(url -> Image.builder()
+                .url(url)
+                .hotel(hotel)
+                .build())
+                .collect(Collectors.toList());
+
+        hotel.setHotelImages(imageEntities);
+        // Set thời gian tạo và cập nhật
+        LocalDateTime now = LocalDateTime.now();
+        hotel.setHotelCreatedAt(now);
+        hotel.setHotelUpdatedAt(now);
+
+        Hotel savedHotel = hotelRepository.save(hotel);//goị tới Repository để update lên DB
+        return hotelMapper.mapToHotelDto(savedHotel);
+    }
+
+    @Override
+    public HotelDto createHotel(Integer ownerId, HotelDto hotelDto) {
+        UserEntity user = userRepository.findByUserId(ownerId)
+                .orElseThrow(() -> new RuntimeException("User not Found"));
+
+        String roleUser = checkRole(user.getUserId());
+        if (!roleUser.equals("OWNER")) {
             throw new RuntimeException("Invalid Create with role USER");
         }
 

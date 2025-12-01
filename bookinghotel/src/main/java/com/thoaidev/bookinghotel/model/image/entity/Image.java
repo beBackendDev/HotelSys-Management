@@ -1,6 +1,5 @@
 package com.thoaidev.bookinghotel.model.image.entity;
 
-
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
 
@@ -15,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "images")
@@ -35,9 +35,11 @@ public class Image {
     // Mỗi ảnh thuộc về một room (hoặc hotel)
     @ManyToOne
     @JoinColumn(name = "room_id")
+    @ToString.Exclude
     private Room room;
 
     @ManyToOne
     @JoinColumn(name = "hotel_id")
+    @ToString.Exclude
     private Hotel hotel;
 }

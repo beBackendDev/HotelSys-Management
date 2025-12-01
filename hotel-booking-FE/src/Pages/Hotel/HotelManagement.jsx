@@ -33,6 +33,8 @@ const { Option } = Select;
 
 const HotelManagement = () => {
     const token = localStorage?.getItem("accessToken");
+    const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
+    const role = decodedToken.role; // ADMIN, OWNER, USER
     const [filters, setFilters] = useState({
         //phát triển thêm
         status: "all",
@@ -51,21 +53,23 @@ const HotelManagement = () => {
         per_page: 10,
     });
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [owners, setOwners] = useState([]);
     const [total, setTotal] = useState(0);
-
-    //   const debouncedQ = useDebounce(filters.q, 300);
-
-
-
-
 
     // fetch hotels whenever filters change
     // --- Trong state ---
     const [hotels, setHotels] = useState([]); // hotel đã có owner gắn sẵn
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
+    const getUrlByRole = (role) => {
+        switch (role) {
+            case "ADMIN":
+                return "admin/hotels";
+            case "OWNER":
+                return "owner/hotel-list";
+            default:
+                return "user/hotels"; // USER or guest
+        }
+    };
     // --- Fetch hotels + owners cùng lúc, gắn owner vào từng hotel ---
     useEffect(() => {
         const fetchHotels = async () => {
@@ -73,7 +77,7 @@ const HotelManagement = () => {
             setError(null);
             try {
                 // fetch danh sách hotels
-                const res = await fetch(`http://localhost:8080/api/dashboard/admin/hotels`, {
+                const res = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -85,27 +89,7 @@ const HotelManagement = () => {
                 console.log("hotel: ", hotelList);
 
 
-                // fetch owner cho từng hotel
-                const updatedHotels = await Promise.all(
-                    hotelList.map(async (hotel) => {
-                        if (!hotel.ownerId) return { ...hotel, owner: null };
-
-                        const ownerRes = await fetch(
-                            `http://localhost:8080/api/dashboard/admin/users/${hotel.ownerId}`,
-                            {
-                                headers: {
-                                    "Authorization": `Bearer ${token}`,
-                                },
-                            }
-                        );
-                        const ownerData = await ownerRes.json();
-                        console.log("(HotelManagement.jsx) owner: ", ownerData);
-
-                        return { ...hotel, owner: ownerData }; // gắn owner
-                    })
-                );
-
-                setHotels(updatedHotels);
+                setHotels(hotelList);
             } catch (err) {
                 console.error(err);
                 setError("Tải danh sách khách sạn thất bại.");
