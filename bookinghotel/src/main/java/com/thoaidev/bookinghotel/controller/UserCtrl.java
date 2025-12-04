@@ -38,6 +38,7 @@ import com.thoaidev.bookinghotel.model.hotel.mapper.HotelMapper;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResDTO;
+import com.thoaidev.bookinghotel.model.payment.service.PaymentService;
 import com.thoaidev.bookinghotel.model.payment.service.VNPayService;
 import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
 import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
@@ -54,10 +55,13 @@ import com.thoaidev.bookinghotel.model.user.service.UserService;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/api/user")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@AllArgsConstructor
+
 public class UserCtrl {
 
     private final UserService userService;
@@ -65,25 +69,9 @@ public class UserCtrl {
     private final VNPayService vnPayService;
     private final RoomService roomService;
     private final BookingSer bookingService;
+    private final PaymentService paymentService;
     private final ReviewSer reviewSer;
     private final FavoriteSer favoriteSer;
-
-    public UserCtrl(
-            UserService userService,
-            HotelService hotelService,
-            RoomService roomService,
-            BookingSer bookingService,
-            VNPayService vnPayService,
-            ReviewSer reviewSer,
-            FavoriteSer favoriteSer) {
-        this.userService = userService;
-        this.hotelService = hotelService;
-        this.roomService = roomService;
-        this.bookingService = bookingService;
-        this.vnPayService = vnPayService;
-        this.reviewSer = reviewSer;
-        this.favoriteSer = favoriteSer;
-    }
 
 //  Đăng ký tài khoản
 // Đăng nhập / Đăng xuất
@@ -121,13 +109,13 @@ public class UserCtrl {
     // Tìm kiếm( lọc) khách sạn theo từ khóa, địa điểm(filter)
     @GetMapping("/public/hotels/filter")
     public ResponseEntity<HotelResponse> getAllHotels(
-        @RequestParam (value = "hotelName", required = false) String hotelName,
-        @RequestParam (value = "hotelAddress", required = false) String hotelAddress,
-        @RequestParam (value = "hotelAveragePrice", required = false) BigDecimal hotelAveragePrice,
-        @RequestParam (value = "hotelFacilities", required = false) List<String> hotelFacilities,
-        @RequestParam (value = "ratingPoint", required = false) Double ratingPoint,
-        @RequestParam (value = "ownerId", required = false) Integer ownerId
-        ) {
+            @RequestParam(value = "hotelName", required = false) String hotelName,
+            @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
+            @RequestParam(value = "hotelAveragePrice", required = false) BigDecimal hotelAveragePrice,
+            @RequestParam(value = "hotelFacilities", required = false) List<String> hotelFacilities,
+            @RequestParam(value = "ratingPoint", required = false) Double ratingPoint,
+            @RequestParam(value = "ownerId", required = false) Integer ownerId
+    ) {
         HotelResponse hotels = hotelService.filterHotels(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId);
         return ResponseEntity.ok(hotels);
     }
@@ -178,6 +166,7 @@ public class UserCtrl {
         return new ResponseEntity<>(bookingService.getAllBookings(userDetails.getId(), pageNo, pageSize), HttpStatus.OK);
 
     }
+
     //Xem chi tiết booking
     @GetMapping("/hotels/booking/{id}")
     public ResponseEntity<BookingDTO> getBooking(
@@ -197,19 +186,40 @@ public class UserCtrl {
 
     //Thực hiện thanh toán (Thanh toán VNPay)
     @PostMapping("/VNPay/create-payment")
-    public ResponseEntity<?> createPayment(@RequestBody PaymentInitRequest req, HttpServletRequest servletRequest) throws Exception {
+    public ResponseEntity<?> createPayment(
+            @RequestBody PaymentInitRequest req,
+            HttpServletRequest servletRequest
+    ) throws Exception {
         String url = vnPayService.createOrder(req, servletRequest);
         PaymentResDTO response = new PaymentResDTO(
                 req.getBookingId(),
-                req.getAmount(), 
+                req.getAmount(),
                 "Payment created successfully", // message mô tả hoặc req.getOrderInfo()
                 url // link VNPay trả về
         );
         return ResponseEntity.ok(response);
     }
+//CASH method
+
+    @PostMapping("/CASH/payment")
+    public ResponseEntity<?> payByCash(
+            @RequestBody PaymentInitRequest req
+    ) {
+        int paymentStatus = paymentService.payByCash(req);
+        if (paymentStatus == 1) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("Booking Id: ", req.getBookingId());
+            response.put("Amount: ", req.getAmount());
+            response.put("Message: ", "Đơn hàng đã thực hiện, vui lòng kiểm tra email để xem chi tiết thông tin đặt phòng.");
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+            return new ResponseEntity<>("Thanh toán không thành công, vui lòng thử lại", HttpStatus.NOT_ACCEPTABLE);
+
+    }
+
 //------------------- REVIEW -------------------    
     // Đánh giá khách sạn
-
     @PostMapping("/hotels/reviews")
     public ResponseEntity<?> createReview(@RequestBody HotelReviewDTO reviewDTO) {
         reviewSer.createReview(reviewDTO);

@@ -219,6 +219,7 @@ public class RoomServiceImplement implements RoomService {
                 .roomImageUrls(imageUrls)
                 .roomName(room.getRoomName())
                 .roomType(room.getRoomType())
+                .dateAvailable(room.getDateAvailable())
                 .roomOccupancy(room.getRoomOccupancy())
                 .roomStatus(room.getRoomStatus())
                 .roomPricePerNight(room.getRoomPricePerNight())

@@ -6,6 +6,7 @@ import HotelManagerGuard from "./core/guards/HotelManagerGuard";
 import UnAuth from "./core/guards/UnAuth";
 import Dashboard from "./core/layout/Dashboard";
 import NotFound from "./core/layout/NotFound";
+import Success from "./core/layout/SuccessPage";
 import Booking from "./Pages/Booking";
 import Payment from "./Pages/Payment";
 import HomePage from "./Pages/HomePage";
@@ -240,9 +241,13 @@ const Routes = () => {
           <Dashboard />
         </HotelManagerGuard>
       </Route>
+      <Route exact path={path.success}>
+        <Success />
+      </Route>
       <Route exact path={path.notFound}>
         <NotFound />
       </Route>
+
     </Switch>
   );
 };

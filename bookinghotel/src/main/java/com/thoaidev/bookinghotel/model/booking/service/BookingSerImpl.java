@@ -56,7 +56,53 @@ public class BookingSerImpl implements BookingSer {
     @Override
     public boolean isRoomAvailable(Integer roomId, LocalDate checkin, LocalDate checkout) {
         List<Booking> conflicts = bookingRepository.findConflictingBookings(roomId, checkin, checkout);
-        return conflicts.isEmpty();
+        return conflicts.isEmpty(); // true ? no conflict : conflict
+    }
+
+    // Book Room
+    @Override
+    public Booking bookRoom(BookingDTO bookingDTO, UserEntity user) {
+        if (!isRoomAvailable(bookingDTO.getRoomId(), bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Room isn't available that day");
+        } else {
+            //Khởi tạo một Booking mới
+            Booking booking = new Booking();
+
+            // Lấy thông tin khách sạn
+            Hotel hotel = hotelRepository.findById(bookingDTO.getHotelId())
+                    .orElseThrow(() -> new RuntimeException("Hotel not found"));
+            // Lấy thông tin phòng
+            Room room = roomRepository.findById(bookingDTO.getRoomId())
+                    .orElseThrow(() -> new RuntimeException("Room not found"));
+
+            // Tính số đêm
+            long nights = ChronoUnit.DAYS.between(bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate());
+            if (nights <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Checkout date must be after checkin date");
+            }
+
+            // Tính tổng tiền
+            BigDecimal totalPrice = room.getRoomPricePerNight()
+                    .multiply(BigDecimal.valueOf(nights));
+            //Tạo booking
+            booking.setHotel(hotel);
+            booking.setUser(user);
+            booking.setRoom(room);
+            room.setRoomStatus(RoomStatus.TEMP_HOLD);// thực hiện đặt room status là đang đợi thanh toán
+
+            booking.setCheckinDate(bookingDTO.getCheckinDate());
+            booking.setCheckoutDate(bookingDTO.getCheckoutDate());
+            booking.setTotalPrice(totalPrice);
+            booking.setStatus(BookingStatus.PENDING_PAYMENT);//auto pending _payment
+
+            // Lưu người ở
+            booking.setGuestFullName(bookingDTO.getGuestFullName());
+            booking.setGuestPhone(bookingDTO.getGuestPhone());
+            booking.setGuestEmail(bookingDTO.getGuestEmail());
+            booking.setGuestCccd(bookingDTO.getGuestCccd());
+            return bookingRepository.save(booking);
+        }
+
     }
 
     //  Cron job: huỷ booking quá hạn
@@ -95,57 +141,13 @@ public class BookingSerImpl implements BookingSer {
             booking.setStatus(BookingStatus.COMPLETED); // đã hoàn tất lưu trú
             Room room = booking.getRoom();
             room.setRoomStatus(RoomStatus.AVAILABLE);
+            room.setDateAvailable(today);
         }
         System.out.println("Found(BookingService): " + checkedOut.size());
         if (!checkedOut.isEmpty()) {
             bookingRepository.saveAll(checkedOut);
             System.out.println("Released " + checkedOut.size() + " rooms after checkout.");
         }
-    }
-
-    // Book Room
-    @Override
-    public Booking bookRoom(BookingDTO bookingDTO, UserEntity user) {
-        if (!isRoomAvailable(bookingDTO.getRoomId(), bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Room isn't available that day");
-        } else {
-            //Khởi tạo một Booking mới
-            Booking booking = new Booking();
-
-            // Lấy thông tin khách sạn
-            Hotel hotel = hotelRepository.findById(bookingDTO.getHotelId())
-                    .orElseThrow(() -> new RuntimeException("Hotel not found"));
-            // Lấy thông tin phòng
-            Room room = roomRepository.findById(bookingDTO.getRoomId())
-                    .orElseThrow(() -> new RuntimeException("Room not found"));
-
-            // Tính số đêm
-            long nights = ChronoUnit.DAYS.between(bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate());
-            if (nights <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Checkout date must be after checkin date");
-            }
-
-            // Tính tổng tiền
-            BigDecimal totalPrice = room.getRoomPricePerNight()
-                    .multiply(BigDecimal.valueOf(nights));
-            //Tạo booking
-            booking.setHotel(hotel);
-            booking.setUser(user);
-            booking.setRoom(room);
-            room.setRoomStatus(RoomStatus.TEMP_HOLD);// thực hiện đặt room status là đang đợi thanh toán
-            booking.setCheckinDate(bookingDTO.getCheckinDate());
-            booking.setCheckoutDate(bookingDTO.getCheckoutDate());
-            booking.setTotalPrice(totalPrice);
-            booking.setStatus(BookingStatus.PENDING_PAYMENT);//auto pending _payment
-
-            // Lưu người ở
-            booking.setGuestFullName(bookingDTO.getGuestFullName());
-            booking.setGuestPhone(bookingDTO.getGuestPhone());
-            booking.setGuestEmail(bookingDTO.getGuestEmail());
-            booking.setGuestCccd(bookingDTO.getGuestCccd());
-            return bookingRepository.save(booking);
-        }
-
     }
 
     // Cancel Booking
@@ -176,10 +178,10 @@ public class BookingSerImpl implements BookingSer {
         bookingResponse.setLast(bookings.isLast());
         return bookingResponse;
     }
-    
+
     // Get All Booking List
     @Override
-    public BookingResponse getAllBookings(int pageNo,  int pageSize) {
+    public BookingResponse getAllBookings(int pageNo, int pageSize) {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Booking> bookings = bookingRepository.findAll(pageable);
@@ -196,6 +198,7 @@ public class BookingSerImpl implements BookingSer {
         bookingResponse.setLast(bookings.isLast());
         return bookingResponse;
     }
+
     @Override
     public BookingDTO getBookingById(Integer id) {
         Booking booking = bookingRepository.findById(id)

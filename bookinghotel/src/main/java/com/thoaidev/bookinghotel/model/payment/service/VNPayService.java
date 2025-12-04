@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -42,23 +43,17 @@ import com.thoaidev.bookinghotel.model.room.entity.Room;
 import com.thoaidev.bookinghotel.model.room.repository.RoomRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Service
+@AllArgsConstructor
+@NoArgsConstructor
 public class VNPayService {
 
-    private final PaymentRepository paymentRepository;
-    private final BookingRepo bookingRepository;
-    private final RoomRepository roomRepository;
-
-//Constructor
-    public VNPayService(PaymentRepository paymentRepository,
-            BookingRepo bookingRepository,
-            RoomRepository roomRepository) {
-        this.paymentRepository = paymentRepository;
-        this.bookingRepository = bookingRepository;
-        this.roomRepository = roomRepository;
-
-    }
+    private PaymentRepository paymentRepository;
+    private BookingRepo bookingRepository;
+    private RoomRepository roomRepository;
 
     public String createOrder(PaymentInitRequest request, HttpServletRequest servletRequest) throws UnsupportedEncodingException {
 
@@ -69,15 +64,13 @@ public class VNPayService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
         String vnp_IpAddr = "127.0.0.1";
-
         String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
-
         String vnp_Amount = booking.getTotalPrice()
                 .multiply(new BigDecimal("100")) // nhân 100
                 .setScale(0, RoundingMode.HALF_UP) // làm tròn về số nguyên
                 .toPlainString(); // chuyển sang String không có dấu phẩy
-
         String vnp_OrderInfo = request.getOrderInfo();
+
 
         // Tạo bản ghi Payment (PENDING)
         Payment payment = Payment.builder()
@@ -181,18 +174,15 @@ public class VNPayService {
 
         // --- Bắt đầu lấy dữ liệu và lưu vào DB ---
         String vnp_TxnRef = request.getParameter("vnp_TxnRef");
-
         String transactionStatus = request.getParameter("vnp_TransactionStatus"); // cũng là "00"
         String transactionId = request.getParameter("vnp_TransactionNo");
-
         String totalAmountStr = request.getParameter("vnp_Amount");
-
         BigDecimal paymentAmount = new BigDecimal(totalAmountStr)
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
         String payDate = request.getParameter("vnp_PayDate"); // yyyyMMddHHmmss
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         LocalDateTime paymentTime = LocalDateTime.parse(payDate, formatter);
+
 
         // Tìm payment theo vnp_TxnRef
         Payment payment = paymentRepository.findByTransactionId(vnp_TxnRef)
@@ -206,12 +196,19 @@ public class VNPayService {
         paymentRepository.save(payment);
 
         // Cập nhật booking nếu thanh toán thành công
+        LocalDate today = LocalDate.now(); //thực hiện so sánh với ngày checkin
         Room room = new Room();
         if ("00".equals(transactionStatus)) {
             Booking booking = payment.getBooking();
             Integer roomId = booking.getRoom().getRoomId();
             room = roomRepository.getReferenceById(roomId);
-            room.setRoomStatus(RoomStatus.BOOKED);
+            //Chỉ khi tới ngayf checkin (nếu tồn tại booking) thì mưới set phòng BOOKED
+            if (booking.getCheckinDate() == today) {
+                room.setRoomStatus(RoomStatus.BOOKED);
+                //thực hiện set ngày mà phòng available (checkout + 1)
+                LocalDate checkoutDate = booking.getCheckoutDate();
+                room.setDateAvailable(checkoutDate.plusDays(1));//thực hiện set ngày mà phòng available là checkout + 1
+            }
             //Update trạng thái
             booking.setStatus(BookingStatus.PAID);
             payment.setStatus(PaymentStatus.SUCCESS);

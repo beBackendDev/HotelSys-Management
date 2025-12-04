@@ -15,15 +15,26 @@ import { rules } from "../constant/rules";
 import HomeLayout from "../core/layout/HomeLayout";
 import { booking } from "../slices/booking.slice";
 import styles from "../styles/pages/login.module.scss";
+import moment from "moment";
 
 const Booking = () => {
   const { hotelId, roomId } = useParams();
+  const token = localStorage.getItem("accessToken");
   const { user } = useSelector((state) => state.auth.profile);
   //thực hiện lấy thông tin thực của user đang thao tác với website
   const user_id = user.userId;
   const history = useHistory();
   const dispatch = useDispatch();
+  //Hàm chặn người dùng chọn ngày checkin < today
+  const disabledPreviousDates = (current) => {
+    return current && current < moment().startOf("day");
+  };
+  //Hàm chặn người dùng chọn ngày checkout < checkin
 
+  const disableCheckoutDates = (current) => {
+    if (!checkin) return current < moment().startOf("day");
+    return current < moment(checkin, "YYYY-MM-DD").endOf("day");
+  };
   // State quản lý checkin/checkout
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
@@ -50,10 +61,9 @@ const Booking = () => {
     }
 
     const birthday = values["birthday"];
-    const formattedBirthday = birthday ? birthday.format("YYYY-MM-DD") : null;
+    // const formattedBirthday = birthday ? birthday.format("YYYY-MM-DD") : null;
     const _val = {
       ...values,
-      birthday: formattedBirthday,
       checkinDate: checkin,
       checkoutDate: checkout,
       user_id,
@@ -62,19 +72,22 @@ const Booking = () => {
     };
 
     try {
-      console.log("(Booking.jsx)booking information:", _val);
       // chuyển tiếp đến trang booking.slice.js
       //để thực hiện gọi API phía backend
-      const res = await dispatch(booking(_val));
-      unwrapResult(res);
-      console.log("(Booking.jsx)booking response:", res);
+      const res = await fetch(`http://localhost:8080/api/user/hotels/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(_val)
+      })
 
-      // const bookingId = res.data.bookingId;
-      // if (res.data.redirectToPayment) {
-      //   history("`/payment/${bookingId}`");
-      // } 
-      const bookingId = res.payload.data.bookingId;
-      console.log("(Booking.jsx bookingId: ", bookingId);
+      const result = await res.json();
+      // const res = await dispatch(booking(_val));
+      // unwrapResult(res);
+
+      const bookingId = result?.payload?.data?.bookingId;
       //chuyển tiếp đến trang thanh toán sau khi thực hiện đăng kí thông tin booking
       history.push(`/payment/${bookingId}`);
       toast.success("Đăng ký giữ chỗ thành công, vui lòng thực hiện thanh toán.");
@@ -173,38 +186,43 @@ const Booking = () => {
                   </Form.Item>
 
                   {/* Nếu chưa có checkin/checkout thì render luôn input */}
-                  {!checkin || !checkout ? (
-                    <div className="flex gap-4">
-                      <Form.Item
-                        label="Ngày nhận phòng"
-                        name="checkinDate"
-                        rules={[
-                          { required: true, message: "Vui lòng chọn ngày nhận phòng" },
-                        ]}
-                      >
-                        <DatePicker
-                          onChange={(date, dateString) => setCheckin(dateString)}
-                          format="YYYY-MM-DD"
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        label="Ngày trả phòng"
-                        name="checkoutDate"
-                        rules={[
-                          { required: true, message: "Vui lòng chọn ngày trả phòng" },
-                        ]}
-                      >
-                        <DatePicker
-                          onChange={(date, dateString) => setCheckout(dateString)}
-                          format="YYYY-MM-DD"
-                        />
-                      </Form.Item>
-                    </div>
-                  ) : (
+
+                  <div className="flex gap-4">
+                    <Form.Item
+                      label="Ngày nhận phòng"
+                      name="checkinDate"
+                      rules={[
+                        { required: true, message: "Vui lòng chọn ngày nhận phòng" },
+                      ]}
+                    >
+                      <DatePicker
+                        format="YYYY-MM-DD"
+                        disabledDate={disabledPreviousDates}
+                        onChange={(date, dateString) => setCheckin(dateString)}
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Ngày trả phòng"
+                      name="checkoutDate"
+                      rules={[
+                        { required: true, message: "Vui lòng chọn ngày trả phòng" },
+                      ]}
+                    >
+                      <DatePicker
+                        format="YYYY-MM-DD"
+                        disabledDate={disableCheckoutDates}
+                        onChange={(date, dateString) => setCheckout(dateString)}
+                      />
+                    </Form.Item>
+                  </div>
+
+                  {checkin && checkout && (
                     <p className="text-gray-600 mt-2">
                       Ngày nhận: <b>{checkin}</b> | Ngày trả: <b>{checkout}</b>
                     </p>
                   )}
+
 
                   <div className="flex justify-center my-10">
                     <Form.Item>

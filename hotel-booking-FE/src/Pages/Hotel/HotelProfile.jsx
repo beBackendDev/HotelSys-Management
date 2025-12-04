@@ -19,40 +19,41 @@ import UploadImage from "../../common/UploadImage";
 import { rules } from "../../constant/rules";
 import DashboardLayout from "../../core/layout/Dashboard";
 import { updateProfileHotel } from "../../slices/hotel.slice";
-const token = localStorage.getItem("accessToken"); // hoặc chỗ bạn lưu
-const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
-const role = decodedToken.role; // ADMIN, OWNER, USER
-const getUrlByRole = (role) => {
-  switch (role) {
-    case "ADMIN":
-      return "admin";
-    case "OWNER":
-      return "owner";
-    default:
-      return "user"; // USER or guest
-  }
-};
-const fetchHotelById = async (hotelId) => {
-  const res = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}`, {
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-  });
 
-  if (!res.ok) {
-    throw new Error("Không lấy được dữ liệu khách sạn");
-  }
-  return res.json();
-};
+
 
 const Profile = () => {
+  const token = localStorage.getItem("accessToken");
   const { user } = useSelector(
     (state) => state.auth.profile
   );
   console.log("user redux: ", user);
 
   const role = (user?.role || "").toUpperCase(); // "ADMIN" hoặc "OWNER"
+  const getUrlByRole = (role) => {
+    switch (role) {
+      case "ADMIN":
+        return "admin";
+      case "OWNER":
+        return "owner";
+      default:
+        return "user"; // USER or guest
+    }
+  };
+  const fetchHotelById = async (hotelId) => {
+    const res = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Không lấy được dữ liệu khách sạn");
+    }
+    return res.json();
+  };
+
 
   const isAdmin = role === "ADMIN" || role === "OWNER";
   const { hotelId } = useParams();
@@ -75,7 +76,7 @@ const Profile = () => {
           setLoading(true);
           try {
             const data = await fetchHotelById(hotelId);
-            console.log("hotel data: ", data);            
+            console.log("hotel data: ", data);
             setHotel(data);
           } catch (e) {
             setError(e.message);
@@ -250,8 +251,8 @@ const Profile = () => {
                 size={{ lg: 130, xl: 180, xxl: 200 }}
                 src={
                   hotel?.hotelImageUrls?.lenth > 0
-                  ? `http://localhost:8080${hotel.hotelImageUrls[0]}`
-                  : null
+                    ? `http://localhost:8080${hotel.hotelImageUrls[0]}`
+                    : null
                 }
                 icon={<UserOutlined />}
               />

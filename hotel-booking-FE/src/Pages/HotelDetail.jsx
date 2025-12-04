@@ -254,7 +254,7 @@ const HotelDetail = () => {
         </Typography.Title>
         <div className="flex flex-col gap-6 mt-6">
             {rooms.length > 0 ? (
-              rooms.map((room) => <RoomCardItem key={room.id} room={room} />)
+              rooms.map((room) =><RoomCardItem key={room.id} room={room} />)
             ) : (
               <div className="flex flex-row items-center">
                 <LoadingOutlined />

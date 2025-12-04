@@ -1,11 +1,11 @@
 package com.thoaidev.bookinghotel.model.room.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
-import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.common.RoomFacility;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -21,8 +21,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -55,6 +53,9 @@ public class Room {
 
     @Column(name = "room_occupancy")
     private Integer roomOccupancy;
+
+    @Column(name = "date_available")
+    private LocalDate dateAvailable;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "room_status")

@@ -1,20 +1,45 @@
 import React, { useEffect, useState } from "react";
-import { Button, DatePicker, Card } from "antd";
+import { Button, DatePicker, Card, Typography } from "antd";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import HomeLayout from "../core/layout/HomeLayout";
 import dayjs from "dayjs";
-
+import {
+  CheckOutlined,
+  LoadingOutlined,
+  CarFilled,
+  WifiOutlined,
+  CoffeeOutlined,
+  ShopFilled,
+  SunFilled,
+  LikeFilled,
+  ClockCircleFilled,
+  DingdingOutlined,
+  ScheduleFilled,
+  SmileFilled
+} from "@ant-design/icons";
 const { RangePicker } = DatePicker;
 
 const RoomDetail = () => {
   const { hotelid, roomid } = useParams(); // Lấy param
-  const [hotel, setHotel] = useState(null);
-  const [room, setRoom] = useState(null);
+  const [hotel, setHotel] = useState([]);
+  const [room, setRoom] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dates, setDates] = useState([]); // lưu ngày check-in, check-out
   const [totalPrice, setTotalPrice] = useState(0);
-
+  // Map icon name (string) -> component
+  const iconMap = {
+    CarFilled: <CarFilled />,
+    WifiOutlined: <WifiOutlined />,
+    ShopFilled: <ShopFilled />,
+    SunFilled: <SunFilled />,
+    CoffeeOutlined: <CoffeeOutlined />,
+    LikeFilled: <LikeFilled />,
+    ClockCircleFilled: <ClockCircleFilled />,
+    ScheduleFilled: <ScheduleFilled />,
+    CheckOutlined: <CheckOutlined />,
+    SmileFilled: <SmileFilled />
+  };
   useEffect(() => {
     const fetchRoomDetail = async () => {
       try {
@@ -36,6 +61,8 @@ const RoomDetail = () => {
         const res = await axios.get(
           `http://localhost:8080/api/user/public/hotels/${hotelid}`
         );
+        console.log("hotel: ", res.data);
+        
         setHotel(res.data);
       } catch (err) {
         console.error("Lỗi khi lấy dữ liệu khách sạn:", err);
@@ -51,7 +78,7 @@ const RoomDetail = () => {
   useEffect(() => {
     if (dates.length === 2 && room) {
       const nights = dates[1].diff(dates[0], "day");
-      const total = nights * room.roomPricePerNight;
+      const total = nights * room?.roomPricePerNight;
       setTotalPrice(total);
     } else {
       setTotalPrice(0);
@@ -63,7 +90,7 @@ const RoomDetail = () => {
 
   return (
     <HomeLayout>
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="mt-[100px] flex flex-col max-w-6xl mx-auto py-6">
         {/* Title + hình ảnh */}
         <h1 className="text-3xl font-bold mb-4">{room.roomName}</h1>
         {room.roomImageUrls?.length > 0 && (
@@ -99,8 +126,19 @@ const RoomDetail = () => {
 
             <Card title="Tiện ích phòng" bordered={false}>
               <ul className="list-disc pl-6 space-y-1">
-                {hotel.hotelFacility ? (
-                  <li>{hotel.hotelFacility}</li>
+                {hotel?.hotelFacilities?.length > 0 ? (
+                  hotel.hotelFacilities.map((facility) => (
+                    <div
+                      key={facility.id}
+                      className="flex items-center gap-2"
+                      style={{ color: "#0db3efff" }}
+                    >
+                      {iconMap[facility.icon]}
+                      <Typography.Text style={{ color: "black" }}>
+                        {facility.name}
+                      </Typography.Text>
+                    </div>
+                  ))
                 ) : (
                   <li>Chưa có thông tin tiện ích</li>
                 )}

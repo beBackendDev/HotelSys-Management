@@ -22,20 +22,27 @@ const Payment = () => {
   const token = localStorage.getItem("accessToken");
 
   const [method, setMethod] = useState(null);
-
+  const getPaymentMethod = (method) => {
+    switch (method) {
+      case "VNPAY":
+        return "VNPay/create-payment";
+      case "MOMO":
+        return "MOMO/create-payment";
+      default:
+        return "CASH/payment"; // USER or guest
+    }
+  };
   const onFinish = async (values) => {
     const paymentData = {
       ...values,
       bookingId: Number(bookingId),
-      method: method || "VNPAY",
+      method: method || "CASH",
     };
-    console.log("data payment in:", paymentData);
 
     try {
-      console.log("(Payment.jsx) data before sent: ", paymentData);
 
       // const res = await dispatch(processPayment(paymentData));
-      const res = await fetch(`http://localhost:8080/api/user/VNPay/create-payment`, {
+      const res = await fetch(`http://localhost:8080/api/user/${getPaymentMethod(method)}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,22 +50,16 @@ const Payment = () => {
         },
         body: JSON.stringify(paymentData)
       })
-      
+
       const result = await res.json();
-      console.log("Payment.jsx) response payment: ", result);
 
 
       if (result?.url) {
         window.location.href = result?.url;
       } else {
         // Trường hợp thanh toán tại quầy (CASH) hoặc ví MoMo có confirm ngay
-        if (result.paymentStatus === "SUCCESS") {
-          toast.success("Thanh toán thành công!");
-          history.push("/user/bookings");
-        } else {
-          toast.info("Đơn hàng đang chờ xử lý thanh toán.");
-          history.push("/user/bookings");
-        }
+        toast.success("Thanh toán thành công!");
+        history.push("/success-page");
       }
     } catch (err) {
       console.error(err);

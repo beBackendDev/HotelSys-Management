@@ -1,6 +1,8 @@
 package com.thoaidev.bookinghotel.model.payment.service;
 
-
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,35 +11,79 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.thoaidev.bookinghotel.config.VNPayConfig;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
+import com.thoaidev.bookinghotel.model.booking.entity.Booking;
+import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
+import com.thoaidev.bookinghotel.model.enums.BookingStatus;
+import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
+import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
+import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
 import com.thoaidev.bookinghotel.model.payment.entity.Payment;
 import com.thoaidev.bookinghotel.model.payment.mapper.PaymentMapper;
 import com.thoaidev.bookinghotel.model.payment.repository.PaymentRepository;
+import com.thoaidev.bookinghotel.model.room.entity.Room;
+import com.thoaidev.bookinghotel.model.room.repository.RoomRepository;
 
 @Service
-public class PaymentSerImpl implements PaymentService{
+public class PaymentSerImpl implements PaymentService {
+
     @Autowired
     private PaymentRepository paymentRepo;
     @Autowired
+    private BookingRepo bookingRepository;
+    @Autowired
     private PaymentMapper paymentMapper;
+    @Autowired
+    private RoomRepository roomRepository;
 
     @Override
-    public PaymentDto getPaymentById(Integer id){
+    public int payByCash(PaymentInitRequest paymentRq) {
+        Integer bookingId = paymentRq.getBookingId();
+        String transactionId = VNPayConfig.getRandomNumber(8); // Mã giao dịch
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        Room room = roomRepository.findById(booking.getRoom().getRoomId())
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        String transactionAmount = booking.getTotalPrice()
+                .multiply(new BigDecimal("100")) // nhân 100
+                .setScale(0, RoundingMode.HALF_UP) // làm tròn về số nguyên
+                .toPlainString(); // chuyển sang String không có dấu phẩy
+        Payment payment = Payment.builder()
+                .booking(booking)
+                .transactionId(transactionId)
+                .paymentAmount(new BigDecimal(transactionAmount))
+                .status(PaymentStatus.SUCCESS) // always success with Cash Method
+                .paymentMethod("CASH")
+                .createdAt(LocalDateTime.now())
+                .build();
+        booking.setStatus(BookingStatus.PAID);
+        room.setDateAvailable(booking.getCheckoutDate().plusDays(1));
+        room.setRoomStatus(RoomStatus.BOOKED);
+        paymentRepo.save(payment);
+
+        return 1;
+    }
+
+    @Override
+    public PaymentDto getPaymentById(Integer id) {
         Payment payment = paymentRepo.findById(id)
-            .orElseThrow(() -> new NotFoundException("Payment not found."));
-    
+                .orElseThrow(() -> new NotFoundException("Payment not found."));
+
         return paymentMapper.toDto(payment);
     }
+
     @Override
-    public PaymentResponse getAllPayments(int pageNo, int pageSize){
+    public PaymentResponse getAllPayments(int pageNo, int pageSize) {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1;
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Payment> payments = paymentRepo.findAll(pageable);
 
         List<PaymentDto> content = paymentMapper.toDTOList(payments.getContent());
-
 
         PaymentResponse paymentResponse = new PaymentResponse();
         paymentResponse.setContent(content);

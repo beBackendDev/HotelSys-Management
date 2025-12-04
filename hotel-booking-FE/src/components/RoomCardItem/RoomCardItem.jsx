@@ -9,7 +9,7 @@ const getRoomStatus = (status) => {
   return "Không rõ";
 };
 const RoomCardItem = ({ room }) => {
-  console.log("(roomItem)" + room.roomImageUrls?.[0]);
+  console.log("(roomItem)" + room);
 
   return (
   <div className="w-full bg-white rounded-lg cursor-default hover:shadow-md p-4 mb-4">
@@ -43,10 +43,12 @@ const RoomCardItem = ({ room }) => {
 
         <Typography.Text
           className={`font-semibold ${
-            room.roomStatus === "AVAILABLE" ? "text-green-600" : "text-red-500"
+            room.roomStatus === "AVAILABLE" 
+                        ? "text-green-600" 
+                        : "text-red-500"
           }`}
         >
-          {room.roomStatus === "AVAILABLE" ? "Còn phòng" : "Đã đặt"}
+          {room.roomStatus === "AVAILABLE" ? "Còn phòng" : `Đã đặt cho đến ngày ${room?.dateAvailable}`}
         </Typography.Text>
       </div>
 
@@ -67,7 +69,7 @@ const RoomCardItem = ({ room }) => {
             type="primary"
             disabled={room.roomStatus !== "AVAILABLE"}
           >
-            Đặt phòng
+             {room.roomStatus === "AVAILABLE" ? "Đặt phòng" : "Đã được đặt"}
           </Button>
         </Link>
       </div>

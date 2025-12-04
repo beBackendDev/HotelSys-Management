@@ -1,7 +1,7 @@
 class Path {
   constructor() {
     this.home = "/";
-    this.destinations = "/destinations"
+    this.destinations = "/destinations";
     this.searchHotel = "/hotel/search";
     this.register = "/register";
     this.login = "/login";
@@ -48,7 +48,9 @@ class Path {
     this.purchase = this.user + "/purchase";//Purchase History
     this.reviewPage = this.user + "/review/:bookingId";// Review Page
     this.review = this.user + "/review";// Review History
+    this.success = "/success-page";
     this.notFound = "*";
+
   }
 }
 export const path = new Path();
