@@ -17,6 +17,12 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
         //Tìm kiếm booking dựa trên userId
     Page<Booking> findByUser(UserEntity user, Pageable pageable);
 
+    @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.room.roomId  = :roomId AND b.checkinDate >= :today AND b.status = 'PAID' ")
+    List<Booking> findByRoomId(
+        @Param("roomId") Integer roomId,
+        @Param("today") LocalDate today
+
+);
     //kiểm tra tính khả thi khi viết Review của người dùng
     @Query("SELECT b FROM Booking b "
             + "WHERE b.user.userId = :userId "
@@ -43,4 +49,8 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     //Tìm booking tới hạn checkout
     @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkoutDate) <= :today")
     List<Booking> findBookingsToRelease(@Param("today") LocalDate today);
+
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkinDate) = :today")
+    List<Booking> findBookingsToday(@Param("today") LocalDate today);
 }
+

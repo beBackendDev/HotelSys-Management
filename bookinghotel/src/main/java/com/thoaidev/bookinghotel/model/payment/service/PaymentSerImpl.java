@@ -2,6 +2,7 @@ package com.thoaidev.bookinghotel.model.payment.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.thoaidev.bookinghotel.config.VNPayConfig;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
@@ -39,6 +42,26 @@ public class PaymentSerImpl implements PaymentService {
     @Autowired
     private RoomRepository roomRepository;
 
+    //Thực hiện kiểm tra booking trong ngày
+    @Scheduled(fixedRate = 2400000)//40p/time
+    @Transactional
+    public void checkDateBooking() {
+        int time =1;
+        LocalDate today = LocalDate.now();
+        List<Booking> bookingToday = bookingRepository.findBookingsToday(today);
+
+        //Duyệt toàn bộ danh sách Booking hôm nay
+        for (Booking booking : bookingToday) {
+                time+=1;
+            Room room = booking.getRoom();
+            room.setRoomStatus(RoomStatus.BOOKED);
+            room.setDateAvailable(booking.getCheckoutDate().plusDays(1));
+        }
+        System.out.println("Found(BookingService): " + bookingToday);
+        System.out.println("time check date booking: " + time);
+       
+    }
+
     @Override
     public int payByCash(PaymentInitRequest paymentRq) {
         Integer bookingId = paymentRq.getBookingId();
@@ -62,8 +85,10 @@ public class PaymentSerImpl implements PaymentService {
                 .createdAt(LocalDateTime.now())
                 .build();
         booking.setStatus(BookingStatus.PAID);
-        room.setDateAvailable(booking.getCheckoutDate().plusDays(1));
-        room.setRoomStatus(RoomStatus.BOOKED);
+        // if (checkDateBooking(booking.getCheckinDate()) == 1) {
+        //     room.setDateAvailable(booking.getCheckoutDate().plusDays(1));
+        //     room.setRoomStatus(RoomStatus.BOOKED);
+        // }
         paymentRepo.save(payment);
 
         return 1;

@@ -36,6 +36,8 @@ const Payment = () => {
     const paymentData = {
       ...values,
       bookingId: Number(bookingId),
+      amount: 0,
+      orderInfo: "thanh toan",
       method: method || "CASH",
     };
 

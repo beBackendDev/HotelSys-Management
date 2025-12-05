@@ -84,10 +84,12 @@ const Booking = () => {
       })
 
       const result = await res.json();
+      console.log("booking res:", result);
+      
       // const res = await dispatch(booking(_val));
       // unwrapResult(res);
 
-      const bookingId = result?.payload?.data?.bookingId;
+      const bookingId = result?.bookingId;
       //chuyển tiếp đến trang thanh toán sau khi thực hiện đăng kí thông tin booking
       history.push(`/payment/${bookingId}`);
       toast.success("Đăng ký giữ chỗ thành công, vui lòng thực hiện thanh toán.");

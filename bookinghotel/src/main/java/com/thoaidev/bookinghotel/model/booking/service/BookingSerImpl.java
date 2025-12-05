@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -202,7 +204,15 @@ public class BookingSerImpl implements BookingSer {
     @Override
     public BookingDTO getBookingById(Integer id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Booking not Foung"));
+                .orElseThrow(() -> new NotFoundException("Booking not Found"));
         return bookingMapper.toDTO(booking);
+    }
+
+    @Override
+    public List<BookingDTO> getBookingByRoomId(Integer id, LocalDate today) {
+        List<Booking> bookings = bookingRepository.findByRoomId(id, today);
+        return bookings.stream()
+            .map(bookingMapper::toDTO)
+            .collect(Collectors.toList());
     }
 }

@@ -167,6 +167,15 @@ public class UserCtrl {
 
     }
 
+    @GetMapping("public/booking-list/room/{roomId}")
+    public ResponseEntity<?> bookingsByRoom(
+            @PathVariable Integer roomId) {
+                LocalDate today = LocalDate.now();
+                List<BookingDTO> bookings = bookingService.getBookingByRoomId(roomId, today);
+        return ResponseEntity.ok(bookings);
+
+    }
+
     //Xem chi tiết booking
     @GetMapping("/hotels/booking/{id}")
     public ResponseEntity<BookingDTO> getBooking(
@@ -214,7 +223,7 @@ public class UserCtrl {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-            return new ResponseEntity<>("Thanh toán không thành công, vui lòng thử lại", HttpStatus.NOT_ACCEPTABLE);
+        return new ResponseEntity<>("Thanh toán không thành công, vui lòng thử lại", HttpStatus.NOT_ACCEPTABLE);
 
     }
 
