@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Button, DatePicker, Card, Typography } from "antd";
+import {
+  Button,
+  DatePicker,
+  Card,
+  Typography,
+  Tabs,
+  Tag,
+  List,
+  Divider
+} from "antd";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import HomeLayout from "../core/layout/HomeLayout";
 import dayjs from "dayjs";
+
 import {
-  CheckOutlined,
-  LoadingOutlined,
   CarFilled,
   WifiOutlined,
   CoffeeOutlined,
@@ -14,20 +22,27 @@ import {
   SunFilled,
   LikeFilled,
   ClockCircleFilled,
-  DingdingOutlined,
   ScheduleFilled,
+  CheckOutlined,
   SmileFilled
 } from "@ant-design/icons";
+
 const { RangePicker } = DatePicker;
+const { TabPane } = Tabs;
 
 const RoomDetail = () => {
-  const { hotelid, roomid } = useParams(); // Lấy param
+  const { hotelid, roomid } = useParams();
+  const token = localStorage.getItem("accessToken");
+
   const [hotel, setHotel] = useState([]);
   const [room, setRoom] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dates, setDates] = useState([]); // lưu ngày check-in, check-out
+
+  const [dates, setDates] = useState([]); 
   const [totalPrice, setTotalPrice] = useState(0);
-  // Map icon name (string) -> component
+
+  // Icon map
   const iconMap = {
     CarFilled: <CarFilled />,
     WifiOutlined: <WifiOutlined />,
@@ -40,146 +55,174 @@ const RoomDetail = () => {
     CheckOutlined: <CheckOutlined />,
     SmileFilled: <SmileFilled />
   };
+
+  // Fetch room & hotel
   useEffect(() => {
-    const fetchRoomDetail = async () => {
+    const fetchAll = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8080/api/user/public/hotels/${hotelid}/rooms/${roomid}`
-        );
-        setRoom(res.data);
+        const [roomRes, hotelRes] = await Promise.all([
+          axios.get(`http://localhost:8080/api/user/public/hotels/${hotelid}/rooms/${roomid}`),
+          axios.get(`http://localhost:8080/api/user/public/hotels/${hotelid}`)
+        ]);
+        setRoom(roomRes.data);
+        setHotel(hotelRes.data);
       } catch (err) {
-        console.error("Lỗi khi lấy dữ liệu phòng:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchRoomDetail();
-
-    const fetchHotelDetail = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8080/api/user/public/hotels/${hotelid}`
-        );
-        console.log("hotel: ", res.data);
-        
-        setHotel(res.data);
-      } catch (err) {
-        console.error("Lỗi khi lấy dữ liệu khách sạn:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHotelDetail();
+    fetchAll();
   }, [hotelid, roomid]);
 
-  // Tính tổng tiền khi chọn ngày
+  // Fetch bookings for this room
   useEffect(() => {
-    if (dates.length === 2 && room) {
+    const fetchBookings = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/user/public/booking-list/room/${roomid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+        const data = await res.json();
+        setBookings(data);
+      } catch (err) {
+        console.error("Lỗi lấy booking", err);
+      }
+    };
+
+    if (roomid) fetchBookings();
+  }, [roomid]);
+
+  // Tính giá
+  useEffect(() => {
+    if (dates.length === 2 && room.roomPricePerNight) {
       const nights = dates[1].diff(dates[0], "day");
-      const total = nights * room?.roomPricePerNight;
-      setTotalPrice(total);
-    } else {
-      setTotalPrice(0);
+      setTotalPrice(nights * room.roomPricePerNight);
     }
   }, [dates, room]);
 
-  if (loading) return <div className="p-4">Đang tải...</div>;
-  if (!room) return <div className="p-4 text-red-500">Không tìm thấy phòng</div>;
+  if (loading) return <div>Đang tải...</div>;
 
   return (
     <HomeLayout>
-      <div className="mt-[100px] flex flex-col max-w-6xl mx-auto py-6">
-        {/* Title + hình ảnh */}
-        <h1 className="text-3xl font-bold mb-4">{room.roomName}</h1>
-        {room.roomImageUrls?.length > 0 && (
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {room.roomImageUrls.map((url, index) => (
+      <div className="mt-[90px] max-w-7xl mx-auto px-4 py-6">
+
+        {/* Tên phòng */}
+        <h1 className="text-4xl font-extrabold mb-6">{room.roomName}</h1>
+
+        {/* Khu vực hình ảnh */}
+        <div className="grid grid-cols-3 gap-4 mb-10">
+          {/* Ảnh lớn */}
+          {room.roomImageUrls?.[0] && (
+            <img
+              src={`http://localhost:8080${room.roomImageUrls[0]}`}
+              className="col-span-2 h-[380px] w-full object-cover rounded-xl shadow-lg"
+            />
+          )}
+
+          {/* Ảnh nhỏ */}
+          <div className="flex flex-col gap-3">
+            {room.roomImageUrls?.slice(1, 4).map((img, i) => (
               <img
-                key={index}
-                src={`http://localhost:8080${url}`}
-                alt={`Ảnh phòng ${index + 1}`}
-                className="h-48 w-full object-cover rounded shadow"
+                key={i}
+                src={`http://localhost:8080${img}`}
+                className="h-[120px] w-full rounded-lg object-cover shadow"
               />
             ))}
           </div>
-        )}
+        </div>
 
-        {/* Layout chia 2 cột */}
-        <div className="grid grid-cols-3 gap-6">
-          {/* Cột trái: thông tin tiện ích */}
-          <div className="col-span-2 space-y-4">
-            <Card title="Thông tin chi tiết" bordered={false}>
-              <p>
-                <span className="font-semibold">Giá:</span>{" "}
-                {room.roomPricePerNight.toLocaleString()} VND / đêm
-              </p>
-              <p>
-                <span className="font-semibold">Sức chứa:</span>{" "}
-                {room.roomOccupancy} người
-              </p>
-              <p>
-                <span className="font-semibold">Loại phòng:</span> {room.roomType}
-              </p>
+        <div className="grid grid-cols-3 gap-8">
+
+          {/* ---- CỘT TRÁI ---- */}
+          <div className="col-span-2 space-y-6">
+
+            <Card title="Thông tin chi tiết" className="shadow-md rounded-xl">
+              <p><b>Giá:</b> {room.roomPricePerNight?.toLocaleString()} VND / đêm</p>
+              <p><b>Sức chứa:</b> {room.roomOccupancy} người</p>
+              <p><b>Loại phòng:</b> {room.roomType}</p>
             </Card>
 
-            <Card title="Tiện ích phòng" bordered={false}>
-              <ul className="list-disc pl-6 space-y-1">
-                {hotel?.hotelFacilities?.length > 0 ? (
-                  hotel.hotelFacilities.map((facility) => (
-                    <div
-                      key={facility.id}
-                      className="flex items-center gap-2"
-                      style={{ color: "#0db3efff" }}
-                    >
-                      {iconMap[facility.icon]}
-                      <Typography.Text style={{ color: "black" }}>
-                        {facility.name}
-                      </Typography.Text>
-                    </div>
-                  ))
-                ) : (
-                  <li>Chưa có thông tin tiện ích</li>
-                )}
-              </ul>
+            <Card title="Tiện ích phòng" className="shadow-md rounded-xl">
+              <div className="grid grid-cols-2 gap-3">
+                {hotel?.hotelFacilities?.map((f) => (
+                  <div key={f.id} className="flex items-center gap-2">
+                    <span style={{ color: "#0db3efff" }}>{iconMap[f.icon]}</span>
+                    <Typography.Text>{f.name}</Typography.Text>
+                  </div>
+                ))}
+              </div>
             </Card>
+
           </div>
 
-          {/* Cột phải: Date picker + giá tiền + nút đặt phòng */}
+          {/* ---- CỘT PHẢI (ĐẶT PHÒNG & BOOKING LIST) ---- */}
           <div className="col-span-1">
-            <div className="sticky top-20">
-              <Card title="Đặt phòng" bordered={true}>
-                <RangePicker
-                  format="DD/MM/YYYY"
-                  onChange={(values) => setDates(values)}
-                  disabledDate={(current) =>
-                    current && current < dayjs().startOf("day")
-                  }
-                  className="w-full mb-4"
-                />
 
-                {totalPrice > 0 && (
-                  <p className="mb-4 text-lg font-bold text-red-600">
-                    Tổng tiền: {totalPrice.toLocaleString()} VND
-                  </p>
-                )}
+            <Card className="shadow-xl rounded-xl p-3 sticky top-[100px]">
+              <Tabs defaultActiveKey="1">
 
-                <Link
-                  to={`/hotels/${room.hotelId}/rooms/${room.roomId}/booking`}
-                  state={{ checkIn: dates[0], checkOut: dates[1], totalPrice }}
-                >
-                  <Button
-                    type="primary"
-                    size="large"
-                    disabled={dates.length !== 2}
-                    className="w-full"
+                {/* TAB 1: ĐẶT PHÒNG */}
+                <TabPane tab="Đặt phòng" key="1">
+                  <RangePicker
+                    format="DD/MM/YYYY"
+                    onChange={(values) => setDates(values)}
+                    disabledDate={(cur) => cur && cur < dayjs().startOf("day")}
+                    className="w-full mb-4"
+                  />
+
+                  {totalPrice > 0 && (
+                    <p className="text-lg font-bold text-red-500 mb-4">
+                      Tổng tiền: {totalPrice.toLocaleString()} VND
+                    </p>
+                  )}
+
+                  <Link
+                    to={`/hotels/${room.hotelId}/rooms/${room.roomId}/booking`}
+                    state={{ checkIn: dates[0], checkOut: dates[1], totalPrice }}
                   >
-                    Đặt phòng
-                  </Button>
-                </Link>
-              </Card>
-            </div>
+                    <Button
+                      type="primary"
+                      size="large"
+                      className="w-full"
+                      disabled={dates.length !== 2}
+                    >
+                      Đặt phòng
+                    </Button>
+                  </Link>
+                </TabPane>
+
+                {/* TAB 2: BOOKING SẮP TỚI */}
+                <TabPane tab="Lịch phòng" key="2">
+                  <List
+                    dataSource={bookings}
+                    renderItem={(b) => (
+                      <List.Item>
+                        <div className="flex flex-col">
+                          <span><b>Người đặt:</b> {b?.guestName || "Người dùng ẩn danh"}</span>
+                          <span>
+                            <b>Ngày:</b> {dayjs(b.checkinDate).format("DD/MM")} →{" "}
+                            {dayjs(b.checkoutDate).format("DD/MM")}
+                          </span>
+
+                          <Tag color="blue" className="mt-1">
+                            {b.bookingStatus}
+                          </Tag>
+                        </div>
+                      </List.Item>
+                    )}
+                    locale={{ emptyText: "Không có booking nào" }}
+                  />
+                </TabPane>
+
+              </Tabs>
+            </Card>
+
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, Rate, Input, Button, message, Typography } from "antd";
+import { Card, Rate, Input, Button, message, Typography, Divider } from "antd";
 import { path } from "../../constant/path";
 import HomeLayout from "../../core/layout/HomeLayout";
 
@@ -14,29 +14,31 @@ const ReviewPage = () => {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Lấy thông tin booking để hiển thị
+  console.log("rating point: ", ratingPoint);
+  
+  // 🔹 Fetch booking info
   useEffect(() => {
     const fetchBooking = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/user/booking/${bookingId}`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `http://localhost:8080/api/user/hotels/booking/${bookingId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!res.ok) throw new Error("Không thể tải thông tin đặt phòng");
-        console.log("(ReviewPage) Booking In4: ", res);
 
         const data = await res.json();
-        console.log("(ReviewPage) Booking data in4: ", data);
         setBooking(data);
       } catch (err) {
         message.error(err.message);
       }
     };
+
     fetchBooking();
   }, [bookingId, token]);
 
-  // 🔹 Gửi đánh giá
+  // 🔹 Submit review
   const handleSubmit = async () => {
     if (!ratingPoint) {
       message.warning("Vui lòng chọn số sao đánh giá!");
@@ -48,25 +50,24 @@ const ReviewPage = () => {
     }
 
     setLoading(true);
+
     try {
-      const today = new Date();
-      //Lấy userId từ localStorage
       const userStr = localStorage.getItem("user");
       const user = JSON.parse(userStr);
-      const userId = user?.userId;
-      //
+
       const payload = {
         hotelId: booking?.hotelId,
         userId: user?.userId,
-        ratingPoint: ratingPoint,
-        comment: comment,
-        createdAt: today,
-      }
+        ratingPoint,
+        comment,
+        createdAt: new Date(),
+      };
+
       const res = await fetch("http://localhost:8080/api/user/hotels/reviews", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -74,9 +75,8 @@ const ReviewPage = () => {
       if (!res.ok) throw new Error("Gửi đánh giá thất bại!");
 
       message.success("Cảm ơn bạn đã đánh giá!");
-      // 👇 Thay vì navigate("/purchases")
+
       setTimeout(() => {
-        //sau khi đánh giá xong thì điều hướng về trang chủ
         window.location.href = path.home;
       }, 1200);
     } catch (err) {
@@ -86,38 +86,74 @@ const ReviewPage = () => {
     }
   };
 
-  if (!booking) return <p>Đang tải thông tin...</p>;
+  if (!booking)
+    return (
+      <HomeLayout>
+        <p className="text-center mt-10">Đang tải thông tin...</p>
+      </HomeLayout>
+    );
 
   return (
     <HomeLayout>
-      <div className="max-w-2xl mx-auto mt-10">
-        <Card title={`Đánh giá khách sạn: ${booking?.hotelName || ""}`}>
-          <Typography.Paragraph>
-            Phòng: <b>{booking?.roomName}</b><br />
-            Thời gian lưu trú: <b>{booking?.checkinDate}</b> - <b>{booking?.checkoutDate}</b>
-          </Typography.Paragraph>
+      <div className="max-w-3xl mx-auto mt-20 px-4">
+        <Card
+          className="shadow-lg rounded-xl border border-gray-200"
+          title={
+            <div className="text-lg font-semibold text-gray-700">
+              ⭐ Đánh giá khách sạn:{" "}
+              <span className="text-orange-600">{booking?.hotelName}</span>
+            </div>
+          }
+        >
+          {/* Booking Summary */}
+          <div className="mb-4">
+            <Typography.Paragraph className="text-gray-600">
+              <span className="block mb-1">
+                <b>Phòng:</b> {booking?.roomName}
+              </span>
+              <span>
+                <b>Thời gian lưu trú:</b> {booking?.checkinDate} →{" "}
+                {booking?.checkoutDate}
+              </span>
+            </Typography.Paragraph>
+          </div>
 
-          <Rate
-            value={ratingPoint}
-            onChange={setRating}
-            allowHalf
-          />
+          <Divider />
+
+          {/* Rating */}
+          <div className="flex flex-col items-start mb-4">
+            <Typography.Text className="font-medium text-gray-700 mb-1">
+              Mức độ hài lòng:
+            </Typography.Text>
+            <Rate value={ratingPoint} onChange={setRating} allowHalf />
+          </div>
+
+          {/* Comment */}
+          <Typography.Text className="font-medium text-gray-700">
+            Nhận xét:
+          </Typography.Text>
           <TextArea
             rows={5}
-            placeholder="Nhập nhận xét của bạn về khách sạn này..."
+            placeholder="Hãy chia sẻ trải nghiệm của bạn với khách sạn..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className="mt-3"
+            className="mt-2"
           />
 
-          <div className="flex justify-end mt-5">
-            <Button type="primary" loading={loading} onClick={handleSubmit}>
+          {/* Submit Button */}
+          <div className="flex justify-end mt-6">
+            <Button
+              type="primary"
+              size="large"
+              loading={loading}
+              onClick={handleSubmit}
+              className="px-10 rounded-lg bg-orange-500 hover:bg-orange-600"
+            >
               Gửi đánh giá
             </Button>
           </div>
         </Card>
       </div>
-
     </HomeLayout>
   );
 };

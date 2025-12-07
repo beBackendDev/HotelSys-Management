@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useHistory,
+  useLocation,
   useParams,
 } from "react-router-dom";
 
@@ -39,7 +40,9 @@ const Booking = () => {
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
+  const location = useLocation();
+  const { checkIn, checkOut, totalPrice } = location.state || {};
+  console.log("state values: ", location);
   // Load checkin/out từ localStorage
   useEffect(() => {
     const filters = localStorage.getItem(LocalStorage.filters);
@@ -59,6 +62,7 @@ const Booking = () => {
       toast.error("Vui lòng chọn ngày nhận/trả phòng trước khi đặt!");
       return;
     }
+
 
     const birthday = values["birthday"];
     // const formattedBirthday = birthday ? birthday.format("YYYY-MM-DD") : null;
@@ -82,10 +86,15 @@ const Booking = () => {
         },
         body: JSON.stringify(_val)
       })
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.log("errror:", errorData);
 
+        throw new Error(errorData.message || "Đã xảy ra lỗi");
+      }
       const result = await res.json();
       console.log("booking res:", result);
-      
+
       // const res = await dispatch(booking(_val));
       // unwrapResult(res);
 
@@ -95,7 +104,8 @@ const Booking = () => {
       toast.success("Đăng ký giữ chỗ thành công, vui lòng thực hiện thanh toán.");
 
     } catch (error) {
-      console.log(error);
+      console.error("ERROR:", error.message);
+      // setError(err.message);
     }
   };
 

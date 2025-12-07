@@ -268,7 +268,7 @@ const HotelDetail = () => {
         <div className="mt-4 flex flex-col items-center justify-center p-10">
           <span className="flex flex-row font-bold text-8xl justify-items-center">
             <img src={ratinglayout1} className="w-[70px]" srcset="" />
-            {hotelInfo?.ratingPoint || 0.1}
+            {hotelInfo?.ratingPoint || "Chưa có đánh giá nào"}
             <img src={ratinglayout} className="w-[70px]" srcset="" />
           </span>
           <span className="max-w-[300px] text-center">Được đánh giá chính xác dựa trên trải nghiệm người dùng</span>
@@ -292,9 +292,9 @@ const HotelDetail = () => {
                 {/* Rating + thời gian */}
                 <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600">
                   <span className="text-black">
-                    {"★".repeat(review.ratingPoint)}{"☆".repeat(5 - review.ratingPoint)}
+                    {"★".repeat(review?.ratingPoint)}{"☆".repeat(5 - review.ratingPoint)}
                   </span>
-                  <span>{new Date(review.createdAt).toLocaleDateString("vi-VN")}</span>
+                  <span>{new Date(review?.createdAt).toLocaleDateString("vi-VN")}</span>
                 </div>
 
                 {/* Review text */}

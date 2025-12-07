@@ -1,4 +1,4 @@
-import { Col, Row, Typography, Pagination } from "antd";
+import { Col, Row, Typography, Pagination, Card } from "antd";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import User from "./User";
@@ -20,7 +20,7 @@ const Purchase = () => {
   const fetchPurchase = async (pageNo, pageSize) => {
     try {
       const res = await fetch(
-        `http://localhost:8080/api/user/hotels/booking-management?pageNo=${pageNo - 1}&pageSize=${pageSize}`,
+        `http://localhost:8080/api/user/hotels/booking-management?pageNo=${pageNo}&pageSize=${pageSize}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -29,7 +29,6 @@ const Purchase = () => {
         }
       );
       const data = await res.json();
-      console.log("_getPurchase: ", data);
 
       setPurchaseList(data?.content || []);
       setPagination((prev) => ({
@@ -44,7 +43,6 @@ const Purchase = () => {
     }
   };
 
-  // fetch lần đầu khi component mount
   useEffect(() => {
     fetchPurchase(pagination.pageNo, pagination.pageSize);
   }, []);
@@ -55,42 +53,57 @@ const Purchase = () => {
 
   return (
     <User>
-      <div className="px-8 bg-white min-h-screen rounded py-12">
-        <Typography.Title level={3} className="pt-5">
+      <div className="px-8 bg-white min-h-screen rounded py-10">
+
+        {/* Title */}
+        <Typography.Title level={3} className="text-gray-700 mb-6">
           Đơn đã đặt
         </Typography.Title>
 
-        <Row gutter={[24, 24]} className="bg-orange-200 p-4">
-          <Col sm={5}>
-            <Typography.Text className="font-bold">Khách sạn</Typography.Text>
-          </Col>
-          <Col sm={3}>
-            <Typography.Text className="font-bold">Phòng</Typography.Text>
-          </Col>
-          <Col sm={3}>
-            <Typography.Text className="font-bold">Ngày nhận</Typography.Text>
-          </Col>
-          <Col sm={3}>
-            <Typography.Text className="font-bold">Ngày trả</Typography.Text>
-          </Col>
-          <Col sm={4}>
-            <Typography.Text className="font-bold">Tình trạng</Typography.Text>
-          </Col>
-          <Col sm={3}>
-            <Typography.Text className="font-bold">Giá (VNĐ)</Typography.Text>
-          </Col>
-          <Col sm={3}>
-            <Typography.Text className="font-bold">Thao tác</Typography.Text>
-          </Col>
-        </Row>
+        {/* Header Row */}
+        <Card
+          className="rounded-xl shadow-sm mb-3 bg-orange-50 border border-orange-200"
+          bodyStyle={{ padding: "14px 20px" }}
+        >
+          <Row gutter={[16, 16]} align="middle">
+            <Col sm={6}>
+              <Typography.Text className="font-semibold text-gray-800">
+                Khách sạn (Phòng)
+              </Typography.Text>
+            </Col>
 
+            <Col sm={4}>
+              <Typography.Text className="font-semibold text-gray-800">
+                Ngày nhận
+              </Typography.Text>
+            </Col>
+
+            <Col sm={4}>
+              <Typography.Text className="font-semibold text-gray-800">
+                Ngày trả
+              </Typography.Text>
+            </Col>
+
+            <Col sm={4}>
+              <Typography.Text className="font-semibold text-gray-800">
+                Trạng thái
+              </Typography.Text>
+            </Col>
+
+            <Col sm={4}>
+              <Typography.Text className="font-semibold text-gray-800">
+                Giá tiền
+              </Typography.Text>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* Purchase List */}
         {purchaseList?.map((purchase) => (
-          <PurchaseCard
-            purchase={purchase}
-            key={purchase.id}
-          />
+          <PurchaseCard purchase={purchase} key={purchase.id} />
         ))}
 
+        {/* Pagination */}
         <div className="flex justify-center mt-6">
           <Pagination
             current={pagination.pageNo}
@@ -100,6 +113,7 @@ const Purchase = () => {
             showSizeChanger={false}
           />
         </div>
+
       </div>
     </User>
   );
