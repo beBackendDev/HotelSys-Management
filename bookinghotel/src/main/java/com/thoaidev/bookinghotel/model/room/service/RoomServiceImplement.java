@@ -1,6 +1,7 @@
 package com.thoaidev.bookinghotel.model.room.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,29 +17,33 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
+import com.thoaidev.bookinghotel.model.hotel.HotelSpecification;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
 import com.thoaidev.bookinghotel.model.image.service.ImageService;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
+import com.thoaidev.bookinghotel.model.room.dto.response.RoomResponse;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
+import com.thoaidev.bookinghotel.model.room.mapper.RoomMapper;
 import com.thoaidev.bookinghotel.model.room.repository.RoomRepository;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 @Service
+@AllArgsConstructor
+@NoArgsConstructor
 public class RoomServiceImplement implements RoomService {
 
-    private final HotelRepository hotelRepository;
-    private final RoomRepository roomRepository;
-    private final RestTemplate restTemplate;
-
     @Autowired
-    public RoomServiceImplement(HotelRepository hotelRepository,
-            RoomRepository roomRepository,
-            RestTemplate restTemplate) {
-        this.hotelRepository = hotelRepository;
-        this.roomRepository = roomRepository;
-        this.restTemplate = restTemplate;
-    }
+    private HotelRepository hotelRepository;
+    @Autowired
+    private RoomRepository roomRepository;
+    @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    private RoomMapper roomMapper;
     @Autowired
     private ImageService imageService;
 //GET methods
@@ -154,7 +159,24 @@ public class RoomServiceImplement implements RoomService {
         return mapToRoomDto(updatedRoom);
     }
 
+    //Filter
+    @Override
+    public RoomResponse searchAvailableRooms(
+            LocalDate checkin,
+            LocalDate checkout,
+            Integer numPeople) {
+        RoomResponse roomRes = new RoomResponse();
+        List<Room> rooms = roomRepository.findAll(HotelSpecification.filter(checkin, checkout));
+        List<RoomDto> content = rooms.stream()
+                .map(roomMapper::mapToRoomDTO)
+                .collect(Collectors.toList());
+
+        roomRes.setContent(content); // Chỉ cần gán content
+
+        return roomRes;
+    }
 //DELETE methods
+
     @Override
     public void deleteRoombyId(Integer hotelId, Integer roomId) {
         Hotel hotel

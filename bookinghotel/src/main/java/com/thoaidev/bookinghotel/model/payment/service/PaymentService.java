@@ -5,6 +5,7 @@ import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
 
 public interface PaymentService {
+    public void checkDateBooking();
     public int payByCash (PaymentInitRequest paymentRq);
     public PaymentDto getPaymentById(Integer id);
     public PaymentResponse getAllPayments(int pageNo, int pageSize);

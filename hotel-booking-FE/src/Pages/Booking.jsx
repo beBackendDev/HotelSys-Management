@@ -76,37 +76,34 @@ const Booking = () => {
     };
 
     try {
-      // chuyển tiếp đến trang booking.slice.js
-      //để thực hiện gọi API phía backend
-      const res = await fetch(`http://localhost:8080/api/user/hotels/bookings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(_val)
-      })
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.log("errror:", errorData);
+  const res = await fetch(`http://localhost:8080/api/user/hotels/bookings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(_val),
+  });
 
-        throw new Error(errorData.message || "Đã xảy ra lỗi");
-      }
-      const result = await res.json();
-      console.log("booking res:", result);
+  // Nếu HTTP status là lỗi → ném lỗi ngay
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || "Đã xảy ra lỗi không xác định");
+  }
 
-      // const res = await dispatch(booking(_val));
-      // unwrapResult(res);
+  const result = await res.json();
+  console.log("booking res:", result);
 
-      const bookingId = result?.bookingId;
-      //chuyển tiếp đến trang thanh toán sau khi thực hiện đăng kí thông tin booking
-      history.push(`/payment/${bookingId}`);
-      toast.success("Đăng ký giữ chỗ thành công, vui lòng thực hiện thanh toán.");
+  const bookingId = result?.bookingId;
+  history.push(`/payment/${bookingId}`);
 
-    } catch (error) {
-      console.error("ERROR:", error.message);
-      // setError(err.message);
-    }
+  toast.success("Đăng ký giữ chỗ thành công, vui lòng thực hiện thanh toán.");
+
+} catch (error) {
+  console.error("ERROR:", error);
+  toast.error(error.message); // HIỂN THỊ LỖI ĐÚNG FORMAT
+}
+
   };
 
   const onFinishFailed = (errorInfo) => {

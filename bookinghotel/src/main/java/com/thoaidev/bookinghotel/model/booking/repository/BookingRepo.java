@@ -16,11 +16,12 @@ import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 public interface BookingRepo extends JpaRepository<Booking, Integer> {
         //Tìm kiếm booking dựa trên userId
     Page<Booking> findByUser(UserEntity user, Pageable pageable);
+    
+    @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.room.roomId  = :roomId AND b.checkinDate >= :today AND b.status = 'PAID' ")
+    Page<Booking> findByOwner(UserEntity user, Pageable pageable);
 
     @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.room.roomId  = :roomId AND b.checkinDate >= :today AND b.status = 'PAID' ")
-    List<Booking> findByRoomId(
-        @Param("roomId") Integer roomId,
-        @Param("today") LocalDate today
+    List<Booking> findByRoomId(@Param("roomId") Integer roomId, @Param("today") LocalDate today
 
 );
     //kiểm tra tính khả thi khi viết Review của người dùng
@@ -37,7 +38,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     // Kiểm tra trùng lịch
     @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId "
             + "AND b.status IN ('PENDING_PAYMENT', 'PAID') "
-            + "AND (:startDate < b.checkoutDate AND :endDate > b.checkinDate)")
+            + "AND (:startDate <= b.checkoutDate AND :endDate >= b.checkinDate)")
     List<Booking> findConflictingBookings(@Param("roomId") Integer roomId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
@@ -50,7 +51,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkoutDate) <= :today")
     List<Booking> findBookingsToRelease(@Param("today") LocalDate today);
 
-    @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkinDate) = :today")
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkinDate) >= :today")
     List<Booking> findBookingsToday(@Param("today") LocalDate today);
 }
 

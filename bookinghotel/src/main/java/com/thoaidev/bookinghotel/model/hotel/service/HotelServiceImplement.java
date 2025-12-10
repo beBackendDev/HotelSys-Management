@@ -124,7 +124,8 @@ public class HotelServiceImplement implements HotelService {
     }
 
     @Override
-    public HotelResponse filterHotels(String hotelName,
+    public HotelResponse filterHotels(
+            String hotelName,
             String hotelAddress,
             BigDecimal hotelAveragePrice,
             List<String> hotelFacilities,

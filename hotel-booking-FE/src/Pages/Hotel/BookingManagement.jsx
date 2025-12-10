@@ -17,7 +17,18 @@ const BookingManagement = () => {
     const [loading, setLoading] = useState(false);
     const [bookings, setBookings] = useState([]);
     const token = localStorage.getItem("accessToken");
-
+    const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
+    const role = decodedToken.role; // ADMIN, OWNER, USER
+    const getUrlByRole = (role) => {
+        switch (role) {
+            case "ADMIN":
+                return "admin/hotels";
+            case "OWNER":
+                return "owner/hotel-list";
+            default:
+                return "user/hotels"; // USER or guest
+        }
+    };
     useEffect(() => {
         fetchBookings();
     }, [bookings?.hotelId]);
@@ -26,7 +37,7 @@ const BookingManagement = () => {
         setLoading(true);
         try {
             const res = await fetch(
-                `http://localhost:8080/api/dashboard/admin/hotels/bookings-management`,
+                `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/bookings-management`,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -148,12 +159,12 @@ const BookingManagement = () => {
                         status === "CONFIRMED"
                             ? "green"
                             : status === "PAID"
-                            ? "green"
-                            : status === "CANCELLED"
-                                ? "volcano"
-                                : status === "COMPLETED"
-                                    ? "blue"
-                                    : "orange"
+                                ? "green"
+                                : status === "CANCELLED"
+                                    ? "volcano"
+                                    : status === "COMPLETED"
+                                        ? "blue"
+                                        : "orange"
                     }
                 >
                     {status}

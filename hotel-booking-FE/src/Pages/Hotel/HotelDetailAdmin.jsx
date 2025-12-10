@@ -39,6 +39,9 @@ const HotelDetailAdmin = () => {
   const token = localStorage.getItem("accessToken");
   const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
   const role = decodedToken.role; // ADMIN, OWNER, USER
+  const userId = decodedToken?.userId; // ADMIN, OWNER, USER
+  console.log("role: ", decodedToken);
+  
   const history = useHistory();
   const getUrlByRole = (role) => {
     switch (role) {
@@ -53,7 +56,7 @@ const HotelDetailAdmin = () => {
   // Fetch rooms
   const fetchRooms = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}/rooms`, {
+      const res = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/${userId}/hotels/${hotelId}/rooms`, {
         headers: { "Authorization": `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch rooms");
@@ -94,7 +97,7 @@ const HotelDetailAdmin = () => {
   const handleDeleteRoom = async (roomId) => {
     try {
       const res = await fetch(
-        `http://localhost:8080/api/dashboard/admin/hotels/${hotelId}/delete-room/${roomId}`,
+        `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}/delete-room/${roomId}`,
         {
           method: "DELETE",
           headers: {
@@ -133,13 +136,13 @@ const HotelDetailAdmin = () => {
           <Tooltip title="Xem chi tiết">
             <Button
               icon={<EyeOutlined />}
-              onClick={() => history.push(`/dashboard/admin/hotels/${hotelId}/rooms/${room.id}`)}
+              onClick={() => history.push(`/dashboard/${getUrlByRole(role)}/hotels/${hotelId}/rooms/${room.id}`)}
             />
           </Tooltip>
           <Tooltip title="Chỉnh sửa">
             <Button
               icon={<EditOutlined />}
-              onClick={() => history.push(`/dashboard/admin/hotels/${hotelId}/edit-room/${room.id}`)}
+              onClick={() => history.push(`/dashboard/${getUrlByRole(role)}/hotels/${hotelId}/edit-room/${room.id}`)}
             />
           </Tooltip>
           <Popconfirm

@@ -43,6 +43,7 @@ import com.thoaidev.bookinghotel.model.payment.service.VNPayService;
 import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
 import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
+import com.thoaidev.bookinghotel.model.room.dto.response.RoomResponse;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
 import com.thoaidev.bookinghotel.model.user.dto.request.ChangePasswordRequest;
@@ -119,7 +120,15 @@ public class UserCtrl {
         HotelResponse hotels = hotelService.filterHotels(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId);
         return ResponseEntity.ok(hotels);
     }
-
+    @GetMapping("/public/room-available")
+    public ResponseEntity<RoomResponse> getAvailableRoom(
+        @RequestParam(required = true) LocalDate checkIn,
+        @RequestParam(required = true) LocalDate checkOut,
+        @RequestParam(required = false) Integer numPeople
+    ){
+        RoomResponse rooms = roomService.searchAvailableRooms(checkIn, checkOut, numPeople);
+        return ResponseEntity.ok(rooms);
+    }
     //Kiểm tra tình trạng phòng
     @GetMapping("/check-availability")
     public ResponseEntity<?> checkAvailability(

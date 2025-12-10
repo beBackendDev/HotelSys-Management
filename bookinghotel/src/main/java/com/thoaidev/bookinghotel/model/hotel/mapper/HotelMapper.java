@@ -12,6 +12,7 @@ import com.thoaidev.bookinghotel.model.common.HotelFacilityDTO;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
+import com.thoaidev.bookinghotel.model.review.dto.ReviewDto;
 import com.thoaidev.bookinghotel.model.user.dto.OwnerDto;
 
 @Component

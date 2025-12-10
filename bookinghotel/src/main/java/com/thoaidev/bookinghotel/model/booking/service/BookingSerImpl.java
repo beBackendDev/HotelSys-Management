@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.thoaidev.bookinghotel.exceptions.BadRequestException;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
@@ -61,11 +61,14 @@ public class BookingSerImpl implements BookingSer {
         return conflicts.isEmpty(); // true ? no conflict : conflict
     }
 
+    //Check Avalable Room
+    
+
     // Book Room
     @Override
     public Booking bookRoom(BookingDTO bookingDTO, UserEntity user) {
         if (!isRoomAvailable(bookingDTO.getRoomId(), bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Room isn't available that day");
+            throw new BadRequestException("Phòng đã có người đặt trong thời gian bạn chọn.");
         } else {
             //Khởi tạo một Booking mới
             Booking booking = new Booking();
@@ -212,7 +215,7 @@ public class BookingSerImpl implements BookingSer {
     public List<BookingDTO> getBookingByRoomId(Integer id, LocalDate today) {
         List<Booking> bookings = bookingRepository.findByRoomId(id, today);
         return bookings.stream()
-            .map(bookingMapper::toDTO)
-            .collect(Collectors.toList());
+                .map(bookingMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

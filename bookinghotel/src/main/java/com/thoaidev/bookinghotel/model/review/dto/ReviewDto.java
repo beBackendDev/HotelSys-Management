@@ -1,16 +1,18 @@
 package com.thoaidev.bookinghotel.model.review.dto;
 
+import java.time.LocalDateTime;
+
 import groovy.transform.builder.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 
 
 @Data
-@Builder
+@AllArgsConstructor
 public class ReviewDto {
-
-    private Integer hotelId;
-    private Integer userId;
-    private String rating;
     private String comment;
+    private Double ratingPoint; // 1 - 5 (số sao)
+    private LocalDateTime createdAt;
+
 }

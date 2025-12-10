@@ -43,23 +43,27 @@ public class PaymentSerImpl implements PaymentService {
     private RoomRepository roomRepository;
 
     //Thực hiện kiểm tra booking trong ngày
-    @Scheduled(fixedRate = 2400000)//40p/time
+    @Override
+    @Scheduled(fixedRate = 6000)//40p/time
     @Transactional
     public void checkDateBooking() {
-        int time =1;
+        int time = 1;
         LocalDate today = LocalDate.now();
         List<Booking> bookingToday = bookingRepository.findBookingsToday(today);
 
         //Duyệt toàn bộ danh sách Booking hôm nay
         for (Booking booking : bookingToday) {
-                time+=1;
+            time += 1;
             Room room = booking.getRoom();
             room.setRoomStatus(RoomStatus.BOOKED);
             room.setDateAvailable(booking.getCheckoutDate().plusDays(1));
+
+            roomRepository.save(room);
+
         }
         System.out.println("Found(BookingService): " + bookingToday);
         System.out.println("time check date booking: " + time);
-       
+
     }
 
     @Override

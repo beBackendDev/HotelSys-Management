@@ -38,8 +38,8 @@ const DashboardLayout = ({ children }) => {
   const ownerMenu = [
     { key: path.overview, icon: <HomeTwoTone />, label: "Tổng quan", link: path.overview },
     { key: path.hotelManagement, icon: <HomeOutlined />, label: "Quản lý khách sạn", link: path.hotelManagement },
-    { key: "roomManagement", icon: <HomeTwoTone />, label: "Quản lý đặt phòng", link: "#" },
-    { key: path.bookingManagement, icon: <HomeOutlined />, label: "Quản lý hóa đơn", link: "#" },
+    { key: "roomManagement", icon: <HomeTwoTone />, label: "Quản lý đặt phòng", link: path.bookingManagement },
+    { key: path.bookingManagement, icon: <HomeOutlined />, label: "Quản lý hóa đơn", link: path.paymentManagement },
     { key: "reviewManagement", icon: <FileDoneOutlined />, label: "Quản lý đánh giá", link: "#" },
     { key: "settings", icon: <LogoutOutlined />, label: "Đăng xuất", link: path.login, onclick: handleLogout },
   ];

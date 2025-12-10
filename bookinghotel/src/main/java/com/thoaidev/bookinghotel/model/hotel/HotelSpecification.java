@@ -1,21 +1,28 @@
 package com.thoaidev.bookinghotel.model.hotel;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.thoaidev.bookinghotel.exceptions.BadRequestException;
+import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
+import com.thoaidev.bookinghotel.model.room.entity.Room;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 public class HotelSpecification {
 
-    public static Specification<Hotel> filter(String hotelName,
+    public static Specification<Hotel> filter(
+            String hotelName,
             String hotelAddress,
             BigDecimal hotelAveragePrice,
             List<String> hotelFacilities,
@@ -28,6 +35,7 @@ public class HotelSpecification {
         //cb( CriteriaBuilder) tương đương trình tạo điều kiện 
         //predicate tương đương điều kiện lọc( mệnh đề quan hệ trong sql)
         return (root, query, cb) -> {
+            //Khởi tạo một tập các điều kiện truy vấn (predicates)
             List<Predicate> predicates = new ArrayList<>();
             Predicate predicate;
             // Lọc theo giá trung bình
@@ -59,10 +67,10 @@ public class HotelSpecification {
                 // predicates.add(facilityJoin.get("name").in(facilityNames));
 // //Cach 2:
                 List<Predicate> facilityPredicates = new ArrayList<>();
-                for(String facility : hotelFacilities){
+                for (String facility : hotelFacilities) {
                     String keyword = "%" + facility.toLowerCase() + "%";
                     facilityPredicates.add(
-                        cb.like(cb.lower(facilityJoin.get("name")), keyword)
+                            cb.like(cb.lower(facilityJoin.get("name")), keyword)
                     );
                 }
                 //Gop OR: (facility.name LIKE '%wifi%' OR facility.name LIKE '%pool%')
@@ -85,6 +93,24 @@ public class HotelSpecification {
             Predicate predicated = cb.and(predicates.toArray(new Predicate[0]));
             System.out.println("Filter result: " + predicated);
             return predicated;
+        };
+    }
+
+    public static Specification<Room> filter(LocalDate checkin, LocalDate checkout) {
+
+        return (root, query, cb) -> {
+            //tạo một query con
+            Subquery<Long> sub = query.subquery(Long.class);
+            Root<Booking> bookingRoot = sub.from(Booking.class);
+
+            sub.select(bookingRoot.get("bookingId"))
+                    .where(
+                            cb.equal(bookingRoot.get("room").get("roomId"), root.get("roomId")),
+                            cb.lessThan(bookingRoot.get("checkinDate"), checkout),
+                            cb.greaterThan(bookingRoot.get("checkoutDate"), checkin),
+                            bookingRoot.get("status").in("PAID", "PENDING")
+                    );
+            return cb.not(cb.exists(sub));
         };
     }
 }

@@ -13,19 +13,31 @@ const CreateRoom = () => {
     const [imageUrls, setImageUrls] = useState([]);
     const [form] = Form.useForm();
     const history = useHistory();
-
+    const token = localStorage.getItem("accessToken");
+    const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
+    const role = decodedToken.role; // ADMIN, OWNER, USER
+    const getUrlByRole = (role) => {
+        switch (role) {
+            case "ADMIN":
+                return "admin";
+            case "OWNER":
+                return "owner";
+            default:
+                return "user"; // USER or guest
+        }
+    };
     useEffect(() => {
         let mounted = true;
 
         const fetchHotels = async () => {
             try {
                 if (paramHotelId) {
-                    const res = await api.get(`/admin/hotels/${paramHotelId}`);
+                    const res = await api.get(`/${getUrlByRole(role)}/hotels/${paramHotelId}`);
                     if (!mounted) return;
                     setHotels([res.data]);
                     form.setFieldsValue({ hotelId: res.data.hotelId }); // set lại giá trị sau khi có option
                 } else {
-                    const res = await api.get('/admin/hotels');
+                    const res = await api.get(`/${getUrlByRole}/hotels`);
                     if (!mounted) return;
                     setHotels(Array.isArray(res.data) ? res.data : []);
                 }

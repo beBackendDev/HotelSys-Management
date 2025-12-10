@@ -244,7 +244,7 @@ public class AdminCtrl {
 //------------------- BOOKING -------------------   
 
     //Xem toàn bộ booking
-    @GetMapping("/admin/hotels/bookings-management")
+    @GetMapping("/admin/bookings-management")
     public ResponseEntity<BookingResponse> listBookings(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {

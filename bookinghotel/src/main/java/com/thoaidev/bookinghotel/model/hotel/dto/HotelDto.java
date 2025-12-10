@@ -8,6 +8,7 @@ import java.util.List;
 import com.thoaidev.bookinghotel.model.common.HotelFacilityDTO;
 import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.hotel.entity.HotelReview;
+import com.thoaidev.bookinghotel.model.review.dto.ReviewDto;
 import com.thoaidev.bookinghotel.model.user.dto.OwnerDto;
 
 import lombok.Builder;
@@ -23,8 +24,7 @@ public class HotelDto {
 
     private BigDecimal hotelAveragePrice;//gia tien trung binh
     private List<HotelFacilityDTO> hotelFacilities;//tien ich
-    private List<HotelReview> reviews;//danh gia
-    private Double ratingPoint;
+    private Double ratingPoint; //Luu y nen luu trong ReviewDto 
     private Integer totalReview;//danh gia
     private HotelStatus hotelStatus;
     private String hotelContactMail;//Email lien he
@@ -40,5 +40,5 @@ public class HotelDto {
     }
 
     private Integer ownerId;
-    OwnerDto owner;// Thong tin Owner
+    private OwnerDto owner;// Thong tin Owner
 }
