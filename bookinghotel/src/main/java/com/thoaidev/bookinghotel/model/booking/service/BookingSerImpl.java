@@ -62,8 +62,6 @@ public class BookingSerImpl implements BookingSer {
     }
 
     //Check Avalable Room
-    
-
     // Book Room
     @Override
     public Booking bookRoom(BookingDTO bookingDTO, UserEntity user) {
@@ -212,10 +210,54 @@ public class BookingSerImpl implements BookingSer {
     }
 
     @Override
+    public BookingResponse getBookingInDay(Integer ownerId, LocalDate date, int pageNo, int pageSize) {
+        UserEntity user = userRepository.findById(ownerId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
+
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        // Tính khoảng thời gian cho ngày cần lọc
+        LocalDate start = date;
+        LocalDate end = date.plusDays(1);
+        Page<Booking> bookings = bookingRepository.findBookingsByOwnerAndDate(user.getUserId(), start, end, pageable);
+        List<BookingDTO> content = bookingMapper.toDTOList(bookings.getContent());
+
+        BookingResponse bookingResponse = new BookingResponse();
+        bookingResponse.setContent(content);
+        bookingResponse.setPageNo(bookings.getNumber());
+        bookingResponse.setPageSize(bookings.getSize());
+        bookingResponse.setTotalElements(bookings.getTotalElements());
+        bookingResponse.setTotalPage(bookings.getTotalPages());
+        bookingResponse.setLast(bookings.isLast());
+        return bookingResponse;
+    }
+
+    @Override
+
     public List<BookingDTO> getBookingByRoomId(Integer id, LocalDate today) {
         List<Booking> bookings = bookingRepository.findByRoomId(id, today);
         return bookings.stream()
                 .map(bookingMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public BookingResponse getBookingOfOwner(Integer ownerId, int pageNo, int pageSize) {
+        UserEntity user = userRepository.findById(ownerId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        List<Integer> hotelIds = hotelRepository.findAllByOwner_UserId(user.getUserId())
+                .stream().map(Hotel::getHotelId).toList();
+        Page<Booking> bookings = bookingRepository.findAllByHotelIds(hotelIds, pageable);
+        List<BookingDTO> content = bookingMapper.toDTOList(bookings.getContent());
+
+        BookingResponse bookingResponse = new BookingResponse();
+        bookingResponse.setContent(content);
+        bookingResponse.setPageNo(bookings.getNumber());
+        bookingResponse.setPageSize(bookings.getSize());
+        bookingResponse.setTotalElements(bookings.getTotalElements());
+        bookingResponse.setTotalPage(bookings.getTotalPages());
+        bookingResponse.setLast(bookings.isLast());
+        return bookingResponse;
+    }
+
 }

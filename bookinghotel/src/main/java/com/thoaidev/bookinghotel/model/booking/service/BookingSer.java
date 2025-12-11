@@ -10,7 +10,11 @@ import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 
 public interface BookingSer {
 
+    BookingResponse getBookingOfOwner(Integer ownerId, int pageNo, int pageSize);
+
     public BookingDTO getBookingById(Integer id);
+
+    public BookingResponse getBookingInDay(Integer ownerId, LocalDate day, int pageNo, int pageSize);
 
     public List<BookingDTO> getBookingByRoomId(Integer id, LocalDate today);
 

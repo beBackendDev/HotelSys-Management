@@ -14,16 +14,39 @@ import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 
 public interface BookingRepo extends JpaRepository<Booking, Integer> {
-        //Tìm kiếm booking dựa trên userId
+
+    @Query("""
+    SELECT b FROM Booking b
+    JOIN b.room r
+    JOIN r.hotel h
+    WHERE h.owner.userId = :ownerId
+      AND b.checkinDate >= :start
+      AND b.checkinDate < :end
+        """)
+    Page<Booking> findBookingsByOwnerAndDate(
+            @Param("ownerId") Integer ownerId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end,
+            Pageable pageable
+    );
+
+    //Tìm kiếm booking dựa trên userId
     Page<Booking> findByUser(UserEntity user, Pageable pageable);
-    
+
+    @Query("SELECT b FROM Booking b WHERE b.room.hotel.hotelId IN :hotelIds")
+    Page<Booking> findAllByHotelIds(List<Integer> hotelIds, Pageable pageable);
+
     @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.room.roomId  = :roomId AND b.checkinDate >= :today AND b.status = 'PAID' ")
     Page<Booking> findByOwner(UserEntity user, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.room.roomId  = :roomId AND b.checkinDate >= :today AND b.status = 'PAID' ")
+    @Query("SELECT b FROM Booking b "
+            + "JOIN FETCH b.room "
+            + "WHERE b.room.roomId  = :roomId "
+            + "AND b.checkinDate >= :today "
+            + "AND b.status = 'PAID' ")
     List<Booking> findByRoomId(@Param("roomId") Integer roomId, @Param("today") LocalDate today
+    );
 
-);
     //kiểm tra tính khả thi khi viết Review của người dùng
     @Query("SELECT b FROM Booking b "
             + "WHERE b.user.userId = :userId "
@@ -54,4 +77,3 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkinDate) >= :today")
     List<Booking> findBookingsToday(@Param("today") LocalDate today);
 }
-

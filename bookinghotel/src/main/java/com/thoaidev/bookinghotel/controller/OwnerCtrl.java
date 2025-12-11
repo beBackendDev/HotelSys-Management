@@ -1,9 +1,11 @@
 package com.thoaidev.bookinghotel.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,14 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
-import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
+import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
-import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
-import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
 import com.thoaidev.bookinghotel.model.payment.service.PaymentService;
 import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
@@ -148,61 +147,27 @@ public class OwnerCtrl {
 //BOOKING 
 //Xem toàn bộ booking
 
-    // @GetMapping("/owner/bookings-management")
-    // public ResponseEntity<BookingResponse> listBookings(
-    //         @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-    //         @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
-    //     return new ResponseEntity<>(bookingService.getAllBookings(pageNo, pageSize), HttpStatus.OK);
+    @GetMapping("/owner/bookings-management")
+    public ResponseEntity<?> getOwnerBookings(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @AuthenticationPrincipal CustomUserDetail user) {
+        Integer ownerId = user.getId();
 
-    // }
-    // //Xem toàn bộ booking cua User
+        return new ResponseEntity<>(bookingService.getBookingOfOwner(ownerId, pageNo, pageSize), HttpStatus.OK);
+    }
 
-    // @GetMapping("/admin/hotels/{userId}/bookings-management")
-    // public ResponseEntity<BookingResponse> userBookings(
-    //         @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-    //         @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
-    //         @PathVariable Integer userId
-    // ) {
-    //     return new ResponseEntity<>(bookingService.getAllBookings(userId, pageNo, pageSize), HttpStatus.OK);
+    @GetMapping("/owner/booking-today")
+    public ResponseEntity<?> getBookingsOfOwnerByDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @AuthenticationPrincipal CustomUserDetail user
+    ) {
+        return new ResponseEntity<>(bookingService.getBookingInDay(user.getId(), date, pageNo, pageSize), HttpStatus.OK);
+    }
 
-    // }
-
-    // //Xem chi tiết booking
-    // @GetMapping("/admin/hotels/booking/{id}")
-    // public ResponseEntity<BookingDTO> getBooking(
-    //         @PathVariable Integer id
-    // ) {
-    //     BookingDTO booking = bookingService.getBookingById(id);
-    //     return new ResponseEntity<>(booking, HttpStatus.OK);
-    // }
-
-    // //Hủy/ Xóa booking
-    // @DeleteMapping("/admin/hotels/cancel-booking/{id}")
-    // public ResponseEntity<?> cancelBooking(@PathVariable Integer id) {
-    //     bookingService.cancelBooking(id);
-    //     return ResponseEntity.ok("Booking cancelled");
-    // }
-    // //------------------- PAYMENT -------------------   
-    // //Lấy toàn bộ danh sách Payment
-
-    // @GetMapping("/admin/hotels/payment-management")
-    // public ResponseEntity<?> getAllPayment(
-    //         @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-    //         @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
-    //     PaymentResponse paymentResponse = paymentService.getAllPayments(pageNo, pageSize);
-
-    //     return new ResponseEntity<>(paymentResponse, HttpStatus.OK);
-    // }
-
-    // //Lấy chi tiết payment
-    // @GetMapping("/admin/hotels/payment/{id}")
-    // public ResponseEntity<?> getMethodName(
-    //         @PathVariable("id") Integer paymentId) {
-
-    //     PaymentDto payment = paymentService.getPaymentById(paymentId);
-    //     return new ResponseEntity<>(payment, HttpStatus.OK);
-    // }
-
+    
 //RATING
 //REVIEW
 }
