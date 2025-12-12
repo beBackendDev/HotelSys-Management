@@ -40,6 +40,7 @@ import HotelDetailAdmin from "./Pages/Hotel/HotelDetailAdmin";
 import UserDetailAdmin from "./Pages/User/UserDetailAdmin";
 import RoomDetailAdmin from "./Pages/Hotel/RoomDetailAdmin";
 import CreateHotel from "./Pages/Hotel/CreateHotel";
+import ReviewManagement from "./Pages/Hotel/ReviewManagement";
 
 const Routes = () => {
   return (
@@ -211,6 +212,17 @@ const Routes = () => {
           <PaymentDetail />
         </HotelManagerGuard>
       </Route>
+      {/* review */}
+      <Route exact path={path.reviewManagement}>
+        <HotelManagerGuard>
+          <ReviewManagement />
+        </HotelManagerGuard>
+      </Route>
+      {/* <Route exact path={path.paymentDetailAdmin}>
+        <HotelManagerGuard>
+          <PaymentDetail />
+        </HotelManagerGuard>
+      </Route> */}
       {/* QUản lý thông tin ks(Admin/ Owner) || có thể không cần dùng*/}
       <Route exact path={path.roomProfilePattern}>
         <HotelManagerGuard>

@@ -245,6 +245,7 @@ public class BookingSerImpl implements BookingSer {
         UserEntity user = userRepository.findById(ownerId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        
         List<Integer> hotelIds = hotelRepository.findAllByOwner_UserId(user.getUserId())
                 .stream().map(Hotel::getHotelId).toList();
         Page<Booking> bookings = bookingRepository.findAllByHotelIds(hotelIds, pageable);

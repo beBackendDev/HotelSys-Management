@@ -242,8 +242,9 @@ public class UserCtrl {
     public ResponseEntity<?> createReview(@RequestBody HotelReviewDTO reviewDTO) {
         reviewSer.createReview(reviewDTO);
         Map<String, Object> response = new HashMap<>();
+        response.put("hotel Name", reviewDTO.getHotelName());
         response.put("hotel id", reviewDTO.getHotelId());
-        response.put("user id", reviewDTO.getUserId());
+        response.put("user name", reviewDTO.getFullName());
         response.put("rating point", reviewDTO.getRatingPoint());
         response.put("created", reviewDTO.getCreatedAt());
         response.put("comment", reviewDTO.getComment());

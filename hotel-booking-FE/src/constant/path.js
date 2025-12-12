@@ -37,6 +37,8 @@ class Path {
     this.bookingManagement = this.dashboard + "/booking-management";
     this.bookingDetailAdmin = this.dashboard + "/booking-detail/:bookingId";
     this.paymentManagement = this.dashboard + "/payment-management";
+    this.reviewManagement = this.dashboard + "/review-management";
+
     this.bookingDetailAdminPath = (bookingId) => this.dashboard + `/booking-detail/${bookingId}`; // thực hiện sử dụng tham số userId để truyền vào path
     this.paymentDetailAdmin = this.dashboard + "/payment-detail/:paymentId";
     this.paymentDetailAdminPath = (paymentId) => this.dashboard + `/payment-detail/${paymentId}`; // thực hiện sử dụng tham số userId để truyền vào path

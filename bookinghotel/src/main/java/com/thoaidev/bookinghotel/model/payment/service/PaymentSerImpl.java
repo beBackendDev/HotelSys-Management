@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
 import com.thoaidev.bookinghotel.model.enums.BookingStatus;
 import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
+import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
 import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
@@ -29,10 +31,16 @@ import com.thoaidev.bookinghotel.model.payment.mapper.PaymentMapper;
 import com.thoaidev.bookinghotel.model.payment.repository.PaymentRepository;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
 import com.thoaidev.bookinghotel.model.room.repository.RoomRepository;
+import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
+import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
 
 @Service
 public class PaymentSerImpl implements PaymentService {
 
+    @Autowired
+    private HotelRepository hotelRepository;
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private PaymentRepository paymentRepo;
     @Autowired
@@ -112,6 +120,26 @@ public class PaymentSerImpl implements PaymentService {
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Payment> payments = paymentRepo.findAll(pageable);
 
+        List<PaymentDto> content = paymentMapper.toDTOList(payments.getContent());
+
+        PaymentResponse paymentResponse = new PaymentResponse();
+        paymentResponse.setContent(content);
+        paymentResponse.setPageNo(payments.getNumber());
+        paymentResponse.setPageSize(payments.getSize());
+        paymentResponse.setTotalElements(payments.getTotalElements());
+        paymentResponse.setTotalPage(payments.getTotalPages());
+        paymentResponse.setLast(payments.isLast());
+
+        return paymentResponse;
+    }
+
+    @Override
+    public PaymentResponse getPaymentByOwner(Integer ownerId, int pageNo, int pageSize) {
+        UserEntity user = userRepository.findById(ownerId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1;
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+
+        Page<Payment> payments = paymentRepo.findAllPaymentsForOwner(user.getUserId(), pageable);
         List<PaymentDto> content = paymentMapper.toDTOList(payments.getContent());
 
         PaymentResponse paymentResponse = new PaymentResponse();

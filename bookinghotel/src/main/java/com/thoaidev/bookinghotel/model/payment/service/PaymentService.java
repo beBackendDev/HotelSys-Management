@@ -9,4 +9,5 @@ public interface PaymentService {
     public int payByCash (PaymentInitRequest paymentRq);
     public PaymentDto getPaymentById(Integer id);
     public PaymentResponse getAllPayments(int pageNo, int pageSize);
+    public PaymentResponse getPaymentByOwner(Integer ownerId, int pageNo, int pageSize);
 }

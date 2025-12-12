@@ -20,12 +20,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
+import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
+import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
 import com.thoaidev.bookinghotel.model.payment.service.PaymentService;
+import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
 import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
@@ -167,7 +169,44 @@ public class OwnerCtrl {
         return new ResponseEntity<>(bookingService.getBookingInDay(user.getId(), date, pageNo, pageSize), HttpStatus.OK);
     }
 
-    
-//RATING
-//REVIEW
+//------------------- PAYMENT -------------------   
+    //Lấy toàn bộ danh sách Payment
+    @GetMapping("/owner/hotels/payment-management")
+    public ResponseEntity<?> getAllPayment(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @AuthenticationPrincipal CustomUserDetail user) {
+        PaymentResponse paymentResponse = paymentService.getPaymentByOwner(user.getId(), pageNo, pageSize);
+
+        return new ResponseEntity<>(paymentResponse, HttpStatus.OK);
+    }
+
+    //Lấy chi tiết payment
+    @GetMapping("/owner/hotels/payment/{id}")
+    public ResponseEntity<?> getMethodName(
+            @PathVariable("id") Integer paymentId) {
+
+        PaymentDto payment = paymentService.getPaymentById(paymentId);
+        return new ResponseEntity<>(payment, HttpStatus.OK);
+    }
+//------------------- REVIEW -------------------   
+    // Danh sách đánh giá Pagination
+
+    @GetMapping("/owner/reviews-list")
+    public ResponseEntity<ReviewResponse> reviews_list_user(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @AuthenticationPrincipal CustomUserDetail user
+    ) {
+        return new ResponseEntity<>(reviewSer.getReviewForOwner(user.getId(), pageNo, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/owner/user-review/{id}/reviews-list")
+    public ResponseEntity<ReviewResponse> reviews_list_user(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @PathVariable Integer id
+    ) {
+        return new ResponseEntity<>(reviewSer.getReviewsByUserId(id, pageNo, pageSize), HttpStatus.OK);
+    }
 }

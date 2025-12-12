@@ -17,6 +17,18 @@ const PaymentManagement = () => {
     const [loading, setLoading] = useState(false);
     const [payments, setPayments] = useState([]);
     const token = localStorage.getItem("accessToken");
+    const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
+    const role = decodedToken.role; // ADMIN, OWNER, USER
+    const getUrlByRole = (role) => {
+        switch (role) {
+            case "ADMIN":
+                return "admin";
+            case "OWNER":
+                return "owner";
+            default:
+                return "user"; // USER or guest
+        }
+    };
 
     useEffect(() => {
         fetchPayments();
@@ -26,7 +38,7 @@ const PaymentManagement = () => {
         setLoading(true);
         try {
             const res = await fetch(
-                `http://localhost:8080/api/dashboard/admin/hotels/payment-management`,
+                `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/payment-management`,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -43,7 +55,7 @@ const PaymentManagement = () => {
                 paymentList.map(async (payment) => {
                     if (!payment?.bookingId) return payment;
                     const bookingRes = await fetch(
-                        `http://localhost:8080/api/dashboard/admin/hotels/booking/${payment.bookingId}`,
+                        `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/booking/${payment.bookingId}`,
                         {
                             headers: {
                                 "Authorization": `Bearer ${token}`,
@@ -97,11 +109,7 @@ const PaymentManagement = () => {
             dataIndex: ["booking", "guestFullName"],
             key: "guestFullName",
         },
-        {
-            title: "Số điện thoại",
-            dataIndex: ["booking", "guestPhone"],
-            key: "guestPhone",
-        },
+
         {
             title: "Tổng tiền",
             dataIndex: "paymentAmount",

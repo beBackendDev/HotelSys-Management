@@ -25,6 +25,15 @@ public interface ReviewRepository extends JpaRepository<HotelReview, Integer> {
 
     Page<HotelReview> findByUser_UserId(Integer userId, Pageable pageable);
 
+    //select from hotelreview and JOIN hotel -> compare h.owner.userId with ownerId
+    @Query("""
+                SELECT r FROM HotelReview r
+                JOIN r.hotel h
+                WHERE h.owner.userId = :ownerId         
+                ORDER BY r.createdAt DESC 
+        """)
+    Page<HotelReview> findReviewForOwner(Integer ownerId, Pageable pageable);
+
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END "
             + "FROM HotelReview r "
             + "WHERE r.user.userId = :userId "

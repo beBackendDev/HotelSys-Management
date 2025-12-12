@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
@@ -21,6 +23,7 @@ import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
 import com.thoaidev.bookinghotel.model.review.mapper.ReviewMapper;
 import com.thoaidev.bookinghotel.model.review.repo.ReviewRepository;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
+import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
 
 import lombok.RequiredArgsConstructor;
@@ -29,9 +32,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewSerImpl implements ReviewSer {
 
+    @Autowired
     private final ReviewRepository reviewRepository;
+    @Autowired
+
     private final BookingRepo bookingRepo;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private final HotelRepository hotelRepository;
+
+    @Autowired
     private final ReviewMapper reviewMapper;
 
     @Override
@@ -99,7 +112,7 @@ public class ReviewSerImpl implements ReviewSer {
     @Override
     public ReviewResponse getReviewsByHotelId(Integer hotelId, int pageNo, int pageSize) {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
-        System.out.println("pageNo: "+ pageIndex + ""  + pageNo);
+        System.out.println("pageNo: " + pageIndex + "" + pageNo);
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<HotelReview> reviews = reviewRepository.findByHotel_HotelId(hotelId, pageable);
 
@@ -153,4 +166,25 @@ public class ReviewSerImpl implements ReviewSer {
 
         return reviewResponse;
     }
+
+    @Override
+    public ReviewResponse getReviewForOwner(Integer ownerId, int pageNo, int pageSize) {
+        UserEntity user = userRepository.findById(ownerId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        Page<HotelReview> reviews = reviewRepository.findReviewForOwner(user.getUserId(), pageable);
+
+        List<HotelReviewDTO> content = reviewMapper.toDTOList(reviews.getContent());
+
+        ReviewResponse reviewResponse = new ReviewResponse();
+        reviewResponse.setContent(content);
+        reviewResponse.setPageNo(reviews.getNumber());
+        reviewResponse.setPageSize(reviews.getSize());
+        reviewResponse.setTotalElements(reviews.getTotalElements());
+        reviewResponse.setTotalPage(reviews.getTotalPages());
+        reviewResponse.setLast(reviews.isLast());
+
+        return reviewResponse;
+    }
+
 }

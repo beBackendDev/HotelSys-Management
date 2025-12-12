@@ -22,11 +22,11 @@ const BookingManagement = () => {
     const getUrlByRole = (role) => {
         switch (role) {
             case "ADMIN":
-                return "admin/hotels";
+                return "admin";
             case "OWNER":
-                return "owner/hotel-list";
+                return "owner";
             default:
-                return "user/hotels"; // USER or guest
+                return "user"; // USER or guest
         }
     };
     useEffect(() => {
@@ -55,7 +55,7 @@ const BookingManagement = () => {
                 bookingList.map(async (booking) => {
                     if (!booking.bookingId) return { ...booking, hotel: null };
 
-                    const hotelRes = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${booking?.hotelId}`,
+                    const hotelRes = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${booking?.hotelId}`,
                         {
                             headers: {
                                 "Authorization": `Bearer ${token}`,
@@ -64,7 +64,7 @@ const BookingManagement = () => {
                     );
                     const hotelData = await hotelRes.json();
 
-                    const roomRes = await fetch(`http://localhost:8080/api/dashboard/admin/hotels/${booking?.hotelId}/rooms/${booking?.roomId}`,
+                    const roomRes = await fetch(`http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${booking?.hotelId}/rooms/${booking?.roomId}`,
                         {
                             headers: {
                                 "Authorization": `Bearer ${token}`,
@@ -106,42 +106,29 @@ const BookingManagement = () => {
             dataIndex: "guestFullName",
             key: "guestFullName",
         },
+    
         {
-            title: "Điện thoại",
-            dataIndex: "guestPhone",
-            key: "guestPhone",
-        },
-        {
-            title: "Email",
-            dataIndex: "guestEmail",
-            key: "guestEmail",
-        },
-        {
-            title: "CCCD",
-            dataIndex: "guestCccd",
-            key: "guestCccd",
-        },
-        {
-            title: "Hotel ID",
+            title: "Tên khách sạn",
             dataIndex: "hotel",
             key: "hotelId",
             render: (id) => <span>{id?.hotelName}</span>,
         },
         {
-            title: "Room ID",
+            title: "Tên phòng",
             dataIndex: "room",
             key: "roomId",
             render: (id) => <span >{id.roomName}</span>,
         },
         {
-            title: "Check-in",
+            title: "Ngày Check-in",
             dataIndex: "checkinDate",
             key: "checkinDate",
         },
         {
-            title: "Check-out",
+            title: "Ngày Check-out",
             dataIndex: "checkoutDate",
             key: "checkoutDate",
+            render: (date) => date ? new Date(date).toLocaleString() : "-",
         },
         {
             title: "Tổng tiền",
