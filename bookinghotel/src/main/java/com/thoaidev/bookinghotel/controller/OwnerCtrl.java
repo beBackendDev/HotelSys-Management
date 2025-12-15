@@ -31,8 +31,9 @@ import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
 import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
-import com.thoaidev.bookinghotel.model.user.service.UserService;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
+import com.thoaidev.bookinghotel.summary.owner.dto.DashboardSummaryDTO;
+import com.thoaidev.bookinghotel.summary.owner.service.DashboardService;
 
 import lombok.AllArgsConstructor;
 
@@ -47,7 +48,8 @@ public class OwnerCtrl {
     @Autowired
     private final RoomService roomService;
     @Autowired
-    private final UserService userService;
+    private final DashboardService dashboardService;
+
     @Autowired
     private final BookingSer bookingService;
     @Autowired
@@ -55,6 +57,62 @@ public class OwnerCtrl {
     @Autowired
     private final PaymentService paymentService;
 
+//SUMMARY
+// GET /owner/summary (x)
+// GET /owner/revenue?type=monthly&year=2025
+// GET /owner/occupancy
+// GET /owner/top-rooms
+//Xem tổng quan các thông tin tổng quan (tổng booking, doanh thu, tỉ lệ đặt phòng..)
+    @GetMapping("/owner/summary")
+    public DashboardSummaryDTO getSummary(
+            @AuthenticationPrincipal CustomUserDetail owner,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
+    ) {
+        return dashboardService.getSummary(owner.getId(), month, year);
+    }
+//Xem các booking đang hoạt động 
+// GET /owner/recent-bookings
+
+    @GetMapping("/owner/recent-bookings")
+    public ResponseEntity<?> RecentBookings(
+            @AuthenticationPrincipal CustomUserDetail owner,
+            @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
+    ) {
+        Integer ownerId = owner.getId();
+
+        return new ResponseEntity<>(bookingService.getRecentBookings(ownerId, pageNo, pageSize), HttpStatus.OK);
+    }
+//Xem trendingRooms
+    // GET /owner/recent-bookings
+
+    @GetMapping("/owner/trending-rooms")
+    public ResponseEntity<?> getTrendingRooms(
+            @AuthenticationPrincipal CustomUserDetail owner,
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "limit", defaultValue= "5", required = false) int limit
+
+        ) {
+        Integer ownerId = owner.getId();
+
+        return new ResponseEntity<>(dashboardService.getTrendingRooms(ownerId, month, year, limit), HttpStatus.OK);
+    }
+//Xem danh sách phòng được đặt nhiều nhất
+
+    @GetMapping("/owner/top-rooms")
+    public ResponseEntity<?> getTopRoom(
+            @AuthenticationPrincipal CustomUserDetail owner,
+            @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
+    ) {
+        Integer ownerId = owner.getId();
+
+        return new ResponseEntity<>(bookingService.getRecentBookings(ownerId, pageNo, pageSize), HttpStatus.OK);
+    }
+
+//Xem các bookin
 //----HOTEL
 //Lấy toàn bộ danh sách khách sạn của chủ sở hữu theo UserId
     @GetMapping("/owner/hotel-list")

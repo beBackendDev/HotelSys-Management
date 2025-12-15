@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -13,12 +15,27 @@ import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 @Repository
 public interface HotelRepository extends JpaRepository<Hotel, Integer>, JpaSpecificationExecutor<Hotel> {
 
-    public List<Hotel> findByHotelAddressContainingIgnoreCase (String location);
+    public List<Hotel> findByHotelAddressContainingIgnoreCase(String location);
 
-    public List<Hotel> findByHotelNameContainingIgnoreCase (String name);
+    public List<Hotel> findByHotelNameContainingIgnoreCase(String name);
 
-    public Page<Hotel> findByOwner_UserId (Integer ownerId, Pageable pageable);
-    
-    public List<Hotel> findAllByOwner_UserId (Integer ownerId);
+    @Query("""
+        SELECT h FROM Hotel h
+        WHERE h.owner.userId = :ownerId
+        ORDER BY h.hotelCreatedAt DESC
+    """)
+    public Page<Hotel> findByOwner_UserId(
+            @Param("ownerId") Integer ownerId,
+            Pageable pageable);
+
+    public List<Hotel> findAllByOwner_UserId(Integer ownerId);
+    //DASHBOARD tính tổng số khách sạn của Owner
+
+    @Query("""
+        SELECT COUNT(h.hotelId)
+        FROM Hotel h
+        WHERE h.owner.userId = :ownerId
+""")
+    Integer countHotels(Integer ownerId);
 
 }

@@ -88,10 +88,13 @@ public class PaymentSerImpl implements PaymentService {
                 .multiply(new BigDecimal("100")) // nhân 100
                 .setScale(0, RoundingMode.HALF_UP) // làm tròn về số nguyên
                 .toPlainString(); // chuyển sang String không có dấu phẩy
+
+        BigDecimal actualAmount = new BigDecimal(transactionAmount)
+        .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
         Payment payment = Payment.builder()
                 .booking(booking)
                 .transactionId(transactionId)
-                .paymentAmount(new BigDecimal(transactionAmount))
+                .paymentAmount(actualAmount)
                 .status(PaymentStatus.SUCCESS) // always success with Cash Method
                 .paymentMethod("CASH")
                 .createdAt(LocalDateTime.now())

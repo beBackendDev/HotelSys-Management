@@ -12,9 +12,12 @@ import org.springframework.data.repository.query.Param;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
+import com.thoaidev.bookinghotel.summary.owner.TrendingRoomProjection;
+import com.thoaidev.bookinghotel.summary.owner.dto.DashboardTrendingRoomDTO;
 
 public interface BookingRepo extends JpaRepository<Booking, Integer> {
 
+    //Kiểm tra Booking theo ngày checkin
     @Query("""
     SELECT b FROM Booking b
     JOIN b.room r
@@ -33,7 +36,11 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     //Tìm kiếm booking dựa trên userId
     Page<Booking> findByUser(UserEntity user, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.room.hotel.hotelId IN :hotelIds")
+    @Query("""
+        SELECT b FROM Booking b 
+        WHERE b.room.hotel.hotelId IN :hotelIds
+        ORDER BY b.checkinDate DESC
+""")
     Page<Booking> findAllByHotelIds(List<Integer> hotelIds, Pageable pageable);
 
     @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.room.roomId  = :roomId AND b.checkinDate >= :today AND b.status = 'PAID' ")
@@ -76,4 +83,111 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
 
     @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkinDate) >= :today")
     List<Booking> findBookingsToday(@Param("today") LocalDate today);
+
+//DASHBOARD tính tổng booking
+    @Query("""
+        SELECT COUNT(b.bookingId)
+        FROM Booking b
+        JOIN b.room r
+        JOIN r.hotel h
+        WHERE h.owner.userId = :ownerId
+        AND MONTH(b.createdAt) = :month
+        AND YEAR(b.createdAt) = :year
+""")
+    Integer countBookings(Integer ownerId, Integer month, Integer year);
+
+    @Query("""
+        SELECT COUNT(b.bookingId)
+        FROM Booking b
+        JOIN b.room r
+        JOIN r.hotel h
+        WHERE h.owner.userId = :ownerId
+        AND r.roomId = :roomId
+        AND MONTH(b.createdAt) = :month
+        AND YEAR(b.createdAt) = :year
+""")
+    Integer countBookings(Integer ownerId, Integer roomId, Integer month, Integer year);
+//DASHBOARD tính tổng booking bị hủy
+
+    @Query("""
+        SELECT COUNT(b.bookingId)
+        FROM Booking b
+        JOIN b.room r
+        JOIN r.hotel h
+        WHERE h.owner.userId = :ownerId
+        AND b.status = 'CANCELLED'
+        AND MONTH(b.createdAt) = :month
+        AND YEAR(b.createdAt) = :year
+""")
+    Integer countCancelledBookings(Integer ownerId, Integer month, Integer year);
+
+//DASHBOARD tính tổng số ngày đã được book
+    @Query("""
+        SELECT COALESCE(SUM(DATEDIFF(b.checkoutDate, b.checkinDate)), 0)
+        FROM Booking b
+        JOIN b.room r
+        JOIN r.hotel h
+        WHERE h.owner.userId = :ownerId
+        AND b.status IN ('PAID', 'COMPLETED')
+        AND MONTH(b.checkinDate) = :month
+        AND YEAR(b.checkinDate) = :year
+""")
+    int getBookedRoomDays(Integer ownerId, Integer month, Integer year);
+
+    @Query("""
+        SELECT COALESCE(SUM(DATEDIFF(b.checkoutDate, b.checkinDate)), 0)
+        FROM Booking b
+        JOIN b.room r
+        JOIN r.hotel h
+        WHERE h.owner.userId = :ownerId
+        AND r.roomId = :roomId
+        AND b.status IN ('PAID', 'COMPLETED')
+        AND MONTH(b.checkinDate) = :month
+        AND YEAR(b.checkinDate) = :year
+""")
+    int getBookedRoomDays(Integer ownerId, Integer roomId, Integer month, Integer year);
+//DASHBOARD thực hiện tính các booking đang hoạt động
+
+    @Query("""
+        SELECT b FROM Booking b
+        JOIN b.room r
+        JOIN r.hotel h
+        WHERE h.owner.userId = :ownerId
+        AND b.checkinDate <= :today
+        AND b.checkoutDate >= :today
+    """)
+    Page<Booking> findRecentBookings(
+            @Param("ownerId") Integer ownerId,
+            @Param("today") LocalDate today,
+            Pageable pageable
+    );
+
+//DASHBOARD timf trending room để tao BXH
+//Sử dụng GroupBy để thực hiện nhóm theo từng attribute cụ thể và dùng hàm COUNT để tính tổng booking
+//Sử dụng ORDER BY thực hiện sắp xếp
+@Query("""
+    SELECT
+        r.roomId AS roomId,
+        r.roomName AS roomName,
+        h.hotelName AS hotelName,
+        COUNT(b) AS bookingCount,
+        SUM(FUNCTION('datediff', b.checkoutDate, b.checkinDate)) AS bookedNights,
+        SUM(b.totalPrice) AS revenue
+    FROM Booking b
+    JOIN b.room r
+    JOIN r.hotel h
+    WHERE h.owner.userId = :ownerId
+      AND b.status IN ('PAID', 'COMPLETED')
+      AND MONTH(b.checkinDate) = :month
+      AND YEAR(b.checkinDate) = :year
+    GROUP BY r.roomId, r.roomName, h.hotelName
+    ORDER BY COUNT(b) DESC
+""")
+    List<TrendingRoomProjection> findTrendingRoom(
+            @Param("ownerId") Integer ownerId,
+            @Param("month") Integer month,
+            @Param("year") Integer year,
+            Pageable pageable
+    );
+
 }

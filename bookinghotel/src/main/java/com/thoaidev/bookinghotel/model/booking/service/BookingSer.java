@@ -14,6 +14,8 @@ public interface BookingSer {
 
     public BookingDTO getBookingById(Integer id);
 
+    public BookingResponse getRecentBookings(Integer ownerId, int pageNo, int pageSize);
+
     public BookingResponse getBookingInDay(Integer ownerId, LocalDate day, int pageNo, int pageSize);
 
     public List<BookingDTO> getBookingByRoomId(Integer id, LocalDate today);

@@ -245,7 +245,7 @@ public class BookingSerImpl implements BookingSer {
         UserEntity user = userRepository.findById(ownerId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
-        
+
         List<Integer> hotelIds = hotelRepository.findAllByOwner_UserId(user.getUserId())
                 .stream().map(Hotel::getHotelId).toList();
         Page<Booking> bookings = bookingRepository.findAllByHotelIds(hotelIds, pageable);
@@ -261,4 +261,24 @@ public class BookingSerImpl implements BookingSer {
         return bookingResponse;
     }
 
+    @Override
+    public BookingResponse getRecentBookings(Integer ownerId, int pageNo, int pageSize) {
+        UserEntity user = userRepository.findById(ownerId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        LocalDate today = LocalDate.now();
+        // List<Integer> hotelIds = hotelRepository.findAllByOwner_UserId(user.getUserId())
+        //         .stream().map(Hotel::getHotelId).toList();
+        Page<Booking> bookings = bookingRepository.findRecentBookings(user.getUserId(), today, pageable);
+        List<BookingDTO> content = bookingMapper.toDTOList(bookings.getContent());
+
+        BookingResponse bookingResponse = new BookingResponse();
+        bookingResponse.setContent(content);
+        bookingResponse.setPageNo(bookings.getNumber());
+        bookingResponse.setPageSize(bookings.getSize());
+        bookingResponse.setTotalElements(bookings.getTotalElements());
+        bookingResponse.setTotalPage(bookings.getTotalPages());
+        bookingResponse.setLast(bookings.isLast());
+        return bookingResponse;
+    }
 }
