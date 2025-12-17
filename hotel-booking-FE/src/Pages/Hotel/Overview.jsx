@@ -6,6 +6,8 @@ import OverviewCard from "../../components/OverviewCard/OverviewCard";
 import DashboardLayout from "../../core/layout/Dashboard";
 import { formatMoney } from "../../utils/helper";
 import ChartView from "../ChartView";
+import TrendingRoomCard from "../../Pages/Hotel/TrendingRoomCard";
+
 
 const Overview = () => {
   const profile = useSelector((state) => state.auth.profile);
@@ -23,6 +25,7 @@ const Overview = () => {
   });
 
   const [stats, setStats] = useState({});
+  const [trendingRooms, setTrendingRooms] = useState([]);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [selectedHotelId, setSelectedHotelId] = useState("all");
   const [loading, setLoading] = useState(false);
@@ -75,6 +78,38 @@ const Overview = () => {
 
     fetchSummary();
   }, [month, effectiveHotelId]);
+useEffect(() => {
+  const fetchTrendingRooms = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      const query = new URLSearchParams({
+        month,
+        ...(effectiveHotelId && { hotelId: effectiveHotelId }),
+        limit: 5,
+      }).toString();
+
+      const response = await fetch(
+        `http://localhost:8080/api/dashboard/owner/trending-rooms?${query}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error();
+
+      const data = await response.json();
+      setTrendingRooms(data);
+
+    } catch (e) {
+      console.error("Fetch trending rooms failed", e);
+    }
+  };
+
+  fetchTrendingRooms();
+}, [month, effectiveHotelId]);
 
   return (
     <DashboardLayout>
@@ -160,9 +195,38 @@ const Overview = () => {
                 </div>
               </div>
             </Col>
+
+            <Col xs={24} lg={16}>
+    <ChartView
+      stats={stats}
+      month={month}
+      hotelId={effectiveHotelId}
+    />
+  </Col>
+
+  {/* TRENDING ROOMS */}
+  <Col xs={24} lg={8}>
+    <Typography.Title level={5}>
+      🔥 Phòng được đặt nhiều nhất
+    </Typography.Title>
+
+    {trendingRooms.length === 0 && (
+      <Typography.Text type="secondary">
+        Chưa có dữ liệu
+      </Typography.Text>
+    )}
+
+    {trendingRooms.map((room) => (
+      <TrendingRoomCard
+        key={room.roomId}
+        room={room}
+      />
+    ))}
+  </Col>
           </Row>
 
           {/* CHART */}
+          
           <div className="mt-8">
             <ChartView
               stats={stats}

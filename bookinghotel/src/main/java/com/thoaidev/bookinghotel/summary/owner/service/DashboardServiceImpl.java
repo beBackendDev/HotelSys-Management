@@ -28,7 +28,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final PaymentRepository paymentRepo;
     private final UserRepository userRepository;
     private final RoomRepository roomRepo;
-
+//getSummary 
     @Override
     public DashboardSummaryDTO getSummary(Integer ownerId, Integer month, Integer year) {
         LocalDate now = LocalDate.now();
@@ -58,7 +58,7 @@ public class DashboardServiceImpl implements DashboardService {
                 cancelled
         );
     }
-
+// getTrendingRooms
     @Override
     public List<DashboardTrendingRoomDTO> getTrendingRooms(
             Integer ownerId,
@@ -98,7 +98,6 @@ public class DashboardServiceImpl implements DashboardService {
             return dto;
         }).toList();
     }
-// getTrendingRooms
 // getRevenueChart
 // getOccupancyChart
 

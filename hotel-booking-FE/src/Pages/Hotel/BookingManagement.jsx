@@ -21,6 +21,12 @@ const { Title } = Typography;
 const BookingManagement = () => {
     const history = useHistory();
     const [loading, setLoading] = useState(false);
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize] = useState(10);
+    const [hasMore, setHasMore] = useState(true);
+    const [filterMode, setFilterMode] = useState("ALL");
+    // ALL | STAYING
+
     const [bookings, setBookings] = useState([]);
     const [mode, setMode] = useState("ALL"); // ALL | DATE
     const [selectedDate, setSelectedDate] = useState(null);
@@ -99,6 +105,11 @@ const BookingManagement = () => {
 
                 url = `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/booking-today?date=${dayjs(selectedDate).format("YYYY-MM-DD")}`;
             }
+            if (mode === "STAYING") {
+                console.log("mode ALL");
+
+                url = `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/recent-bookings`;
+            }
             const res = await fetch(
                 url,
                 {
@@ -112,34 +123,65 @@ const BookingManagement = () => {
             if (!res.ok) throw new Error("Failed to fetch bookings");
 
             const data = await res.json();
+            console.log("data:", data);
+
             const bookingList = data?.content || [];
 
-            const updateBookings = await Promise.all(
-                bookingList.map(async (booking) => {
-                    const hotelRes = await fetch(
-                        `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${booking.hotelId}`,
-                        { headers: { Authorization: `Bearer ${token}` } }
-                    );
 
-                    const roomRes = await fetch(
-                        `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${booking.hotelId}/rooms/${booking.roomId}`,
-                        { headers: { Authorization: `Bearer ${token}` } }
-                    );
-
-                    const hotel = await hotelRes.json();
-                    const room = await roomRes.json();
-
-                    return { ...booking, hotel, room };
-                })
-            );
-
-            setBookings(updateBookings);
+            setBookings(bookingList);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
     };
+    // useEffect(() => {
+    //     fetchRecentBookings(true);
+    // }, [filterMode]);
+
+    const fetchRecentBookings = async (reset = false) => {
+        if (loading) return;
+
+        setLoading(true);
+        try {
+            const res = await fetch(
+                `http://localhost:8080/api/dashboard/owner/recent-bookings?pageNo=${reset ? 1 : pageNo}&pageSize=${pageSize}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!res.ok) throw new Error();
+
+            const data = await res.json();
+
+            let newBookings = data?.content;
+
+            // 🔥 FILTER: booking đang ở
+            if (filterMode === "STAYING") {
+                const today = dayjs();
+                newBookings = newBookings.filter(
+                    (b) =>
+                        dayjs(b.checkinDate).isSameOrBefore(today, "day") &&
+                        dayjs(b.checkoutDate).isSameOrAfter(today, "day")
+                );
+            }
+
+            setBookings((prev) =>
+                reset ? newBookings : [...prev, ...newBookings]
+            );
+
+            setHasMore(!data.last);
+            setPageNo((prev) => prev + 1);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const handleViewDetail = (bookingId) => {
         history.push(`/dashboard/booking-detail/${bookingId}`);
@@ -163,12 +205,12 @@ const BookingManagement = () => {
         {
             title: "Khách sạn",
             key: "hotel",
-            render: (_, record) => record.hotel?.hotelName || "-",
+            render: (_, record) => record?.hotelName || "-",
         },
         {
             title: "Phòng",
             key: "room",
-            render: (_, record) => record.room?.roomName || "-",
+            render: (_, record) => record?.roomName || "-",
         },
         {
             title: "Check-in",
@@ -197,7 +239,7 @@ const BookingManagement = () => {
             render: (status) => (
                 <Tag
                     color={
-                        status === "PAID" || status === "CONFIRMED"
+                        status === "PAID" || status === "COMPLETED"
                             ? "green"
                             : status === "CANCELLED"
                                 ? "volcano"
@@ -233,53 +275,63 @@ const BookingManagement = () => {
         <DashboardLayout>
             <div style={{ padding: 24, background: "#fff", minHeight: "100vh" }}>
                 <Space
-    style={{ width: "100%", marginBottom: 16 }}
-    align="center"
-    justify="space-between"
->
-    <Title level={4} style={{ margin: 0 }}>
-        Quản lý Booking
-    </Title>
+                    style={{ width: "100%", marginBottom: 16 }}
+                    align="center"
+                    justify="space-between"
+                >
+                    <Title level={4} style={{ margin: 0 }}>
+                        Quản lý Booking
+                    </Title>
 
-    <Space size="middle">
-        {/* Notification */}
-        <Dropdown
-            overlay={notificationMenu}
-            trigger={["click"]}
-            placement="bottomRight"
-        >
-            <Badge count={unreadCount}>
-                <BellOutlined
-                    style={{
-                        fontSize: 20,
-                        cursor: "pointer",
-                        color: "#1677ff",
-                    }}
-                />
-            </Badge>
-        </Dropdown>
+                    <Space size="middle">
+                        {/* Notification */}
+                        <Dropdown
+                            overlay={notificationMenu}
+                            trigger={["click"]}
+                            placement="bottomRight"
+                        >
+                            <Badge count={unreadCount}>
+                                <BellOutlined
+                                    style={{
+                                        fontSize: 20,
+                                        cursor: "pointer",
+                                        color: "#1677ff",
+                                    }}
+                                />
+                            </Badge>
+                        </Dropdown>
 
-        {/* Filter by date */}
-        <DatePicker
-            placeholder="Chọn ngày"
-            format="DD/MM/YYYY"
-            onChange={(date) => {
-                setMode("DATE");
-                setSelectedDate(date);
-            }}
-        />
+                        {/* Filter by date */}
+                        <DatePicker
+                            placeholder="Chọn ngày"
+                            format="DD/MM/YYYY"
+                            onChange={(date) => {
+                                setMode("DATE");
+                                setSelectedDate(date);
+                            }}
+                        />
 
-        <Button
-            icon={<CalendarOutlined />}
-            onClick={() => {
-                setMode("ALL");
-                setSelectedDate(null);
-            }}
-        >
-            Tất cả
-        </Button>
-    </Space>
-</Space>
+                        <Button
+                            icon={<CalendarOutlined />}
+                            onClick={() => {
+                                setMode("ALL");
+                                setSelectedDate(null);
+                            }}
+                        >
+                            Tất cả
+                        </Button>
+                        <Button
+                            type={filterMode === "STAYING" ? "primary" : "default"}
+                            onClick={() => {
+                                setMode("STAYING");
+                                setSelectedDate(null);
+                            }}
+                        >
+                            Đang ở
+                        </Button>
+                    </Space>
+
+                </Space>
 
 
                 <Table

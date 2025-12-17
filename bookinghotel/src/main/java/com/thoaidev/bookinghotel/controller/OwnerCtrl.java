@@ -61,7 +61,10 @@ public class OwnerCtrl {
 // GET /owner/summary (x)
 // GET /owner/revenue?type=monthly&year=2025
 // GET /owner/occupancy
-// GET /owner/top-rooms
+// GET /owner/top-rooms (x)
+
+
+// GET /owner/summary
 //Xem tổng quan các thông tin tổng quan (tổng booking, doanh thu, tỉ lệ đặt phòng..)
     @GetMapping("/owner/summary")
     public DashboardSummaryDTO getSummary(
@@ -99,19 +102,6 @@ public class OwnerCtrl {
 
         return new ResponseEntity<>(dashboardService.getTrendingRooms(ownerId, month, year, limit), HttpStatus.OK);
     }
-//Xem danh sách phòng được đặt nhiều nhất
-
-    @GetMapping("/owner/top-rooms")
-    public ResponseEntity<?> getTopRoom(
-            @AuthenticationPrincipal CustomUserDetail owner,
-            @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
-    ) {
-        Integer ownerId = owner.getId();
-
-        return new ResponseEntity<>(bookingService.getRecentBookings(ownerId, pageNo, pageSize), HttpStatus.OK);
-    }
-
 //Xem các bookin
 //----HOTEL
 //Lấy toàn bộ danh sách khách sạn của chủ sở hữu theo UserId
