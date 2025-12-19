@@ -23,6 +23,7 @@ import com.thoaidev.bookinghotel.model.enums.BookingStatus;
 import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
+import com.thoaidev.bookinghotel.model.notification.service.NotificationService;
 import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
@@ -40,6 +41,8 @@ public class PaymentSerImpl implements PaymentService {
     @Autowired
     private HotelRepository hotelRepository;
     @Autowired
+    private NotificationService notificationService;
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private PaymentRepository paymentRepo;
@@ -52,7 +55,7 @@ public class PaymentSerImpl implements PaymentService {
 
     //Thực hiện kiểm tra booking trong ngày
     @Override
-    @Scheduled(fixedRate = 6000)//40p/time
+    @Scheduled(fixedRate = 600000)//40p/time
     @Transactional
     public void checkDateBooking() {
         int time = 1;
@@ -83,7 +86,7 @@ public class PaymentSerImpl implements PaymentService {
 
         Room room = roomRepository.findById(booking.getRoom().getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
-
+        Integer ownerId = booking.getHotel().getOwner().getUserId();
         String transactionAmount = booking.getTotalPrice()
                 .multiply(new BigDecimal("100")) // nhân 100
                 .setScale(0, RoundingMode.HALF_UP) // làm tròn về số nguyên
@@ -100,6 +103,9 @@ public class PaymentSerImpl implements PaymentService {
                 .createdAt(LocalDateTime.now())
                 .build();
         booking.setStatus(BookingStatus.PAID);
+
+        //send notification
+        notificationService.notifyOwnerNewBooking(ownerId, booking);
         // if (checkDateBooking(booking.getCheckinDate()) == 1) {
         //     room.setDateAvailable(booking.getCheckoutDate().plusDays(1));
         //     room.setRoomStatus(RoomStatus.BOOKED);

@@ -30,7 +30,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;//SU dung de xu li loi StackOverflowError khi entity tu dong goi ham toString giua cac moi quan he
 
 // //Sử dụng @Getter @Setter thay vì @Data bởi vì @Data có thể gây lỗi khi sử dụng JPA
@@ -38,7 +40,8 @@ import lombok.ToString;//SU dung de xu li loi StackOverflowError khi entity tu d
 @AllArgsConstructor
 @Entity
 @Table(name = "hotel")
-@Data
+@Getter
+@Setter
 //Sử dụng class Serializable để đánh dấu một class có thể được chuyển đổi (serialize) thành
 // một chuỗi byte và có thể khôi phục (deserialize) về đối tượng Java ban đầu.
 public class Hotel implements Serializable {

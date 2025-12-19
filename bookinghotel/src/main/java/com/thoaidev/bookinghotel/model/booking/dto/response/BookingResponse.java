@@ -7,7 +7,11 @@ import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @NoArgsConstructor
 public class BookingResponse {
     private List<BookingDTO> content;

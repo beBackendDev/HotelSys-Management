@@ -22,12 +22,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "booking")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Booking {
@@ -37,14 +40,17 @@ public class Booking {
     @Column(name = "booking_id")
     private Integer bookingId;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "room_id")
     private Room room;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
@@ -75,7 +81,7 @@ public class Booking {
 
     @Column(name = "guest_email")
     private String guestEmail;
-    
+
     @Column(name = "guest_cccd")
     private String guestCccd;
 

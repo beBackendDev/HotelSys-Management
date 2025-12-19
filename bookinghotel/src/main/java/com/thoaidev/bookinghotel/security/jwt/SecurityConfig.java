@@ -60,18 +60,22 @@ public class SecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers("/uploads/**").permitAll()
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/user/public/**").permitAll()
-                    .requestMatchers("/api/user/**").authenticated()
-                    .requestMatchers("/api/dashboard/admin/**").hasAuthority("ADMIN")
-                    .requestMatchers("/api/dashboard/owner/**").hasAuthority("OWNER")
-                    // .requestMatchers("/owner/**").hasAuthority("OWNER")
-                    // .requestMatchers("/user/**").hasAnyAuthority("USER", "ADMIN", "OWNER")
-                    .anyRequest().authenticated()
-                    // .anyRequest().permitAll()
-                    )
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
+                .requestMatchers(
+                        "/ws/**", // 🔥 BẮT BUỘC
+                        "/ws/info"
+                ).permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/user/public/**").permitAll()
+                .requestMatchers("/api/user/**").authenticated()
+                .requestMatchers("/api/dashboard/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/dashboard/owner/**").hasAuthority("OWNER")
+                // .requestMatchers("/owner/**").hasAuthority("OWNER")
+                // .requestMatchers("/user/**").hasAnyAuthority("USER", "ADMIN", "OWNER")
+                .anyRequest().authenticated()
+                // .anyRequest().permitAll()
+                )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();

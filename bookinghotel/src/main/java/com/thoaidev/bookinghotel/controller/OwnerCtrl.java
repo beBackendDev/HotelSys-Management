@@ -24,6 +24,11 @@ import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
+import com.thoaidev.bookinghotel.model.notification.dto.NotificationDTO;
+import com.thoaidev.bookinghotel.model.notification.entity.Notifications;
+import com.thoaidev.bookinghotel.model.notification.mapper.NotificationMapper;
+import com.thoaidev.bookinghotel.model.notification.repository.NotificationRepository;
+import com.thoaidev.bookinghotel.model.notification.service.NotificationService;
 import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
 import com.thoaidev.bookinghotel.model.payment.service.PaymentService;
@@ -46,10 +51,15 @@ public class OwnerCtrl {
     @Autowired
     private final HotelService hotelService;
     @Autowired
+    private final NotificationMapper notificationMapper;
+    @Autowired
+    private final NotificationService notificationService;
+    @Autowired
     private final RoomService roomService;
     @Autowired
     private final DashboardService dashboardService;
-
+    @Autowired
+    private final NotificationRepository repo;
     @Autowired
     private final BookingSer bookingService;
     @Autowired
@@ -62,8 +72,6 @@ public class OwnerCtrl {
 // GET /owner/revenue?type=monthly&year=2025
 // GET /owner/occupancy
 // GET /owner/top-rooms (x)
-
-
 // GET /owner/summary
 //Xem tổng quan các thông tin tổng quan (tổng booking, doanh thu, tỉ lệ đặt phòng..)
     @GetMapping("/owner/summary")
@@ -95,16 +103,49 @@ public class OwnerCtrl {
             @AuthenticationPrincipal CustomUserDetail owner,
             @RequestParam(value = "month", required = false) Integer month,
             @RequestParam(value = "year", required = false) Integer year,
-            @RequestParam(value = "limit", defaultValue= "5", required = false) int limit
-
-        ) {
+            @RequestParam(value = "limit", defaultValue = "5", required = false) int limit
+    ) {
         Integer ownerId = owner.getId();
 
         return new ResponseEntity<>(dashboardService.getTrendingRooms(ownerId, month, year, limit), HttpStatus.OK);
     }
+//Send notifications
+
+    // @GetMapping("/owner/notifications")
+    // public ResponseEntity<?> getNotifications(
+    //         @AuthenticationPrincipal CustomUserDetail owner) {
+    //     return ResponseEntity.ok(
+    //             notificationService.getByOwner(owner.getId())
+    //     );
+    // }
+    //TOP 10 notis
+    @GetMapping("/owner/notifications")
+    public ResponseEntity<?> getLatest(
+            @AuthenticationPrincipal CustomUserDetail owner
+    ) {
+        
+
+        return new ResponseEntity<>(notificationService.getNotifications(owner.getId()), HttpStatus.OK);
+    }
+
+    @GetMapping("/owner/unread-count")
+    public Integer unreadCount(
+            @AuthenticationPrincipal CustomUserDetail owner
+    ) {
+        return repo.countByOwnerIdAndIsReadFalse(owner.getId());
+    }
+
+    @PostMapping("/owner/{id}/read")
+    public void markRead(@PathVariable Integer id) {
+        repo.findById(id).ifPresent(n -> {
+            n.setIsRead(true);
+            repo.save(n);
+        });
+    }
 //Xem các bookin
 //----HOTEL
 //Lấy toàn bộ danh sách khách sạn của chủ sở hữu theo UserId
+
     @GetMapping("/owner/hotel-list")
     public ResponseEntity<HotelResponse> hotelsOfOwner(
             @AuthenticationPrincipal CustomUserDetail user,

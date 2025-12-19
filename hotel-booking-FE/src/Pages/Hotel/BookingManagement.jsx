@@ -15,10 +15,18 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import DashboardLayout from "../../core/layout/Dashboard";
 import dayjs from "dayjs";
+//Websocket
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 
 const { Title } = Typography;
 
 const BookingManagement = () => {
+
+
+
+
+
     const history = useHistory();
     const [loading, setLoading] = useState(false);
     const [pageNo, setPageNo] = useState(1);
@@ -28,11 +36,78 @@ const BookingManagement = () => {
     // ALL | STAYING
 
     const [bookings, setBookings] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+
     const [mode, setMode] = useState("ALL"); // ALL | DATE
     const [selectedDate, setSelectedDate] = useState(null);
 
-
     const token = localStorage.getItem("accessToken");
+    useEffect(() => {
+        const stompClient = new Client({
+            webSocketFactory: () =>
+                new SockJS("http://localhost:8080/ws"),
+
+            connectHeaders: {
+                Authorization: `Bearer ${token}`,
+            },
+
+            debug: (str) => console.log(str),
+
+            onConnect: () => {
+                console.log("✅ WS connected");
+
+                stompClient.subscribe(
+                    "/user/queue/notifications",
+                    (message) => {
+                        const notification = JSON.parse(message.body);
+                        console.log("📢 New notification:", notification);
+                    }
+                );
+            },
+
+            onStompError: (frame) => {
+                console.error("Broker error:", frame.headers["message"]);
+            },
+        });
+
+        stompClient.activate();
+
+        return () => stompClient.deactivate();
+    }, []);
+    useEffect(() => {
+        fetchNoti();
+    }, []);
+    const fetchNoti = async () => {
+        setLoading(true);
+        try {
+
+            const res = await fetch(
+                `http://localhost:8080/api/dashboard/owner/notifications`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!res.ok) throw new Error("Failed to fetch bookings");
+            console.log("noti:", res);
+
+            const data = await res.json();
+            console.log("noti:", data);
+
+            const notiList = data?.content || [];
+
+
+            setNotifications(notiList);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const decodedToken = JSON.parse(atob(token.split('.')[1]));
     const role = decodedToken.role;
 
@@ -46,18 +121,7 @@ const BookingManagement = () => {
                 return "user";
         }
     };
-    const [notifications] = useState([
-        {
-            id: 1,
-            title: "Booking mới",
-            content: "Phòng Deluxe - Happiness Hotel",
-        },
-        {
-            id: 2,
-            title: "Booking mới",
-            content: "Phòng Superior - Sunshine Hotel",
-        },
-    ]);
+
 
     const unreadCount = notifications.length;
     const notificationMenu = (

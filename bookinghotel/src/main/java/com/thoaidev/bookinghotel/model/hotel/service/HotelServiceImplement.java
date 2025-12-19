@@ -111,7 +111,6 @@ public class HotelServiceImplement implements HotelService {
         hotelResponse.setTotalElements(hotels.getTotalElements());
         hotelResponse.setTotalPage(hotels.getTotalPages());
         hotelResponse.setLast(hotels.isLast());
-        System.out.println("HotelResponse : " + hotelResponse);
         return hotelResponse;
     }
 

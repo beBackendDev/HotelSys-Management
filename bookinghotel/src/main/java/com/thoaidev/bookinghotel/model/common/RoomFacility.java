@@ -14,13 +14,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.Getter;
+import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 @Table(name = "room-facility")
-@Data
+
+
+@Getter
+@Setter
 public class RoomFacility {
 
     @Id

@@ -5,8 +5,11 @@ import java.util.List;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-@Data
+import lombok.Setter;
+@Getter
+@Setter
 @NoArgsConstructor
 public class HotelResponse{
     private List<HotelDto> content;

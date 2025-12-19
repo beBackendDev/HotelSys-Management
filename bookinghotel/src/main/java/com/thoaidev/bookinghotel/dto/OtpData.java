@@ -3,8 +3,11 @@ package com.thoaidev.bookinghotel.dto;
 import java.time.LocalDateTime;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class OtpData {
     private String email;
     private String otpCode;
