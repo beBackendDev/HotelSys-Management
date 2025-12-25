@@ -323,6 +323,26 @@ public class UserServiceImplement implements UserService {
         otpStorage.remove(request.getEmail()); // Xoá OTP sau khi dùng
     }
 
+    @Override
+    public Integer findOwnerIdByUsername(String username) {
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(()
+                        -> new RuntimeException("User not found: " + username)
+                );
+
+        boolean isOwner = user.getRoles()
+                .stream()
+                .anyMatch(r -> r.getRoleName().equals("OWNER"));
+
+        if (!isOwner) {
+            throw new RuntimeException("User is not OWNER");
+        }
+
+        return user.getUserId();
+    }
+
+
     /*------------------------ ------------------------------------*/
 //
     // Inner class để lưu OTP + thời hạn

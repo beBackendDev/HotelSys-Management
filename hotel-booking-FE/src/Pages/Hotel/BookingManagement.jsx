@@ -9,107 +9,57 @@ import {
     Dropdown,
     List,
 } from "antd";
-import { EyeOutlined, CalendarOutlined, BellOutlined } from "@ant-design/icons";
+import {
+    EyeOutlined,
+    CalendarOutlined,
+    BellOutlined,
+} from "@ant-design/icons";
 
-import React, { useEffect, useState } from "react";
+import React, {
+    useEffect,
+    useState,
+    useMemo,
+    useRef,
+} from "react";
 import { useHistory } from "react-router-dom";
 import DashboardLayout from "../../core/layout/Dashboard";
-import dayjs from "dayjs";
-//Websocket
+// WebSocket
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
+
+
+
 
 const { Title } = Typography;
 
 const BookingManagement = () => {
-
-
-
-
-
     const history = useHistory();
-    const [loading, setLoading] = useState(false);
-    const [pageNo, setPageNo] = useState(1);
-    const [pageSize] = useState(10);
-    const [hasMore, setHasMore] = useState(true);
-    const [filterMode, setFilterMode] = useState("ALL");
-    // ALL | STAYING
+    const stompClientRef = useRef(null);
 
+    /* ================= STATE ================= */
     const [bookings, setBookings] = useState([]);
     const [notifications, setNotifications] = useState([]);
 
-    const [mode, setMode] = useState("ALL"); // ALL | DATE
+    const [loadingBookings, setLoadingBookings] = useState(false);
+    const [loadingNotifications, setLoadingNotifications] = useState(false);
+
+    const [mode, setMode] = useState("ALL"); // ALL | DATE | STAYING
     const [selectedDate, setSelectedDate] = useState(null);
 
     const token = localStorage.getItem("accessToken");
-    useEffect(() => {
-        const stompClient = new Client({
-            webSocketFactory: () =>
-                new SockJS("http://localhost:8080/ws"),
 
-            connectHeaders: {
-                Authorization: `Bearer ${token}`,
-            },
-
-            debug: (str) => console.log(str),
-
-            onConnect: () => {
-                console.log("✅ WS connected");
-
-                stompClient.subscribe(
-                    "/user/queue/notifications",
-                    (message) => {
-                        const notification = JSON.parse(message.body);
-                        console.log("📢 New notification:", notification);
-                    }
-                );
-            },
-
-            onStompError: (frame) => {
-                console.error("Broker error:", frame.headers["message"]);
-            },
-        });
-
-        stompClient.activate();
-
-        return () => stompClient.deactivate();
-    }, []);
-    useEffect(() => {
-        fetchNoti();
-    }, []);
-    const fetchNoti = async () => {
-        setLoading(true);
+    /* ================= TOKEN ================= */
+    const role = useMemo(() => {
+        if (!token) return null;
         try {
-
-            const res = await fetch(
-                `http://localhost:8080/api/dashboard/owner/notifications`,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (!res.ok) throw new Error("Failed to fetch bookings");
-            console.log("noti:", res);
-
-            const data = await res.json();
-            console.log("noti:", data);
-
-            const notiList = data?.content || [];
-
-
-            setNotifications(notiList);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
+            return JSON.parse(atob(token.split(".")[1])).role;
+        } catch {
+            return null;
         }
-    };
-
-    const decodedToken = JSON.parse(atob(token.split('.')[1]));
-    const role = decodedToken.role;
+    }, [token]);
 
     const getUrlByRole = (role) => {
         switch (role) {
@@ -122,94 +72,46 @@ const BookingManagement = () => {
         }
     };
 
-
-    const unreadCount = notifications.length;
-    const notificationMenu = (
-        <List
-            size="small"
-            dataSource={notifications}
-            style={{ width: 320 }}
-            locale={{ emptyText: "Không có thông báo mới" }}
-            renderItem={(item) => (
-                <List.Item>
-                    <div>
-                        <Typography.Text strong>
-                            {item.title}
-                        </Typography.Text>
-                        <br />
-                        <Typography.Text type="secondary">
-                            {item.content}
-                        </Typography.Text>
-                    </div>
-                </List.Item>
-            )}
-        />
-    );
-
+    /* ================= WEBSOCKET ================= */
     useEffect(() => {
-        fetchBookings();
-    }, [mode, selectedDate]);
+        if (!token) return;
 
-    const fetchBookings = async () => {
-        setLoading(true);
-        try {
-            const dateQuery = selectedDate
-                ? `?date=${dayjs(selectedDate).format("YYYY-MM-DD")}`
-                : "";
-            let url = "";
+        const client = new Client({
+            webSocketFactory: () =>
+                new SockJS(`http://localhost:8080/ws?token=${token}`),
+            debug: () => { },
+            onConnect: () => {
+                console.log("✅ WebSocket connected");
 
-            if (mode === "ALL") {
-                console.log("mode ALL");
-
-                url = `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/bookings-management`;
-            }
-
-            if (mode === "DATE" && selectedDate) {
-                console.log("mode DATE");
-
-                url = `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/booking-today?date=${dayjs(selectedDate).format("YYYY-MM-DD")}`;
-            }
-            if (mode === "STAYING") {
-                console.log("mode ALL");
-
-                url = `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/recent-bookings`;
-            }
-            const res = await fetch(
-                url,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (!res.ok) throw new Error("Failed to fetch bookings");
-
-            const data = await res.json();
-            console.log("data:", data);
-
-            const bookingList = data?.content || [];
+                client.subscribe("/user/queue/notifications", (message) => {
+                    const noti = JSON.parse(message.body);
+                    setNotifications((prev) => [noti, ...prev]);
+                });
+            },
+            onStompError: (frame) => {
+                console.error("❌ STOMP error:", frame.headers["message"]);
+            },
+        });
 
 
-            setBookings(bookingList);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-    // useEffect(() => {
-    //     fetchRecentBookings(true);
-    // }, [filterMode]);
+        client.activate();
+        stompClientRef.current = client;
 
-    const fetchRecentBookings = async (reset = false) => {
-        if (loading) return;
+        return () => {
+            client.deactivate();
+        };
+    }, [token]);
 
-        setLoading(true);
+    /* ================= FETCH NOTIFICATIONS ================= */
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        setLoadingNotifications(true);
         try {
             const res = await fetch(
-                `http://localhost:8080/api/dashboard/owner/recent-bookings?pageNo=${reset ? 1 : pageNo}&pageSize=${pageSize}`,
+                "http://localhost:8080/api/dashboard/owner/notifications",
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -217,117 +119,240 @@ const BookingManagement = () => {
                 }
             );
 
-            if (!res.ok) throw new Error();
+            if (!res.ok) throw new Error("Fetch notifications failed");
 
             const data = await res.json();
 
-            let newBookings = data?.content;
-
-            // 🔥 FILTER: booking đang ở
-            if (filterMode === "STAYING") {
-                const today = dayjs();
-                newBookings = newBookings.filter(
-                    (b) =>
-                        dayjs(b.checkinDate).isSameOrBefore(today, "day") &&
-                        dayjs(b.checkoutDate).isSameOrAfter(today, "day")
+            // ❗ merge DB + realtime (không overwrite)
+            setNotifications((prev) => {
+                const map = new Map();
+                prev.forEach((n) => map.set(n.notifyId, n));
+                data.forEach((n) => map.set(n.notifyId, n));
+                return Array.from(map.values()).sort(
+                    (a, b) =>
+                        new Date(b.createdAt) -
+                        new Date(a.createdAt)
                 );
-            }
-
-            setBookings((prev) =>
-                reset ? newBookings : [...prev, ...newBookings]
-            );
-
-            setHasMore(!data.last);
-            setPageNo((prev) => prev + 1);
+            });
         } catch (e) {
             console.error(e);
         } finally {
-            setLoading(false);
+            setLoadingNotifications(false);
         }
     };
 
+    /* ================= FETCH BOOKINGS ================= */
+    useEffect(() => {
+        fetchBookings();
+    }, [mode, selectedDate]);
 
-    const handleViewDetail = (bookingId) => {
-        history.push(`/dashboard/booking-detail/${bookingId}`);
+    const fetchBookings = async () => {
+        setLoadingBookings(true);
+        try {
+            let url = "";
+
+            if (mode === "ALL") {
+                url = `http://localhost:8080/api/dashboard/${getUrlByRole(
+                    role
+                )}/bookings-management`;
+            }
+
+            if (mode === "DATE" && selectedDate) {
+                url = `http://localhost:8080/api/dashboard/${getUrlByRole(
+                    role
+                )}/booking-today?date=${dayjs(
+                    selectedDate
+                ).format("YYYY-MM-DD")}`;
+            }
+
+            if (mode === "STAYING") {
+                url = `http://localhost:8080/api/dashboard/${getUrlByRole(
+                    role
+                )}/recent-bookings`;
+            }
+
+            const res = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) throw new Error("Fetch bookings failed");
+
+            const data = await res.json();
+            setBookings(data?.content || []);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingBookings(false);
+        }
     };
+
+    /* ================= UI ================= */
+    const unreadCount = notifications.filter(
+        (n) => !n.isRead
+    ).length;
+
+    const notificationMenu = (
+        <div
+            style={{
+                width: 360,
+                maxHeight: 420,
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
+            {/* ===== Header ===== */}
+            <div
+                style={{
+                    padding: "12px 16px",
+                    borderBottom: "1px solid #f0f0f0",
+                    fontWeight: 600,
+                    fontSize: 15,
+                }}
+            >
+                🔔 Thông báo
+            </div>
+
+            {/* ===== List ===== */}
+            <div
+                style={{
+                    flex: 1,
+                    overflowY: "auto",
+                }}
+            >
+                <List
+                    loading={loadingNotifications}
+                    dataSource={notifications}
+                    locale={{ emptyText: "Không có thông báo" }}
+                    renderItem={(noti) => (
+                        <List.Item
+                            key={noti.notifyId}
+                            style={{
+                                padding: "12px 16px",
+                                background: noti.isRead
+                                    ? "#fff"
+                                    : "#f6faff",
+                                cursor: "pointer",
+                            }}
+                        >
+                            <div style={{ width: "100%" }}>
+                                <Space align="start">
+                                    {/* chấm unread */}
+                                    {!noti.isRead && (
+                                        <span
+                                            style={{
+                                                width: 8,
+                                                height: 8,
+                                                marginTop: 6,
+                                                borderRadius: "50%",
+                                                background: "#1677ff",
+                                                display: "inline-block",
+                                            }}
+                                        />
+                                    )}
+
+                                    <div>
+                                        <Typography.Text strong>
+                                            {noti.title}
+                                        </Typography.Text>
+
+                                        <div
+                                            style={{
+                                                fontSize: 13,
+                                                color: "#666",
+                                                marginTop: 2,
+                                            }}
+                                        >
+                                            {noti.content}
+                                        </div>
+
+                                        <div
+                                            style={{
+                                                fontSize: 11,
+                                                color: "#999",
+                                                marginTop: 4,
+                                            }}
+                                        >
+                                            {dayjs(noti.createdAt).fromNow()}
+                                        </div>
+                                    </div>
+                                </Space>
+                            </div>
+                        </List.Item>
+                    )}
+                />
+            </div>
+
+            {/* ===== Footer ===== */}
+            <div
+                style={{
+                    padding: 10,
+                    textAlign: "center",
+                    borderTop: "1px solid #f0f0f0",
+                }}
+            >
+                <Button
+                    type="link"
+                    size="small"
+                    onClick={() =>
+                        history.push("/dashboard/owner/notifications")
+                    }
+                >
+                    Xem tất cả
+                </Button>
+            </div>
+        </div>
+    );
+
 
     const columns = [
         {
             title: "Booking",
-            key: "bookingId",
-            width: 110,
-            fixed: "left",
-            render: (_, record) => (
-                <Tag color="blue">{record.bookingId}</Tag>
+            render: (_, r) => (
+                <Tag color="blue">{r.bookingId}</Tag>
             ),
         },
-        {
-            title: "Khách hàng",
-            dataIndex: "guestFullName",
-            key: "guestFullName",
-        },
-        {
-            title: "Khách sạn",
-            key: "hotel",
-            render: (_, record) => record?.hotelName || "-",
-        },
-        {
-            title: "Phòng",
-            key: "room",
-            render: (_, record) => record?.roomName || "-",
-        },
+        { title: "Khách", dataIndex: "guestFullName" },
+        { title: "Khách sạn", dataIndex: "hotelName" },
+        { title: "Phòng", dataIndex: "roomName" },
         {
             title: "Check-in",
             dataIndex: "checkinDate",
-            key: "checkinDate",
-            render: (date) => dayjs(date).format("DD/MM/YYYY"),
+            render: (d) => dayjs(d).format("DD/MM/YYYY"),
         },
         {
             title: "Check-out",
             dataIndex: "checkoutDate",
-            key: "checkoutDate",
-            render: (date) => dayjs(date).format("DD/MM/YYYY"),
+            render: (d) => dayjs(d).format("DD/MM/YYYY"),
         },
         {
             title: "Tổng tiền",
             dataIndex: "totalPrice",
-            key: "totalPrice",
             align: "right",
-            render: (price) => `${price?.toLocaleString()} VNĐ`,
+            render: (p) =>
+                `${p?.toLocaleString()} VNĐ`,
         },
         {
             title: "Trạng thái",
             dataIndex: "status",
-            key: "status",
             align: "center",
-            render: (status) => (
-                <Tag
-                    color={
-                        status === "PAID" || status === "COMPLETED"
-                            ? "green"
-                            : status === "CANCELLED"
-                                ? "volcano"
-                                : status === "COMPLETED"
-                                    ? "blue"
-                                    : "orange"
-                    }
-                >
-                    {status}
+            render: (s) => (
+                <Tag color={s === "PAID" ? "green" : "orange"}>
+                    {s}
                 </Tag>
             ),
         },
         {
             title: "Hành động",
-            key: "action",
-            width: 110,
-            align: "center",
-            render: (_, record) => (
+            render: (_, r) => (
                 <Button
-                    type="primary"
-                    size="middle"
                     icon={<EyeOutlined />}
-                    style={{ height: 32 }}
-                    onClick={() => handleViewDetail(record.bookingId)}
+                    onClick={() =>
+                        history.push(
+                            `/dashboard/booking-detail/${r.bookingId}`
+                        )
+                    }
                 >
                     Chi tiết
                 </Button>
@@ -337,22 +362,44 @@ const BookingManagement = () => {
 
     return (
         <DashboardLayout>
-            <div style={{ padding: 24, background: "#fff", minHeight: "100vh" }}>
+            <div style={{ padding: 24, background: "#fff" }}>
                 <Space
-                    style={{ width: "100%", marginBottom: 16 }}
-                    align="center"
-                    justify="space-between"
+                    style={{
+                        width: "100%",
+                        marginBottom: 16,
+                        justifyContent: "space-between",
+                    }}
                 >
-                    <Title level={4} style={{ margin: 0 }}>
-                        Quản lý Booking
-                    </Title>
+                    <Title level={4}>Quản lý Booking</Title>
 
-                    <Space size="middle">
-                        {/* Notification */}
+                    <Space>
+                        <DatePicker
+                            onChange={(d) => {
+                                setMode("DATE");
+                                setSelectedDate(d);
+                            }}
+                        />
+                        <Button
+                            icon={<CalendarOutlined />}
+                            onClick={() => {
+                                setMode("ALL");
+                                setSelectedDate(null);
+                            }}
+                        >
+                            Tất cả
+                        </Button>
+                        <Button
+                            icon={<CalendarOutlined />}
+                            onClick={() => {
+                                setMode("STAYING");
+                                setSelectedDate(null);
+                            }}
+                        >
+                            Hôm nay
+                        </Button>
                         <Dropdown
                             overlay={notificationMenu}
                             trigger={["click"]}
-                            placement="bottomRight"
                         >
                             <Badge count={unreadCount}>
                                 <BellOutlined
@@ -364,47 +411,15 @@ const BookingManagement = () => {
                                 />
                             </Badge>
                         </Dropdown>
-
-                        {/* Filter by date */}
-                        <DatePicker
-                            placeholder="Chọn ngày"
-                            format="DD/MM/YYYY"
-                            onChange={(date) => {
-                                setMode("DATE");
-                                setSelectedDate(date);
-                            }}
-                        />
-
-                        <Button
-                            icon={<CalendarOutlined />}
-                            onClick={() => {
-                                setMode("ALL");
-                                setSelectedDate(null);
-                            }}
-                        >
-                            Tất cả
-                        </Button>
-                        <Button
-                            type={filterMode === "STAYING" ? "primary" : "default"}
-                            onClick={() => {
-                                setMode("STAYING");
-                                setSelectedDate(null);
-                            }}
-                        >
-                            Đang ở
-                        </Button>
                     </Space>
-
                 </Space>
-
 
                 <Table
                     rowKey="bookingId"
-                    loading={loading}
+                    loading={loadingBookings}
                     columns={columns}
                     dataSource={bookings}
                     pagination={false}
-                    size="middle"
                 />
             </div>
         </DashboardLayout>

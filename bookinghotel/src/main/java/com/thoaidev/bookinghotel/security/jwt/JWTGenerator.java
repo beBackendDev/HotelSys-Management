@@ -35,6 +35,7 @@ public class JWTGenerator {
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
                 .claim("userId", userId)
+                .claim("userName", username)
                 .claim("role", role)
                 .signWith(SecurityConstant.JWT_SECRET, SignatureAlgorithm.HS512)
                 .compact();
@@ -77,6 +78,7 @@ public class JWTGenerator {
                 .setIssuedAt(currentDate)
                 .setExpiration(expireDate)
                 .claim("userId", userDetails.getId())
+                .claim("userName", userDetails.getUsername())
                 .signWith(SecurityConstant.JWT_SECRET, SignatureAlgorithm.HS512)
                 .compact();
     }

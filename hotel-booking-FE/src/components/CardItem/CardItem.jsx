@@ -1,5 +1,5 @@
 import { Card, Tooltip } from "antd";
-import { EnvironmentOutlined, StarFilled } from "@ant-design/icons";
+import { EnvironmentOutlined, StarFilled, StarOutlined } from "@ant-design/icons";
 import placeholder from "../../assets/images/building-placeholder.png";
 import { Link } from "react-router-dom";
 import { getRoomByHotelId, userGetRoomByHotelId } from "../../slices/room.slice";
@@ -14,6 +14,46 @@ const CardItem = ({ data }) => {
   const facilitiesArr = data.hotelFacility
     ?.split(",")
     .map((f) => f.trim());
+  const statusColor = {
+    "Còn phòng": "bg-green-500",
+    "Hết phòng": "bg-red-500",
+    "Đang kiểm tra...": "bg-gray-400",
+    "Không xác định": "bg-yellow-500",
+  }[status];
+
+  const renderStars = (rating = 0) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);      // sao đầy
+    const hasHalfStar = rating % 1 >= 0.5;     // có nửa sao không
+
+    for (let i = 1; i <= 5; i++) {
+      if (i <= fullStars) {
+        // Sao đầy
+        stars.push(
+          <StarFilled key={i} style={{ color: "gold" }} />
+        );
+      } else if (i === fullStars + 1 && hasHalfStar) {
+        // Nửa sao (dùng gradient)
+        stars.push(
+          <StarFilled
+            key={i}
+            style={{
+              background: "linear-gradient(90deg, gold 50%, #d9d9d9 50%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          />
+        );
+      } else {
+        // Sao rỗng
+        stars.push(
+          <StarOutlined key={i} style={{ color: "#d9d9d9" }} />
+        );
+      }
+    }
+
+    return stars;
+  };
 
   // Lấy danh sách phòng và xác định trạng thái
   useEffect(() => {
@@ -57,9 +97,10 @@ const CardItem = ({ data }) => {
               className="h-48 w-full object-cover"
             />
             {/* Badge trạng thái phòng */}
-            <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+            <div className={`absolute top-2 right-2 ${statusColor} text-white text-xs font-semibold px-3 py-1 rounded-full shadow`}>
               {status}
             </div>
+
           </div>
         }
       >
@@ -77,20 +118,24 @@ const CardItem = ({ data }) => {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <StarFilled style={{ color: "gold" }} />
-            <span className="text-[14px] text-primary italic line-clamp-1 overflow-ellipsis">
-              {data?.ratingPoint >= 1
-                ? [data.ratingPoint ,"  (", data.totalReview, " lượt đánh giá)"]
-                : "Chưa có đánh giá nào"}
-            </span>
+            {data?.ratingPoint >= 1 ? (
+              <>
+                <div className="flex gap-[2px]">
+                  {renderStars(data.ratingPoint)}
+                </div>
+                <span className="text-[14px] text-primary italic line-clamp-1">
+                  {data.ratingPoint} ({data.totalReview} lượt đánh giá)
+                </span>
+              </>
+            ) : (
+              <span className="text-[14px] italic text-gray-400">
+                Chưa có đánh giá nào
+              </span>
+            )}
           </div>
+
         </div>
-        <div className="mt-4 flex justify-between items-center">
-          <span className="text-red-500 font-semibold text-[14px]">
-            {data?.hotelAveragePrice
-              ? `${data.hotelAveragePrice.toLocaleString()} VNĐ/ đêm`
-              : "Liên hệ"}
-          </span>
+        <div className="mt-4 flex justify-end items-center">
           <Link
             to={`/hotel/${data?.hotelId || "None"}`}
             className="px-3 py-1 border border-blue-500 text-[14px] text-blue-500 rounded-md hover:bg-blue-50 transition"

@@ -1,19 +1,29 @@
-import { Button, Tag, Typography } from "antd";
+import { Button, Tag, Tooltip, Typography } from "antd";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { typeOfRoom } from "../../constant/common";
 import { formatMoney } from "../../utils/helper";
 
-const RoomCardItem = ({ room }) => {
+const RoomCardItem = ({ room, checkIn, checkOut }) => {
   console.log("(roomItem)", JSON.stringify(room));
   const token = localStorage.getItem("accessToken");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [status, setStatus] = useState("Đang kiểm tra..."); // trạng thái mặc định
   const getRoomStatus = (status) => {
     if (status === true) return "Còn trống";
     if (status === false) return "Đã được đặt";
     return "Không rõ";
   };
+
+  const isDateSelected = checkIn && checkOut;
+  // const isBooked = room?.roomStatus === "BOOKED";
+
+
+  const buttonClass = !isDateSelected
+    ? "bg-red-500 hover:bg-red-600 cursor-not-allowed"
+    : "bg-blue-500 hover:bg-blue-600";
+
   const [bookings, setBooking] = useState([]);
   useEffect(() => {
     fetchBookings();
@@ -44,7 +54,7 @@ const RoomCardItem = ({ room }) => {
       setLoading(false);
     }
   };
-  const nextBooking = bookings.length > 0 ? bookings[0] : null;
+  const nextBooking = bookings?.length > 0 ? bookings[0] : null;
 
   return (
     <div className="w-full bg-white rounded-lg cursor-default hover:shadow-md p-4 mb-4">
@@ -76,7 +86,7 @@ const RoomCardItem = ({ room }) => {
             Loại phòng: {room.roomType}
           </Typography.Text>
 
-          <Typography.Text className={`font-semibold ${room.roomStatus === "AVAILABLE" ? "text-green-600" : "text-red-500"
+          {/* <Typography.Text className={`font-semibold ${room.roomStatus === "AVAILABLE" ? "text-green-600" : "text-red-500"
             }`}>
             {room.roomStatus === "BOOKED"
               ? `Đã đặt cho đến ngày ${room?.dateAvailable}`
@@ -84,31 +94,37 @@ const RoomCardItem = ({ room }) => {
                 ? `Còn phòng đến ngày ${nextBooking.checkinDate}`
                 : `Còn trống (không có booking tương lai)`
             }
-          </Typography.Text>
+          </Typography.Text> */}
 
         </div>
 
         {/* Giá + Đặt phòng */}
-        <div className="flex flex-col justify-center items-end mt-4 sm:mt-0">
-          <span className="line-through text-gray-400">
-            {formatMoney(room.roomPricePerNight)} vnd
-          </span>
-          <span className="font-bold text-2xl text-red-500">
-            {formatMoney(room.roomPricePerNight)} vnd
-          </span>
+        <div className="mt-2">
+  {!isDateSelected ? (
+    <Tooltip title="Vui lòng chọn ngày check-in và check-out">
+      <Button
+        type="primary"
+        danger
+        disabled
+        className={`${buttonClass} border-none`}
+      >
+        Chọn ngày trước
+      </Button>
+    </Tooltip>
+  ) : (
+    <Link
+      to={`/hotels/${room.hotelId}/rooms/${room.roomId}/booking`}
+    >
+      <Button
+        type="primary"
+        className={`${buttonClass} border-none`}
+      >
+        Đặt phòng
+      </Button>
+    </Link>
+  )}
+</div>
 
-          <Link
-            to={`/hotels/${room.hotelId}/rooms/${room.roomId}/booking`}
-            className="mt-2"
-          >
-            <Button
-              type="primary"
-              disabled={room.roomStatus === "BOOKED"}
-            >
-              {room.roomStatus === "BOOKED" ? "Đã được đặt" : "Đặt phòng"}
-            </Button>
-          </Link>
-        </div>
       </div>
     </div>
   );

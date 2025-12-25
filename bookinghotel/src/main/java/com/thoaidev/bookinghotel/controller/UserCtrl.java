@@ -120,6 +120,7 @@ public class UserCtrl {
         HotelResponse hotels = hotelService.filterHotels(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId);
         return ResponseEntity.ok(hotels);
     }
+    //kiem tra phòng trống
     @GetMapping("/public/room-available")
     public ResponseEntity<RoomResponse> getAvailableRoom(
         @RequestParam(required = true) LocalDate checkIn,

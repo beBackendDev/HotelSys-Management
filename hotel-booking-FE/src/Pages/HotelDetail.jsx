@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pagination, Typography } from "antd";
+import { Pagination, Typography, DatePicker, Divider, Button } from "antd";
 import {
   CheckOutlined,
   LoadingOutlined,
@@ -10,45 +10,60 @@ import {
   SunFilled,
   LikeFilled,
   ClockCircleFilled,
-  DingdingOutlined,
   ScheduleFilled,
-  SmileFilled
+  SmileFilled,
 } from "@ant-design/icons";
 import { Content } from "antd/lib/layout/layout";
+import { useParams } from "react-router-dom";
 import ratinglayout from "../assets/images/ratinglayout.avif"
 import ratinglayout1 from "../assets/images/ratinglayout1.avif"
-import userplaceholder from "../assets/images/img-placeholder.jpg"
-import { useParams } from "react-router-dom";
+
 import HomeLayout from "../core/layout/HomeLayout";
 import RoomCardItem from "../components/RoomCardItem/RoomCardItem";
-import Filter from "../components/Filter/Filter";
 import Footer from "../components/Footer/Footer";
 
+import userplaceholder from "../assets/images/img-placeholder.jpg";
+
 const HotelDetail = () => {
-  const { id } = useParams(); // lấy id từ URL
+  const { id } = useParams();
 
+  const [hotelInfo, setHotelInfo] = useState(null);
+  const [hotelReviews, setHotelReviews] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [owner, setOwner] = useState(null);
+  const [userInfo, setUserInfo] = useState([]);
 
-  const [userInfo, setUserInfo] = useState([]); // thông tin nguoi dung
-
-  const [hotelInfo, setHotelInfo] = useState([]); // thông tin khách sạn
-  const [hotelReviews, setHotelReviews] = useState([]); // thông tin danh gia
-  const [rooms, setRooms] = useState([]); // danh sách phòng
-  const [owner, setOwner] = useState([]); // thoong tin Owner
+  const [checkIn, setCheckIn] = useState(null);
+  const [checkOut, setCheckOut] = useState(null);// ngày check-in và check-out được chọn
+  const [loadingRooms, setLoadingRooms] = useState(false); // trạng thái tải phòng
   const [pagination, setPagination] = useState({
     pageNo: 1,
     pageSize: 5,
-    totalPage: 1,
     totalElements: 0,
   });
+
   const token = localStorage.getItem("accessToken");
-
-
-  const userStr = localStorage.getItem("user");
-  const user = JSON.parse(userStr);
-  const userId = user?.userId;
   const ownerId = hotelInfo?.ownerId;
+  // Kiểm tra phòng trống
+  const handleCheckAvailability = async () => {
+    if (!checkIn || !checkOut) return;
 
-  // Map icon name (string) -> component
+    setLoadingRooms(true);
+
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/user/public/room-available?checkIn=${checkIn.format("YYYY-MM-DD")}&checkOut=${checkOut.format("YYYY-MM-DD")}`
+      );
+
+      const data = await res.json();
+      setRooms(data?.content || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingRooms(false);
+    }
+  };
+
   const iconMap = {
     CarFilled: <CarFilled />,
     WifiOutlined: <WifiOutlined />,
@@ -59,212 +74,168 @@ const HotelDetail = () => {
     ClockCircleFilled: <ClockCircleFilled />,
     ScheduleFilled: <ScheduleFilled />,
     CheckOutlined: <CheckOutlined />,
-    SmileFilled: <SmileFilled />
+    SmileFilled: <SmileFilled />,
   };
-  //fetch Reviews
+
+  /* ================= FETCH ================= */
+
   const fetchReviews = async (pageNo, pageSize) => {
-    try {
-      const res = await fetch(`http://localhost:8080/api/user/hotel/${id}/reviews-list?pageNo=${pageNo - 1}&pageSize=${pageSize}`, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      console.log("(HotelDetail)API-Reviews-List:", data);
-      setHotelReviews(data?.content || []);
-      setPagination((prev) => ({
-        ...prev,
-        pageNo,
-        pageSize,
-        totalPage: data.totalPage,
-        totalElements: data.totalElements,
-      }));
+    const res = await fetch(
+      `http://localhost:8080/api/user/hotel/${id}/reviews-list?pageNo=${pageNo - 1}&pageSize=${pageSize}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const data = await res.json();
+    setHotelReviews(data?.content || []);
+    setPagination({ pageNo, pageSize, totalElements: data.totalElements });
+  };
 
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách đánh giá:", err);
-
-    }
-  }
-  // fetch lần đầu khi component mount
   useEffect(() => {
-    // Gọi API lấy danh sách reviews
     fetchReviews(pagination.pageNo, pagination.pageSize);
   }, []);
   const handlePageChange = (page, pageSize) => {
     fetchReviews(page, pageSize);
   };
   useEffect(() => {
-    // Goi API lay thong tin nguoi dung da danh gia 
-    const fetchUser = async () => {
-      if (hotelReviews.length > 0) {
-        try {
-          const userPromises = hotelReviews.map((review) =>
-            fetch(`http://localhost:8080/api/user/profile/${review.userId}`, {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }).then((res) => res.json())
-          );
+    fetch(`http://localhost:8080/api/user/public/hotels/${id}`)
+      .then((r) => r.json())
+      .then(setHotelInfo);
 
-          const users = await Promise.all(userPromises);
-          console.log("(HotelDetail)API-AllUsers:", users);
-          setUserInfo(users); // Lưu danh sách user
-        } catch (error) {
-          console.error("Lỗi khi lấy danh sách user:", error);
-        }
-      }
-    }
-    // Gọi API khách sạn
-    const fetchHotel = async () => {
-      try {
-        const res = await fetch(`http://localhost:8080/api/user/public/hotels/${id}`);
-        const data = await res.json();
-        console.log("(HotelDetail)API:", data);
-        setHotelInfo(data);
-      } catch (err) {
-        console.error("Lỗi khi lấy thông tin khách sạn:", err);
-      }
-    };
-
-    // Gọi API danh sách phòng
-    const fetchRooms = async () => {
-      try {
-        const res = await fetch(`http://localhost:8080/api/user/public/hotels/${id}/rooms`);
-        const data = await res.json();
-        console.log("(HotelDetail)API-Room:", data);
-        setRooms(data || []);
-      } catch (err) {
-        console.error("Lỗi khi lấy danh sách phòng:", err);
-      }
-    };
-    fetchUser();
-    fetchHotel();
-    fetchRooms();
-  }, [id, hotelReviews]);
-
-  //Gọi API lấy thông tin Owner <=> phụ thuộc vào thông tin ownerId trong hotel
+    fetch(`http://localhost:8080/api/user/public/hotels/${id}/rooms`)
+      .then((r) => r.json())
+      .then(setRooms);
+  }, [id]);
+  console.log("hotel api (hoteldetail)", hotelInfo);
+  console.log("room api (hoteldetail)", rooms);
   useEffect(() => {
-    const fetchOwner = async () => {
-      try {
-        const res = await fetch(`http://localhost:8080/api/user/profile/${ownerId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-            }
-          }
-        );//api lấy thông tin người dùng( owner)
-        const data = await res.json();
-        console.log("(HotelDetail)API-User:", data);
-        setOwner(data || []);
-      } catch (err) {
-        console.error("Lỗi khi lấy thông tin người sở hữu.");
-      }
-    };
-    fetchOwner();
-  },
-    [ownerId]);
+    if (!ownerId) return;
+    fetch(`http://localhost:8080/api/user/profile/${ownerId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then(setOwner);
+  }, [ownerId]);
 
-  const defaultImage = "../assets/images/image.png";
-  const rating = hotelInfo?.ratingPoint >= 1.0 ? hotelInfo?.ratingPoint : "Chưa có đánh giá nào";
+  useEffect(() => {
+    if (!hotelReviews.length) return;
+    Promise.all(
+      hotelReviews.map((r) =>
+        fetch(`http://localhost:8080/api/user/profile/${r.userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((res) => res.json())
+      )
+    ).then(setUserInfo);
+  }, [hotelReviews]);
+
+  if (!hotelInfo) {
+    return (
+      <HomeLayout>
+        <Content className="mt-[120px] flex justify-center">
+          <LoadingOutlined /> <span className="ml-2">Đang tải...</span>
+        </Content>
+      </HomeLayout>
+    );
+  }
 
   return (
     <HomeLayout>
-      <Content className="mt-[100px] flex flex-col max-w-6xl mx-auto py-6">
-        {hotelInfo ? (
-          <>
-            <Typography.Title level={1}>{hotelInfo.hotelName}</Typography.Title>
-            {/* Địa chỉ */}
-            <Typography.Text className="pb-4 italic">
-              {hotelInfo.hotelAddress || "no Address"}
-            </Typography.Text>
+      <Content className="mt-[100px] max-w-7xl mx-auto px-4 pb-12">
 
-            {/* Mô tả + Hình ảnh */}
-            <div className="flex items-start gap-4">
-              <div className="w-1/3">
-                <img
-                  src={
-                    hotelInfo?.hotelImageUrls?.length > 0
-                      ? `http://localhost:8080${hotelInfo.hotelImageUrls[0]}`
-                      : defaultImage
-                  }
-                  alt={hotelInfo.hotelName}
-                  className="w-full h-auto object-cover rounded-lg"
-                />
-              </div>
-
-              <div className="w-2/3">
-                <p className="text-gray-600 text-justify">
-                  {hotelInfo.hotelDescription || "no Description"}
-                </p>
-              </div>
-            </div>
-            {/* Owner Information */}
-            <div className="flex items-center gap-3 pt-2">
-              <img
-                src={owner?.urlImg || userplaceholder}
-                alt="avatar"
-                className="w-12 h-12 rounded-full object-cover"
-              />
-              <div className="flex flex-col">
-                <span className="font-semibold text-slate-900">
-                  Host: {owner?.fullname || "Unknown User"}
-                </span>
-                <span className="text-sm text-gray-500">
-                  Superhost · Với {owner?.experienceInHospitality} năm kinh nghiệm đón tiếp khách
-                </span>
-              </div>
-            </div>
-
-            {/* Tiện ích */}
-            <Typography.Title level={2} className="mt-8 border-t-2">
-              Danh sách các tiện ích
-            </Typography.Title>
-            <div className="w-full flex flex-col gap-2 mt-4">
-              {hotelInfo?.hotelFacilities?.length > 0 ? (
-                hotelInfo.hotelFacilities.map((facility) => (
-                  <div key={facility.id} className="flex items-center gap-2"
-                    style={{ color: "#0db3efff" }}
-                  >
-                    {/* Icon (ở đây đang dùng CheckOutlined làm placeholder, 
-                        bạn có thể map facility.icon -> fontawesome hoặc ant icon khác) */}
-                    {iconMap[facility.icon]}
-                    <Typography.Text  style={{ color: "black" }}>
-                      {facility.name}
-                    </Typography.Text>
-                  </div>
-                ))
-              ) : (
-                <Typography.Text>Không có tiện ích nào</Typography.Text>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-row">
-            <LoadingOutlined />
-            <p className="ml-2">Đang tải thông tin khách sạn.</p>
+        {/* ===== HEADER ===== */}
+        <div className="mb-6">
+          <Typography.Title level={1} className="mb-1">
+            {hotelInfo.hotelName}
+          </Typography.Title>
+          <p className="text-gray-500 italic">
+            {hotelInfo.hotelAddress}
+          </p>
+        </div>
+        {/* ===== OWNER ===== */}
+        <div className="flex items-center gap-4 p-4 border rounded-xl mb-10">
+          <img
+            src={owner?.urlImg || userplaceholder}
+            className="w-14 h-14 rounded-full object-cover"
+          />
+          <div>
+            <p className="font-semibold">
+              Chủ nhà: {owner?.fullname}
+            </p>
+            <p className="text-sm text-gray-500">
+              Superhost · {owner?.experienceInHospitality} năm kinh nghiệm
+            </p>
           </div>
-        )}
+        </div>
+        {/* ===== DATE PICKER (BOOKING BAR) ===== */}
+        <div className="sticky top-[80px] z-20 bg-white shadow-sm border rounded-xl p-4 mb-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 border rounded-xl bg-gray-50">
+            <div>
+              <p className="font-medium">Chọn ngày để xem giá & đặt phòng</p>
+              <p className="text-sm text-gray-500">
+                Giá phòng thay đổi theo ngày
+              </p>
+            </div>
 
-        {/* Danh sách phòng */}
-        <Typography.Title level={2} className="mt-8 border-t-2">
-          Danh sách các phòng
-        </Typography.Title>
-        <div className="flex flex-col gap-6 mt-6">
-            {rooms.length > 0 ? (
-              rooms.map((room) =><RoomCardItem key={room.id} room={room} />)
-            ) : (
-              <div className="flex flex-row items-center">
-                <LoadingOutlined />
-                <p className="ml-2">Không có phòng nào được tìm thấy.</p>
-              </div>
-            )}
+            <DatePicker.RangePicker
+              className="w-full md:w-[320px]"
+              onChange={(dates) => {
+                setCheckIn(dates?.[0]);
+                setCheckOut(dates?.[1]);
+              }}
+            />
+
+            <Button
+              type="primary"
+              danger={!checkIn || !checkOut}
+              disabled={!checkIn || !checkOut}
+              loading={loadingRooms}
+              onClick={handleCheckAvailability}
+            >
+              {!checkIn || !checkOut ? "Chọn ngày trước" : "Kiểm tra giá"}
+            </Button>
+          </div>
 
         </div>
 
-        {/* Đánh giá */}
+
+
+        {/* ===== FACILITIES ===== */}
+        <Typography.Title level={2}>Tiện ích</Typography.Title>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 mb-12">
+          {hotelInfo.hotelFacilities?.map((f) => (
+            <div key={f.id} className="flex items-center gap-2 text-gray-700">
+              <span className="text-blue-500">{iconMap[f.icon]}</span>
+              <span>{f.name}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* ===== ROOMS ===== */}
+        <Typography.Title level={2} className="mt-8">
+          Danh sách phòng
+        </Typography.Title>
+
+        <div className="flex flex-col gap-6 mt-6">
+          {loadingRooms ? (
+            <div className="flex items-center gap-2 text-gray-500">
+              <LoadingOutlined /> Đang kiểm tra phòng trống...
+            </div>
+          ) : rooms.length ? (
+            rooms.map((room) => (
+              <RoomCardItem
+                key={room.roomId}
+                room={room}
+                checkIn={checkIn}
+                checkOut={checkOut}
+              />
+            ))
+          ) : (
+            <p className="text-red-500 italic">
+              Không có phòng trống trong khoảng ngày đã chọn
+            </p>
+          )}
+        </div>
+
+
+     {/* Đánh giá */}
         <div className="mt-4 flex flex-col items-center justify-center p-10">
           <span className="flex flex-row font-bold text-8xl justify-items-center">
             <img src={ratinglayout1} className="w-[70px]" srcset="" />
@@ -313,7 +284,15 @@ const HotelDetail = () => {
           </div>
         </div>
 
+        <Pagination
+          className="mt-6 flex justify-center"
+          current={pagination.pageNo}
+          pageSize={pagination.pageSize}
+          total={pagination.totalElements}
+          onChange={(p, s) => fetchReviews(p, s)}
+        />
       </Content>
+
       <Footer />
     </HomeLayout>
   );

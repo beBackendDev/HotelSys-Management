@@ -40,6 +40,7 @@ public interface UserService {
 //DELETE methods
 
     void deleteUserById(Integer userId);
+    public Integer findOwnerIdByUsername(String username) ;
 // other methods
 
     // public UserDto mapToUserDto(UserEntity user);
