@@ -35,6 +35,7 @@ public class BookingMapper {
                 .guestPhone(booking.getGuestPhone())
                 .guestEmail(booking.getGuestEmail())
                 .guestCccd(booking.getGuestCccd())
+                .createdAt(booking.getCreatedAt())
                 .build();
     }
 

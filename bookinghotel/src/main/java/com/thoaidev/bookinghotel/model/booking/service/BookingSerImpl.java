@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -97,7 +98,7 @@ public class BookingSerImpl implements BookingSer {
             booking.setCheckoutDate(bookingDTO.getCheckoutDate());
             booking.setTotalPrice(totalPrice);
             booking.setStatus(BookingStatus.PENDING_PAYMENT);//auto pending _payment
-
+            booking.setCreatedAt(LocalDateTime.now());
             // Lưu người ở
             booking.setGuestFullName(bookingDTO.getGuestFullName());
             booking.setGuestPhone(bookingDTO.getGuestPhone());
@@ -166,7 +167,10 @@ public class BookingSerImpl implements BookingSer {
     public BookingResponse getAllBookings(Integer userId, int pageNo, int pageSize) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("Người dùng không được tìm thấy"));
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        Pageable pageable = PageRequest.of(
+                pageIndex,
+                pageSize,
+                Sort.by("createdAt").descending());
         Page<Booking> bookings = bookingRepository.findByUser(user, pageable);
 
         // List<BookingDTO> content = listOfBookings.stream().map((booking) -> mapToBookingDto(booking)).collect(Collectors.toList());
@@ -186,7 +190,10 @@ public class BookingSerImpl implements BookingSer {
     @Override
     public BookingResponse getAllBookings(int pageNo, int pageSize) {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        Pageable pageable = PageRequest.of(
+                pageIndex,
+                pageSize,
+                Sort.by("createdAt").descending());
         Page<Booking> bookings = bookingRepository.findAll(pageable);
 
         // List<BookingDTO> content = listOfBookings.stream().map((booking) -> mapToBookingDto(booking)).collect(Collectors.toList());

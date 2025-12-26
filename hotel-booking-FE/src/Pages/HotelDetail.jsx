@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Pagination, Typography, DatePicker, Divider, Button } from "antd";
+import { Modal, Tag, Pagination, Typography, DatePicker, Divider, Button, Tooltip } from "antd";
+import { formatMoney, formatDate } from "../utils/helper";
+import { Link } from "react-router-dom";
+
 import {
   CheckOutlined,
   LoadingOutlined,
@@ -26,21 +29,106 @@ import userplaceholder from "../assets/images/img-placeholder.jpg";
 
 const HotelDetail = () => {
   const { id } = useParams();
-
   const [hotelInfo, setHotelInfo] = useState(null);
   const [hotelReviews, setHotelReviews] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [owner, setOwner] = useState(null);
   const [userInfo, setUserInfo] = useState([]);
-
   const [checkIn, setCheckIn] = useState(null);
   const [checkOut, setCheckOut] = useState(null);// ngày check-in và check-out được chọn
   const [loadingRooms, setLoadingRooms] = useState(false); // trạng thái tải phòng
+  const [openRoomModal, setOpenRoomModal] = useState(false);// trạng thái mở modal chi tiết phòng
+  const [selectedRoom, setSelectedRoom] = useState(null);// phòng được chọn để xem chi tiết
+  const { Title, Text } = Typography;
   const [pagination, setPagination] = useState({
     pageNo: 1,
     pageSize: 5,
     totalElements: 0,
   });
+  // Thành phần hiển thị thẻ phòng
+  const RoomCardItem = ({ room, checkIn, checkOut, onViewDetail }) => {
+    const isDateSelected = checkIn && checkOut;
+    const isAvailable = room?.roomStatus === "AVAILABLE";
+
+    return (
+      <div
+        className="border rounded-xl p-4 hover:shadow-lg transition bg-white"
+        onClick={() => onViewDetail(room)}
+      >
+        <div className="flex flex-col md:flex-row gap-4">
+
+          {/* ===== IMAGE ===== */}
+          <div
+            className="w-full md:w-[220px] h-[150px] rounded-lg overflow-hidden cursor-pointer"
+
+          >
+            <img
+              src={`http://localhost:8080${room?.roomImageUrls?.[0]}`}
+              alt={room?.roomName}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* ===== INFO ===== */}
+          <div className="flex-1 flex flex-col justify-between">
+
+            <div>
+              <Title
+                level={5}
+                className="mb-1 cursor-pointer"
+                onClick={() => onViewDetail(room)}
+              >
+                {room?.roomName}
+              </Title>
+
+              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                <Text>Loại: <b>{room?.roomType}</b></Text>
+                <Text>{room?.roomOccupancy} người</Text>
+
+                <Tag color={isAvailable ? "green" : "red"}>
+                  {isAvailable ? "Còn trống" : "Đã đặt"}
+                </Tag>
+              </div>
+
+              <div className="mt-2 text-sm text-gray-500">
+                Trống từ ngày: <b>{formatDate(room?.dateAvailable)}</b>
+              </div>
+            </div>
+
+            {/* ===== PRICE + ACTION ===== */}
+            <div className="flex items-end justify-between mt-4">
+              <div>
+                <div className="text-gray-500 text-sm">Giá / đêm</div>
+                <div className="text-lg font-bold text-red-500">
+                  {formatMoney(room?.roomPricePerNight)} VND
+                </div>
+              </div>
+
+              <Button
+                type="primary"
+                disabled={!isDateSelected || !isAvailable}
+                onClick={() => onViewDetail(room)}
+              >
+                Xem chi tiết
+              </Button>
+            </div>
+
+            {!isDateSelected && (
+              <Text type="danger" className="text-sm mt-2">
+                Vui lòng chọn ngày để đặt phòng
+              </Text>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  //hiển thị ảnh
+  const images = hotelInfo?.hotelImageUrls || [];
+  const extraImages = images?.length - 5;
+  const [openGallery, setOpenGallery] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const token = localStorage.getItem("accessToken");
   const ownerId = hotelInfo?.ownerId;
@@ -95,6 +183,7 @@ const HotelDetail = () => {
   const handlePageChange = (page, pageSize) => {
     fetchReviews(page, pageSize);
   };
+  // Fetch hotel và rooms
   useEffect(() => {
     fetch(`http://localhost:8080/api/user/public/hotels/${id}`)
       .then((r) => r.json())
@@ -114,6 +203,8 @@ const HotelDetail = () => {
       .then((r) => r.json())
       .then(setOwner);
   }, [ownerId]);
+  console.log("owner(hoteldetail): ", owner);
+
 
   useEffect(() => {
     if (!hotelReviews.length) return;
@@ -145,25 +236,97 @@ const HotelDetail = () => {
           <Typography.Title level={1} className="mb-1">
             {hotelInfo.hotelName}
           </Typography.Title>
-          <p className="text-gray-500 italic">
-            {hotelInfo.hotelAddress}
-          </p>
-        </div>
-        {/* ===== OWNER ===== */}
-        <div className="flex items-center gap-4 p-4 border rounded-xl mb-10">
-          <img
-            src={owner?.urlImg || userplaceholder}
-            className="w-14 h-14 rounded-full object-cover"
-          />
-          <div>
-            <p className="font-semibold">
-              Chủ nhà: {owner?.fullname}
-            </p>
-            <p className="text-sm text-gray-500">
-              Superhost · {owner?.experienceInHospitality} năm kinh nghiệm
-            </p>
+
+          <div className="flex items-center gap-3 text-gray-500">
+            <span className="italic">{hotelInfo.hotelAddress}</span>
+            {hotelInfo.ratingPoint && (
+              <span className="font-medium text-blue-600">
+                ⭐ {hotelInfo.ratingPoint} ({hotelInfo.totalReview})
+              </span>
+            )}
           </div>
         </div>
+
+        {/* ===== IMAGE GALLERY ===== */}
+        {/* ===== IMAGE GALLERY ===== */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+
+          {/* Ảnh lớn */}
+          {images[0] && (
+            <img
+              src={`http://localhost:8080${images[0]}`}
+              onClick={() => {
+                setActiveIndex(0);
+                setOpenGallery(true);
+              }}
+              className="cursor-pointer md:col-span-2 h-[320px] w-full object-cover rounded-xl hover:opacity-95 transition"
+            />
+          )}
+
+          {/* Ảnh nhỏ */}
+          <div className="grid grid-cols-2 gap-4">
+            {images.slice(1, 5).map((url, i) => {
+              const realIndex = i + 1;
+
+              return (
+                <div key={i} className="relative">
+                  <img
+                    src={`http://localhost:8080${url}`}
+                    onClick={() => {
+                      setActiveIndex(realIndex);
+                      setOpenGallery(true);
+                    }}
+                    className="cursor-pointer h-[150px] w-full object-cover rounded-xl hover:opacity-90 transition"
+                  />
+
+                  {/* Overlay +X ảnh */}
+                  {i === 3 && extraImages > 0 && (
+                    <div
+                      onClick={() => {
+                        setActiveIndex(realIndex);
+                        setOpenGallery(true);
+                      }}
+                      className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl cursor-pointer"
+                    >
+                      <span className="text-white text-xl font-semibold">
+                        +{extraImages} ảnh
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+
+
+
+        {/* ===== HOTEL DESCRIPTION ===== */}
+
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+          <div className="md:col-span-2">
+            <Typography.Title level={3}>Về khách sạn</Typography.Title>
+            <p className="text-gray-600 leading-relaxed">
+              {hotelInfo.hotelDescription}
+            </p>
+          </div>
+
+          <div className="border rounded-xl p-4 flex items-center gap-4">
+            <img
+              src={owner?.urlImg || userplaceholder}
+              className="w-14 h-14 rounded-full object-cover"
+            />
+            <div>
+              <p className="font-semibold">{owner?.fullname}</p>
+              <p className="text-sm text-gray-500">
+                Superhost · {owner?.experienceInHospitality} năm kinh nghiệm
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* ===== DATE PICKER (BOOKING BAR) ===== */}
         <div className="sticky top-[80px] z-20 bg-white shadow-sm border rounded-xl p-4 mb-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 border rounded-xl bg-gray-50">
@@ -209,9 +372,7 @@ const HotelDetail = () => {
         </div>
 
         {/* ===== ROOMS ===== */}
-        <Typography.Title level={2} className="mt-8">
-          Danh sách phòng
-        </Typography.Title>
+        <Typography.Title level={3}>Phòng còn trống</Typography.Title>
 
         <div className="flex flex-col gap-6 mt-6">
           {loadingRooms ? (
@@ -221,21 +382,27 @@ const HotelDetail = () => {
           ) : rooms.length ? (
             rooms.map((room) => (
               <RoomCardItem
-                key={room.roomId}
                 room={room}
                 checkIn={checkIn}
                 checkOut={checkOut}
+                onViewDetail={(room) => {
+                  setSelectedRoom(room);
+                  setOpenRoomModal(true);
+                }}
               />
+
             ))
           ) : (
-            <p className="text-red-500 italic">
+            <p className="italic text-red-500">
               Không có phòng trống trong khoảng ngày đã chọn
             </p>
           )}
         </div>
 
 
-     {/* Đánh giá */}
+
+
+        {/* Đánh giá */}
         <div className="mt-4 flex flex-col items-center justify-center p-10">
           <span className="flex flex-row font-bold text-8xl justify-items-center">
             <img src={ratinglayout1} className="w-[70px]" srcset="" />
@@ -273,7 +440,7 @@ const HotelDetail = () => {
               </div>
             </div>
           ))}
-          <div className="flex justify-center mt-6">
+          {/* <div className="flex justify-center mt-6">
             <Pagination
               current={pagination.pageNo}
               pageSize={pagination.pageSize}
@@ -281,8 +448,144 @@ const HotelDetail = () => {
               onChange={handlePageChange}
               showSizeChanger={false}
             />
-          </div>
+          </div> */}
         </div>
+        {/* Modal gallery ảnh */}
+        <Modal
+          visible={openGallery}
+          onCancel={() => setOpenGallery(false)}
+          footer={null}
+          width={1000}
+          title={`Hình ảnh khách sạn (${activeIndex + 1}/${images.length})`}
+        >
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {images.map((url, i) => (
+              <img
+                key={i}
+                src={`http://localhost:8080${url}`}
+                className={`w-full h-[200px] object-cover rounded-lg cursor-pointer transition
+          ${i === activeIndex ? "ring-4 ring-blue-500" : ""}`}
+                onClick={() => setActiveIndex(i)}
+              />
+            ))}
+          </div>
+        </Modal>
+{/* Modal chi tiết phòng */}
+        <Modal
+          visible={openRoomModal}
+          onCancel={() => setOpenRoomModal(false)}
+          footer={null}
+          width={900}
+          destroyOnClose
+        >
+          {selectedRoom && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              {/* ===== LEFT: IMAGE GALLERY ===== */}
+              <div className="grid grid-cols-2 gap-3">
+                <img
+                  src={`http://localhost:8080${selectedRoom?.roomImageUrls?.[0]}`}
+                  alt="room"
+                  className="col-span-2 h-[240px] w-full object-cover rounded-xl"
+                />
+
+                {selectedRoom?.roomImageUrls?.slice(1, 5).map((url, index) => (
+                  <img
+                    key={index}
+                    src={`http://localhost:8080${url}`}
+                    alt={`room-${index}`}
+                    className="h-[110px] w-full object-cover rounded-lg"
+                  />
+                ))}
+              </div>
+
+              {/* ===== RIGHT: INFO ===== */}
+              <div className="flex flex-col justify-between">
+
+                <div>
+                  <Title level={4} className="mb-1">
+                    {selectedRoom?.roomName}
+                  </Title>
+
+                  <Text type="secondary">
+                    Loại phòng: <b>{selectedRoom?.roomType}</b>
+                  </Text>
+
+                  <Divider className="my-3" />
+
+                  {/* ===== Room Meta ===== */}
+                  <div className="space-y-2">
+                    <Text>
+                      Sức chứa: <b>{selectedRoom?.roomOccupancy} người</b>
+                    </Text>
+                    <br />
+
+                    <Text>
+                      Ngày trống gần nhất:{" "}
+                      <b>{formatDate(selectedRoom?.dateAvailable)}</b>
+                    </Text>
+                    <br />
+
+                    <Text>
+                      Trạng thái:{" "}
+                      <Tag
+                        color={
+                          selectedRoom?.roomStatus === "AVAILABLE"
+                            ? "green"
+                            : "red"
+                        }
+                      >
+                        {selectedRoom?.roomStatus === "AVAILABLE"
+                          ? "Còn trống"
+                          : "Đã được đặt"}
+                      </Tag>
+                    </Text>
+                  </div>
+
+                  <Divider className="my-4" />
+
+                  {/* ===== PRICE ===== */}
+                  <div>
+                    <Text className="text-gray-500">Giá mỗi đêm</Text>
+                    <div className="text-2xl font-bold text-red-500">
+                      {formatMoney(selectedRoom?.roomPricePerNight)} VND
+                    </div>
+                  </div>
+                </div>
+
+                {/* ===== ACTION ===== */}
+                <div className="mt-6">
+                  <Tooltip title="Vui lòng chọn ngày check-in và check-out">
+                    <Link
+                      to={`/hotels/${selectedRoom?.hotelId}/rooms/${selectedRoom?.roomId}/booking`}
+                      state={{ checkIn, checkOut }}
+                    >
+                      <Button
+                        type="primary"
+                        block
+                        size="large"
+                        disabled={!checkIn || !checkOut}
+                      >
+                        Đặt phòng
+                      </Button>
+                    </Link>
+                  </Tooltip>
+
+
+                  {!checkIn && (
+                    <Text type="danger" className="block mt-2 text-center">
+                      Vui lòng chọn ngày check-in & check-out
+                    </Text>
+                  )}
+                </div>
+
+              </div>
+            </div>
+          )}
+        </Modal>
+
+
 
         <Pagination
           className="mt-6 flex justify-center"

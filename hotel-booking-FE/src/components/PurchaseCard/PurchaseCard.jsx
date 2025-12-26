@@ -1,75 +1,53 @@
-import { Button, Col, Row, Typography, Tag, Card } from "antd";
+import { Button, Col, Row, Typography, Tag, Card, Divider } from "antd";
 import { formatDate, formatMoney } from "../../utils/helper";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 
 const PurchaseCard = ({ purchase }) => {
   const token = localStorage.getItem("accessToken");
-  const hotelId = purchase?.hotelId;
-  const roomId = purchase?.roomId;
+  const history = useHistory();
 
   const [hotel, setHotel] = useState({});
-  const [room, setRooms] = useState({});
+  const [room, setRoom] = useState({});
 
-  const history = useHistory();
-  const handleReview = (bookingId) => {
-    history.push(`/user/review/${bookingId}`);
+  const statusConfig = {
+    COMPLETED: { color: "green", label: "Hoàn thành" },
+    CANCELLED: { color: "red", label: "Đã hủy" },
+    PENDING: { color: "orange", label: "Đang xử lý" },
   };
 
-  const statusColor = {
-    COMPLETED: "green",
-    CANCELLED: "red",
-    PENDING: "orange",
+  const handleReview = () => {
+    history.push(`/user/review/${purchase.bookingId}`);
   };
 
   useEffect(() => {
-    const getHotel = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:8080/api/user/public/hotels/${hotelId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setHotel(await res.json());
-      } catch (err) {
-        console.error("Lỗi khi lấy thông tin khách sạn:", err);
-      }
-    };
+    if (!purchase) return;
 
-    const getRoom = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:8080/api/user/public/hotels/${hotelId}/rooms/${roomId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setRooms(await res.json());
-      } catch (err) {
-        console.error("Lỗi khi lấy thông tin phòng:", err);
-      }
-    };
+    fetch(`http://localhost:8080/api/user/public/hotels/${purchase.hotelId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then(setHotel);
 
-    getHotel();
-    getRoom();
-  }, [hotelId, roomId, token]);
+    fetch(
+      `http://localhost:8080/api/user/public/hotels/${purchase.hotelId}/rooms/${purchase.roomId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+      .then((r) => r.json())
+      .then(setRoom);
+  }, [purchase, token]);
 
   return (
     <Card
-      className="w-full rounded-xl shadow-md hover:shadow-lg transition-all"
-      bodyStyle={{ padding: "20px" }}
+      className="rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100"
+      bodyStyle={{ padding: 20 }}
     >
-      <Row gutter={[16, 16]} align="middle">
-        {/* Hotel Name */}
-        <Col sm={6}>
-          <Typography.Title level={5} className="mb-1">
+      {/* Header */}
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Typography.Title level={5} className="mb-0">
             {hotel.hotelName}
           </Typography.Title>
           <Typography.Text type="secondary">
@@ -77,58 +55,52 @@ const PurchaseCard = ({ purchase }) => {
           </Typography.Text>
         </Col>
 
-        {/* Check-in */}
-        <Col sm={4}>
+        <Col>
+          <Tag
+            color={statusConfig[purchase.status]?.color}
+            className="px-4 py-1 text-sm font-medium"
+          >
+            {statusConfig[purchase.status]?.label}
+          </Tag>
+        </Col>
+      </Row>
+
+      <Divider className="my-4" />
+
+      {/* Info */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={8}>
           <Typography.Text type="secondary">Check-in</Typography.Text>
-          <div>
-            <Tag color="blue" className="mt-1 text-base px-3 py-1">
-              {formatDate(purchase.checkinDate)}
-            </Tag>
+          <div className="font-medium">
+            {formatDate(purchase.checkinDate)}
           </div>
         </Col>
 
-        {/* Check-out */}
-        <Col sm={4}>
+        <Col xs={24} sm={8}>
           <Typography.Text type="secondary">Check-out</Typography.Text>
-          <div>
-            <Tag color="blue" className="mt-1 text-base px-3 py-1">
-              {formatDate(purchase.checkoutDate)}
-            </Tag>
+          <div className="font-medium">
+            {formatDate(purchase.checkoutDate)}
           </div>
         </Col>
 
-        {/* Status */}
-        <Col sm={4}>
-          <Typography.Text type="secondary">Trạng thái</Typography.Text>
-          <div>
-            <Tag
-              color={statusColor[purchase.status] || "default"}
-              className="mt-1 text-base px-4 py-1"
-            >
-              {purchase.status}
-            </Tag>
-          </div>
-        </Col>
-
-        {/* Price */}
-        <Col sm={4}>
+        <Col xs={24} sm={8}>
           <Typography.Text type="secondary">Tổng tiền</Typography.Text>
-          <div className="mt-1 font-semibold text-lg">
+          <div className="font-bold text-lg text-red-500">
             {formatMoney(purchase.totalPrice)} VNĐ
           </div>
         </Col>
+      </Row>
 
-        {/* Action */}
-        <Col sm={4} className="text-right">
-          <Button
-            type="primary"
-            disabled={!purchase.canReview}
-            onClick={() => handleReview(purchase.bookingId)}
-            style={{ width: "100%", height: 40, fontWeight: 500 }}
-          >
-            {purchase.canReview ? "Đánh giá" : "Không thể đánh giá"}
-          </Button>
-        </Col>
+      {/* Action */}
+      <Row justify="end" className="mt-5">
+        <Button
+          type="primary"
+          disabled={!purchase.canReview}
+          onClick={handleReview}
+          className="min-w-[140px] h-[40px] font-medium"
+        >
+          {purchase.canReview ? "Đánh giá" : "Không thể đánh giá"}
+        </Button>
       </Row>
     </Card>
   );
