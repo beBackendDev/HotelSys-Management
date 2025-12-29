@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Tag, Pagination, Typography, DatePicker, Divider, Button, Tooltip } from "antd";
 import { formatMoney, formatDate } from "../utils/helper";
 import { Link } from "react-router-dom";
+import moment from "moment";
 
 import {
   CheckOutlined,
@@ -216,6 +217,7 @@ const HotelDetail = () => {
       )
     ).then(setUserInfo);
   }, [hotelReviews]);
+  console.log("userinf : ", hotelReviews);
 
   if (!hotelInfo) {
     return (
@@ -337,13 +339,18 @@ const HotelDetail = () => {
               </p>
             </div>
 
+
             <DatePicker.RangePicker
               className="w-full md:w-[320px]"
+              disabledDate={(current) =>
+                current && current < moment().startOf("day")
+              }
               onChange={(dates) => {
                 setCheckIn(dates?.[0]);
                 setCheckOut(dates?.[1]);
               }}
             />
+
 
             <Button
               type="primary"
@@ -365,7 +372,8 @@ const HotelDetail = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 mb-12">
           {hotelInfo.hotelFacilities?.map((f) => (
             <div key={f.id} className="flex items-center gap-2 text-gray-700">
-              <span className="text-blue-500">{iconMap[f.icon]}</span>
+              <span className="text-blue-500">{iconMap[f.icon] || <CheckOutlined />}
+              </span>
               <span>{f.name}</span>
             </div>
           ))}
@@ -387,6 +395,8 @@ const HotelDetail = () => {
                 checkOut={checkOut}
                 onViewDetail={(room) => {
                   setSelectedRoom(room);
+                  console.log("room(hoteldetaial): ", room);
+
                   setOpenRoomModal(true);
                 }}
               />
@@ -424,7 +434,7 @@ const HotelDetail = () => {
               {/* Nội dung */}
               <div>
                 {/* Tên + mô tả */}
-                <h3 className="font-semibold">{userInfo?.[index]?.fullname}</h3>
+                <h3 className="font-semibold">{hotelReviews?.[index]?.fullName}</h3>
                 <p className="text-sm text-gray-500">Thành viên đã tham gia từ lâu</p>
 
                 {/* Rating + thời gian */}
@@ -471,7 +481,7 @@ const HotelDetail = () => {
             ))}
           </div>
         </Modal>
-{/* Modal chi tiết phòng */}
+        {/* Modal chi tiết phòng */}
         <Modal
           visible={openRoomModal}
           onCancel={() => setOpenRoomModal(false)}
@@ -544,6 +554,30 @@ const HotelDetail = () => {
                   </div>
 
                   <Divider className="my-4" />
+                  {/* ===== ROOM FACILITIES ===== */}
+                  {selectedRoom?.roomFacilities?.length > 0 && (
+                    <>
+                      <div>
+                        <Text className="font-medium">Tiện ích phòng</Text>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
+                          {selectedRoom.roomFacilities.map((facility, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 text-gray-600"
+                            >
+                              {/* ICON (nếu dùng Ant Icon name) */}
+                              <span className="text-blue-500">
+                                {iconMap?.[facility?.icon] || <CheckOutlined />}
+                              </span>
+
+                              {/* NAME */}
+                              <span className="text-sm">{facility.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) || "Phòng không có tiện ích đặc biệt nào."}
 
                   {/* ===== PRICE ===== */}
                   <div>
@@ -558,8 +592,13 @@ const HotelDetail = () => {
                 <div className="mt-6">
                   <Tooltip title="Vui lòng chọn ngày check-in và check-out">
                     <Link
-                      to={`/hotels/${selectedRoom?.hotelId}/rooms/${selectedRoom?.roomId}/booking`}
-                      state={{ checkIn, checkOut }}
+                      to={{
+                        pathname: `/hotels/${selectedRoom?.hotelId}/rooms/${selectedRoom?.roomId}/booking`,
+                        state: {
+                          checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : null,
+                          checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : null,
+                        }
+                      }}
                     >
                       <Button
                         type="primary"
@@ -567,7 +606,7 @@ const HotelDetail = () => {
                         size="large"
                         disabled={!checkIn || !checkOut}
                       >
-                        Đặt phòng
+                        Đặt phòng.
                       </Button>
                     </Link>
                   </Tooltip>

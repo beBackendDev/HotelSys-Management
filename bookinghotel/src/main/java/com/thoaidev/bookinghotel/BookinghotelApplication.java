@@ -15,11 +15,7 @@ public class BookinghotelApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BookinghotelApplication.class, args);
-		// ApplicationContext context = SpringApplication.run(BookinghotelApplication.class, args);
-		// HotelRepository hotelRepository = context.getBean(HotelRepository.class);
-        // System.out.println("findAll: ");
-        // hotelRepository.findAll()
-        //               .forEach(System.out::println);
+		
 	}
 
 }

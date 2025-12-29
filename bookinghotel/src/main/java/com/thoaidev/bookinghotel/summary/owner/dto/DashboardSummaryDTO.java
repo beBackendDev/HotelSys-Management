@@ -13,6 +13,7 @@ public class DashboardSummaryDTO {
     private BigDecimal totalRevenue; //Tổng doanh thu 
     private Integer totalBookings; //tổng số booking
     private Integer totalRooms; //tổng phòng
-    private Double occupancyRate; //sức chứa
+    private Double occupancyRate; //ti le dat phong
+    private Double revenueGrowthRate; //tăng trưởng doanh thu
     private Integer cancelledBookings; //tổng booking canceled 
 }

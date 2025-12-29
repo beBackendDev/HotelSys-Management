@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
+import com.thoaidev.bookinghotel.model.common.RoomFacility;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.hotel.HotelSpecification;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -52,7 +53,7 @@ public class RoomServiceImplement implements RoomService {
     public List<RoomDto> getRoomByHotelId(Integer id) {
         List<Room> rooms = roomRepository.findByHotel_HotelId(id);
         return rooms.stream()
-                .map(room -> mapToRoomDto(room))
+                .map(room -> roomMapper.mapToRoomDTO(room))
                 .collect(Collectors.toList());
     }
 
@@ -66,22 +67,23 @@ public class RoomServiceImplement implements RoomService {
             throw new NotFoundException("Đối tượng Room không tồn tại trong Hotel");
         }
 
-        return mapToRoomDto(room);
+        return roomMapper.mapToRoomDTO(room);
     }
 
 //POST methods
+    //Tao moi phong trong 1 hotel
     @Override
     public RoomDto createRoom(Integer hotelId, RoomDto roomDto) {
         Hotel hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
 
         Room room = new Room();
+        room.setHotel(hotel);// thiết lập liên kết với Hotel
         room.setRoomId(roomDto.getRoomId());
         room.setRoomName(roomDto.getRoomName());
         room.setRoomOccupancy(roomDto.getRoomOccupancy());
         room.setRoomStatus(RoomStatus.AVAILABLE); // Mặc định
         room.setRoomType(roomDto.getRoomType());
         room.setRoomPricePerNight(roomDto.getRoomPricePerNight());
-        room.setHotel(hotel);
 
 //  Gán danh sách ảnh
         List<Image> imageEntities = Optional.ofNullable(roomDto.getRoomImageUrls())
@@ -95,8 +97,25 @@ public class RoomServiceImplement implements RoomService {
 
         room.setRoomImages(imageEntities);
 
+        //Room Facilities 
+        if (roomDto.getRoomFacilities() != null) {
+            room.setFacilities(
+                    roomDto.getRoomFacilities().stream()
+                            .map(f -> {
+                                RoomFacility facility = new RoomFacility();
+                                facility.setRoom(room);
+                                facility.setId(f.getId());
+                                facility.setIcon(f.getIcon());
+                                facility.setName(f.getName());
+
+                                return facility; // Thay thế bằng logic chuyển đổi thực tế
+                            })
+                            .collect(Collectors.toList())
+            );
+        }
+
         Room createdRoom = roomRepository.save(room);
-        return mapToRoomDto(createdRoom);
+        return roomMapper.mapToRoomDTO(createdRoom);
 
     }
 //UPDATE methods
@@ -156,7 +175,7 @@ public class RoomServiceImplement implements RoomService {
         room.setHotel(hotel);
 
         Room updatedRoom = roomRepository.save(room);
-        return mapToRoomDto(updatedRoom);
+        return roomMapper.mapToRoomDTO(updatedRoom);
     }
 
     //Filter

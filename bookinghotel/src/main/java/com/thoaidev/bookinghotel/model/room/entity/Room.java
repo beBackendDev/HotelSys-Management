@@ -29,6 +29,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -75,6 +76,7 @@ public class Room {
     private List<Booking> bookings;
 
     // Quan hệ 1-N với RoomFacility
+    @ToString.Exclude
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomFacility> facilities = new ArrayList<>();
 }

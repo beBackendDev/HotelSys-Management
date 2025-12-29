@@ -1,5 +1,5 @@
 import { Card, Typography, Tag } from "antd";
-import { formatMoney } from "../../utils/helper";
+import { formatMoney } from "../../../utils/helper";
 
 const { Text } = Typography;
 

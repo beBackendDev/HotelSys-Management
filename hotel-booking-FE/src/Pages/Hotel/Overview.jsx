@@ -6,7 +6,9 @@ import OverviewCard from "../../components/OverviewCard/OverviewCard";
 import DashboardLayout from "../../core/layout/Dashboard";
 import { formatMoney } from "../../utils/helper";
 import ChartView from "../ChartView";
-import TrendingRoomCard from "../../Pages/Hotel/TrendingRoomCard";
+import TrendingRoomCard from "./Overview/TrendingRoomCard";
+import DailyRevenueChart from "./Overview/DailyRevenueChart";
+import moment from "moment";
 
 
 const Overview = () => {
@@ -24,12 +26,23 @@ const Overview = () => {
     cancelledBookings: 0,
   });
 
+  const [chartData, setChartData] = useState([]);
   const [stats, setStats] = useState({});
   const [trendingRooms, setTrendingRooms] = useState([]);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [year, setYear] = useState(new Date().getFullYear());
   const [selectedHotelId, setSelectedHotelId] = useState("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // Format chart data
+const formattedData = Array.isArray(chartData)
+  ? chartData.map(item => ({
+      date: moment(item.date).format("DD/MM"),
+      revenue: item.totalRevenue || 0,
+      booking: item.totalBooking || 0
+    }))
+  : [];
+
 
   const effectiveHotelId = useMemo(
     () =>
@@ -38,8 +51,40 @@ const Overview = () => {
         : undefined,
     [selectedHotelId]
   );
+  useEffect(() => {
+    const fetchDailyRevenue = async () => {
+
+      try {
+        const token = localStorage.getItem("accessToken");
+        const query = new URLSearchParams({
+          month,
+          year,
+          // hotelId: effectiveHotelId,
+          ...(effectiveHotelId && { hotelId: effectiveHotelId }),
+        }).toString();
+        const res = await fetch(
+          `http://localhost:8080/api/dashboard/owner/revenue-daily?${query}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log("param: ", query);
+
+        const data = await res.json();
+        console.log("daily revenue : ", data);
+
+        setChartData(data);
+      } catch (e) {
+        setError("Không thể tải dữ liệu chart");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDailyRevenue();
+  }, [month, year, effectiveHotelId]);
+
 
   useEffect(() => {
+    // Fetch summary data
     const fetchSummary = async () => {
       setLoading(true);
       setError(null);
@@ -78,38 +123,42 @@ const Overview = () => {
 
     fetchSummary();
   }, [month, effectiveHotelId]);
-useEffect(() => {
-  const fetchTrendingRooms = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
 
-      const query = new URLSearchParams({
-        month,
-        ...(effectiveHotelId && { hotelId: effectiveHotelId }),
-        limit: 5,
-      }).toString();
 
-      const response = await fetch(
-        `http://localhost:8080/api/dashboard/owner/trending-rooms?${query}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  useEffect(() => {
+    // Fetch trending rooms data  
+    const fetchTrendingRooms = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
 
-      if (!response.ok) throw new Error();
+        const query = new URLSearchParams({
+          month,
+          ...(effectiveHotelId && { hotelId: effectiveHotelId }),
+          limit: 5,
+        }).toString();
 
-      const data = await response.json();
-      setTrendingRooms(data);
+        const response = await fetch(
+          `http://localhost:8080/api/dashboard/owner/trending-rooms?${query}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-    } catch (e) {
-      console.error("Fetch trending rooms failed", e);
-    }
-  };
+        if (!response.ok) throw new Error();
 
-  fetchTrendingRooms();
-}, [month, effectiveHotelId]);
+        const data = await response.json();
+        setTrendingRooms(data);
+
+      } catch (e) {
+        console.error("Fetch trending rooms failed", e);
+      }
+    };
+
+    fetchTrendingRooms();
+  }, [month, effectiveHotelId]);
+
 
   return (
     <DashboardLayout>
@@ -197,36 +246,37 @@ useEffect(() => {
             </Col>
 
             <Col xs={24} lg={16}>
-    <ChartView
-      stats={stats}
-      month={month}
-      hotelId={effectiveHotelId}
-    />
-  </Col>
+              <DailyRevenueChart
+                data={formattedData}
+                stats={stats}
+                month={month}
+                hotelId={effectiveHotelId}
+              />
+            </Col>
 
-  {/* TRENDING ROOMS */}
-  <Col xs={24} lg={8}>
-    <Typography.Title level={5}>
-      🔥 Phòng được đặt nhiều nhất
-    </Typography.Title>
+            {/* TRENDING ROOMS */}
+            <Col xs={24} lg={8}>
+              <Typography.Title level={5}>
+                🔥 Phòng được đặt nhiều nhất
+              </Typography.Title>
 
-    {trendingRooms.length === 0 && (
-      <Typography.Text type="secondary">
-        Chưa có dữ liệu
-      </Typography.Text>
-    )}
+              {trendingRooms.length === 0 && (
+                <Typography.Text type="secondary">
+                  Chưa có dữ liệu
+                </Typography.Text>
+              )}
 
-    {trendingRooms.map((room) => (
-      <TrendingRoomCard
-        key={room.roomId}
-        room={room}
-      />
-    ))}
-  </Col>
+              {trendingRooms.map((room) => (
+                <TrendingRoomCard
+                  key={room.roomId}
+                  room={room}
+                />
+              ))}
+            </Col>
           </Row>
 
           {/* CHART */}
-          
+
           <div className="mt-8">
             <ChartView
               stats={stats}

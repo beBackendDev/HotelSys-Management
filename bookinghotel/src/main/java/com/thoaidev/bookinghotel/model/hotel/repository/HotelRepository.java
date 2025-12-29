@@ -38,4 +38,11 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer>, JpaSpeci
 """)
     Integer countHotels(Integer ownerId);
 
+      @Query("""
+        SELECT h.hotelId
+        FROM Hotel h
+        WHERE h.owner.userId = :ownerId
+    """)
+    List<Integer> findHotelIdsByOwnerId(@Param("ownerId") Integer ownerId);
+
 }

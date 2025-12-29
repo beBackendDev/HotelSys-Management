@@ -2,6 +2,7 @@ package com.thoaidev.bookinghotel.summary.owner.service;
 
 import java.util.List;
 
+import com.thoaidev.bookinghotel.summary.owner.dto.DailyRevenueDto;
 import com.thoaidev.bookinghotel.summary.owner.dto.DashboardSummaryDTO;
 import com.thoaidev.bookinghotel.summary.owner.dto.DashboardTrendingRoomDTO;
 
@@ -18,4 +19,6 @@ public interface DashboardService {
             Integer year,
             int limit
     );
+
+    public List<DailyRevenueDto> getDailyRevenue(Integer ownerId, Integer hotelId, int year, int month);
 }

@@ -1,0 +1,34 @@
+.chartWrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #262626;
+  }
+}
+
+.chart {
+  :global(.recharts-cartesian-grid line) {
+    stroke: #f0f0f0;
+  }
+
+  :global(.recharts-tooltip-wrapper) {
+    font-size: 13px;
+  }
+
+  :global(.recharts-default-tooltip) {
+    background-color: #ffffff !important;
+  }
+}

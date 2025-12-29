@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import com.thoaidev.bookinghotel.model.common.RoomFacilityDTO;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 
 import lombok.Builder;
@@ -22,7 +23,7 @@ public class RoomDto {
     private LocalDate dateAvailable;
     private RoomStatus roomStatus;
     private BigDecimal roomPricePerNight;
-
+    private List<RoomFacilityDTO> roomFacilities;
     // private Hotel hotel;
     private Integer hotelId;// chỉ cần lấy hotelId trong Dto để truy vấn
 

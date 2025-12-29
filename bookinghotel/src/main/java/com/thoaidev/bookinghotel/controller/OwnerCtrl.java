@@ -24,8 +24,6 @@ import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
-import com.thoaidev.bookinghotel.model.notification.dto.NotificationDTO;
-import com.thoaidev.bookinghotel.model.notification.entity.Notifications;
 import com.thoaidev.bookinghotel.model.notification.mapper.NotificationMapper;
 import com.thoaidev.bookinghotel.model.notification.repository.NotificationRepository;
 import com.thoaidev.bookinghotel.model.notification.service.NotificationService;
@@ -37,6 +35,7 @@ import com.thoaidev.bookinghotel.model.review.service.ReviewSer;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.service.RoomService;
 import com.thoaidev.bookinghotel.security.jwt.CustomUserDetail;
+import com.thoaidev.bookinghotel.summary.owner.dto.DailyRevenueDto;
 import com.thoaidev.bookinghotel.summary.owner.dto.DashboardSummaryDTO;
 import com.thoaidev.bookinghotel.summary.owner.service.DashboardService;
 
@@ -73,7 +72,19 @@ public class OwnerCtrl {
 // GET /owner/occupancy
 // GET /owner/top-rooms (x)
 // GET /owner/summary
+    @GetMapping("/owner/revenue-daily")
+    public List<DailyRevenueDto> getDailyRevenue(
+            @AuthenticationPrincipal CustomUserDetail owner,
+            @RequestParam(required = false) Integer hotelId,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month
+    ) {
+        Integer ownerId = owner.getId();
+
+        return dashboardService.getDailyRevenue(ownerId, hotelId, year, month);
+    }
 //Xem tổng quan các thông tin tổng quan (tổng booking, doanh thu, tỉ lệ đặt phòng..)
+
     @GetMapping("/owner/summary")
     public DashboardSummaryDTO getSummary(
             @AuthenticationPrincipal CustomUserDetail owner,
@@ -123,7 +134,6 @@ public class OwnerCtrl {
     public ResponseEntity<?> getLatest(
             @AuthenticationPrincipal CustomUserDetail owner
     ) {
-        
 
         return new ResponseEntity<>(notificationService.getNotifications(owner.getId()), HttpStatus.OK);
     }

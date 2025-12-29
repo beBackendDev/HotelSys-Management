@@ -31,6 +31,8 @@ const Booking = () => {
     return current && current < moment().startOf("day");
   };
   //Hàm chặn người dùng chọn ngày checkout < checkin
+  //
+
 
   const disableCheckoutDates = (current) => {
     if (!checkin) return current < moment().startOf("day");
@@ -41,7 +43,23 @@ const Booking = () => {
   const [checkout, setCheckout] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const location = useLocation();
-  const { checkIn, checkOut, totalPrice } = location.state || {};
+  const { checkIn, checkOut } = location.state || {};
+  // Hàm định dạng ngày từ "YYYY-MM-DD" sang "DD-MM-YYYY"
+  const formatDate = (dateStr) =>
+  dateStr ? moment(dateStr, "YYYY-MM-DD").format("DD-MM-YYYY") : "";
+
+  console.log("in out: ",checkIn, checkOut);
+  
+  // useEffect(() => {
+  //   if (!checkIn || !checkOut) {
+  //     Modal.warning({
+  //       title: "Thiếu thông tin ngày",
+  //       content: "Vui lòng quay lại trang khách sạn để chọn ngày.",
+  //       onOk: () => history.goBack(),
+  //     });
+  //   }
+  // }, [checkIn, checkOut]);
+
   console.log("state values: ", location);
   // Load checkin/out từ localStorage
   useEffect(() => {
@@ -58,7 +76,7 @@ const Booking = () => {
 
   const onFinish = async (values) => {
     // Validate lại: checkin/checkout bắt buộc
-    if (!checkin || !checkout) {
+    if (!checkIn || !checkOut) {
       toast.error("Vui lòng chọn ngày nhận/trả phòng trước khi đặt!");
       return;
     }
@@ -68,41 +86,41 @@ const Booking = () => {
     // const formattedBirthday = birthday ? birthday.format("YYYY-MM-DD") : null;
     const _val = {
       ...values,
-      checkinDate: checkin,
-      checkoutDate: checkout,
+      checkinDate: checkIn,
+      checkoutDate: checkOut,
       user_id,
       hotelId: Number(hotelId),
       roomId: Number(roomId),
     };
 
     try {
-  const res = await fetch(`http://localhost:8080/api/user/hotels/bookings`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    body: JSON.stringify(_val),
-  });
+      const res = await fetch(`http://localhost:8080/api/user/hotels/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(_val),
+      });
 
-  // Nếu HTTP status là lỗi → ném lỗi ngay
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.message || "Đã xảy ra lỗi không xác định");
-  }
+      // Nếu HTTP status là lỗi → ném lỗi ngay
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Đã xảy ra lỗi không xác định");
+      }
 
-  const result = await res.json();
-  console.log("booking res:", result);
+      const result = await res.json();
+      console.log("booking res:", result);
 
-  const bookingId = result?.bookingId;
-  history.push(`/payment/${bookingId}`);
+      const bookingId = result?.bookingId;
+      history.push(`/payment/${bookingId}`);
 
-  toast.success("Đăng ký giữ chỗ thành công, vui lòng thực hiện thanh toán.");
+      toast.success("Đăng ký giữ chỗ thành công, vui lòng thực hiện thanh toán.");
 
-} catch (error) {
-  console.error("ERROR:", error);
-  toast.error(error.message); // HIỂN THỊ LỖI ĐÚNG FORMAT
-}
+    } catch (error) {
+      console.error("ERROR:", error);
+      toast.error(error.message); // HIỂN THỊ LỖI ĐÚNG FORMAT
+    }
 
   };
 
@@ -197,38 +215,29 @@ const Booking = () => {
                   {/* Nếu chưa có checkin/checkout thì render luôn input */}
 
                   <div className="flex gap-4">
-                    <Form.Item
-                      label="Ngày nhận phòng"
-                      name="checkinDate"
-                      rules={[
-                        { required: true, message: "Vui lòng chọn ngày nhận phòng" },
-                      ]}
-                    >
-                      <DatePicker
-                        format="YYYY-MM-DD"
-                        disabledDate={disabledPreviousDates}
-                        onChange={(date, dateString) => setCheckin(dateString)}
-                      />
+                    <Form.Item label="Thời gian lưu trú">
+                      <Input.Group compact>
+                        <Input
+                          value={formatDate(checkIn)}
+                          disabled
+                          style={{ width: "50%" }}
+                          placeholder="Ngày nhận phòng"
+                        />
+                        <Input
+                          value={formatDate(checkOut)}
+                          disabled
+                          style={{ width: "50%" }}
+                          placeholder="Ngày trả phòng"
+                        />
+                      </Input.Group>
                     </Form.Item>
 
-                    <Form.Item
-                      label="Ngày trả phòng"
-                      name="checkoutDate"
-                      rules={[
-                        { required: true, message: "Vui lòng chọn ngày trả phòng" },
-                      ]}
-                    >
-                      <DatePicker
-                        format="YYYY-MM-DD"
-                        disabledDate={disableCheckoutDates}
-                        onChange={(date, dateString) => setCheckout(dateString)}
-                      />
-                    </Form.Item>
+
                   </div>
 
-                  {checkin && checkout && (
+                  {checkIn && checkOut && (
                     <p className="text-gray-600 mt-2">
-                      Ngày nhận: <b>{checkin}</b> | Ngày trả: <b>{checkout}</b>
+                      Ngày nhận: <b>{checkIn}</b> | Ngày trả: <b>{checkOut}</b>
                     </p>
                   )}
 
