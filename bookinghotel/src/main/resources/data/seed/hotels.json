@@ -1,0 +1,830 @@
+[
+        {
+        "hotelName": "Hotel Template - Khách sạn ở Eo Gió, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 2,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template - Khách sạn ở Eo Gió, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 2,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template - Khách sạn ở Eo Gió, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 2,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template - Khách sạn ở Eo Gió, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 2,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template - Khách sạn ở Eo Gió, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 2,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template - Khách sạn ở Eo Gió, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 2,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template - Khách sạn ở Eo Gió, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 2,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    }
+
+,
+     {
+        "hotelName": "Hotel Template 2 - Khách sạn ở Kỳ Co, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 3,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template 2 - Khách sạn ở Kỳ Co, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 3,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template 2 - Khách sạn ở Kỳ Co, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 3,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template 2 - Khách sạn ở Kỳ Co, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 3,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template 2 - Khách sạn ở Kỳ Co, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 3,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template 2 - Khách sạn ở Kỳ Co, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 3,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    },
+        {
+        "hotelName": "Hotel Template 2 - Khách sạn ở Kỳ Co, Quy Nhơn",
+        "hotelAddress": "Đường số 5, Nhơn Lý, Quy Nhơn, Bình Định, Việt Nam",
+        "hotelAveragePrice": 800.00,
+        "hotelFacilities": [
+            {
+                "icon": "WifiOutlined",
+                "name": "Wi-Fi miễn phí"
+            },
+            {
+                "icon": "CarFilled",
+                "name": "Bãi giữ xe miễn phí"
+            },
+            {
+                "icon": "ShopFilled",
+                "name": "Gần khu trung tâm"
+            },
+            {
+                "icon": "SunFilled",
+                "name": "Góc nhìn hướng ra biển"
+            },
+            {
+                "icon": "LikeFilled",
+                "name": "Phòng tắm xông hơi miễn phí"
+            },
+            {
+                "icon": "ScheduleFilled",
+                "name": "Check-in Check-out dễ dàng"
+            },
+            {
+                "icon": "SmileFilled",
+                "name": "Có điều hòa nhiệt độ"
+            }
+        ],
+        "ratingPoint": 0.0,
+        "totalReview": 0,
+        "hotelStatus": "AVAILABLE",
+        "hotelContactMail": "FLCHotelCenter@gmail.com",
+        "hotelContactPhone": "02563845845",
+        "hotelDescription": "Tọa lạc ngay bên bờ biển xanh mát, khách sạn mang đến cho du khách trải nghiệm nghỉ dưỡng tuyệt vời với tầm nhìn toàn cảnh đại dương. Mỗi phòng đều được thiết kế tinh tế, ban công hướng biển, nơi bạn có thể ngắm bình minh rực rỡ hay hoàng hôn lãng mạn ngay tại không gian riêng tư của mình. Bên cạnh đó, hồ bơi vô cực, nhà hàng hải sản tươi ngon và dịch vụ tận tâm sẽ mang đến cho bạn kỳ nghỉ trọn vẹn, đẳng cấp và đáng nhớ.",
+        "hotelImageUrls": [
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004058.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004121.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004138.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004154.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-11-24 004208.png",
+            "/uploads/HappinessHotel/hotels/1/Screenshot 2025-07-28 232537.png"
+        ],
+        "hotelCreatedAt": "2025-11-15T23:29:10",
+        "hotelUpdatedAt": "2025-12-07T23:40:42",
+        "ownerId": 3,
+        "owner": {
+            "username": "phamquocthoai7a4@gmail.com",
+            "fullname": "devThoiOwner",
+            "businessLicenseNumber": "2151067585",
+            "experienceInHospitality": 7,
+            "ownerDescription": "Được học hỏi kiến thức chuyên sâu về lĩnh vực F&B và có kinh nghiệm nhiều năm làm việc trong các khách sạn nổi tiếng ở trong và ngoài nước. "
+        }
+    }
+]

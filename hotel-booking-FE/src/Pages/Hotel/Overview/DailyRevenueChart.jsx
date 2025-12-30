@@ -11,12 +11,12 @@ import styles from "./DailyRevenue.module.scss";
 
 const DailyRevenueChart = ({ data = [] }) => {
   return (
-    <div className={styles.chartWrapper}>
+    <div style={{ height: 360 }} className={styles.chartWrapper}>
       <div className={styles.header}>
         <h3>📈 Doanh thu & Booking theo ngày</h3>
       </div>
 
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%">
         <LineChart data={data} className={styles.chart}>
           <XAxis
             dataKey="date"

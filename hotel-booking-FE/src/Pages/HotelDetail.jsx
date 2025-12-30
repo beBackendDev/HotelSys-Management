@@ -49,7 +49,7 @@ const HotelDetail = () => {
   // Thành phần hiển thị thẻ phòng
   const RoomCardItem = ({ room, checkIn, checkOut, onViewDetail }) => {
     const isDateSelected = checkIn && checkOut;
-    const isAvailable = room?.roomStatus === "AVAILABLE";
+    // const isAvailable = room?.roomStatus === "AVAILABLE";
 
     return (
       <div
@@ -86,14 +86,14 @@ const HotelDetail = () => {
                 <Text>Loại: <b>{room?.roomType}</b></Text>
                 <Text>{room?.roomOccupancy} người</Text>
 
-                <Tag color={isAvailable ? "green" : "red"}>
+                {/* <Tag color={isAvailable ? "green" : "red"}>
                   {isAvailable ? "Còn trống" : "Đã đặt"}
-                </Tag>
+                </Tag> */}
               </div>
 
-              <div className="mt-2 text-sm text-gray-500">
+              {/* <div className="mt-2 text-sm text-gray-500">
                 Trống từ ngày: <b>{formatDate(room?.dateAvailable)}</b>
-              </div>
+              </div> */}
             </div>
 
             {/* ===== PRICE + ACTION ===== */}
@@ -105,13 +105,14 @@ const HotelDetail = () => {
                 </div>
               </div>
 
-              <Button
+              {/* <Button
                 type="primary"
-                disabled={!isDateSelected || !isAvailable}
+                // disabled={!isDateSelected || !isAvailable}
+                disabled={!isDateSelected}
                 onClick={() => onViewDetail(room)}
               >
                 Xem chi tiết
-              </Button>
+              </Button> */}
             </div>
 
             {!isDateSelected && (
@@ -531,13 +532,13 @@ const HotelDetail = () => {
                     </Text>
                     <br />
 
-                    <Text>
+                    {/* <Text>
                       Ngày trống gần nhất:{" "}
                       <b>{formatDate(selectedRoom?.dateAvailable)}</b>
-                    </Text>
+                    </Text> */}
                     <br />
 
-                    <Text>
+                    {/* <Text>
                       Trạng thái:{" "}
                       <Tag
                         color={
@@ -550,7 +551,7 @@ const HotelDetail = () => {
                           ? "Còn trống"
                           : "Đã được đặt"}
                       </Tag>
-                    </Text>
+                    </Text> */}
                   </div>
 
                   <Divider className="my-4" />

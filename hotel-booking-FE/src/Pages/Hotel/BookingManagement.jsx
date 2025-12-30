@@ -71,6 +71,12 @@ const BookingManagement = () => {
                 return "user";
         }
     };
+    // Pagination state (if needed in future)
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 10,
+        total: 0,
+    });
 
     /* ================= WEBSOCKET ================= */
     useEffect(() => {
@@ -308,6 +314,16 @@ const BookingManagement = () => {
 
     const columns = [
         {
+            title: "STT",
+            width: 60,
+            render: (_, __, index) =>
+                (pagination.current - 1) * pagination.pageSize + index + 1,
+        },
+        {
+            title: "Tên phòng",
+            dataIndex: "roomName",
+        },
+        {
             title: "Booking",
             render: (_, r) => (
                 <Tag color="blue">{r.bookingId}</Tag>
@@ -419,7 +435,8 @@ const BookingManagement = () => {
                     loading={loadingBookings}
                     columns={columns}
                     dataSource={bookings}
-                    pagination={false}
+                    pagination={pagination}
+                    onChange={(pagination) => setPagination(pagination)}
                 />
             </div>
         </DashboardLayout>
