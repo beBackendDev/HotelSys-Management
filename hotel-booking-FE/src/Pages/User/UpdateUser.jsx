@@ -34,7 +34,7 @@ const UpdateUser = () => {
     // Fetch dữ liệu user khi load component
     const fetchUser = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/user/profile/${userId}`, {
+        const res = await fetch(`http://localhost:8080/api/user/profile`, {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,

@@ -126,18 +126,33 @@ public class HotelServiceImplement implements HotelService {
     public HotelResponse filterHotels(
             String hotelName,
             String hotelAddress,
-            BigDecimal hotelAveragePrice,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
             List<String> hotelFacilities,
             Double ratingPoint,
-            Integer ownerId) {
-        List<Hotel> hotels = hotelRepository.findAll(HotelSpecification.filter(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId));
-        List<HotelDto> content = hotels.stream()
+            LocalDate checkin,
+            LocalDate checkout,
+            int pageNo,
+            int pageSize
+    ) {
+        int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        Page<Hotel> hotels = hotelRepository.findAll(
+                HotelSpecification.filterAll(hotelName, hotelAddress, minPrice, maxPrice, hotelFacilities, ratingPoint, checkin, checkout),
+                pageable
+        );
+        List<Hotel> listOfHotels = hotels.getContent();
+        List<HotelDto> content = listOfHotels.stream()
                 .map(hotelMapper::mapToHotelDto)
                 .collect(Collectors.toList());
 
         HotelResponse hotelResponse = new HotelResponse();
         hotelResponse.setContent(content); // Chỉ cần gán content
-
+        hotelResponse.setPageNo(hotels.getNumber());
+        hotelResponse.setPageSize(hotels.getSize());
+        hotelResponse.setTotalElements(hotels.getTotalElements());
+        hotelResponse.setTotalPage(hotels.getTotalPages());
+        hotelResponse.setLast(hotels.isLast());
         return hotelResponse;
     }
 

@@ -4,7 +4,7 @@ import LocalStorage from "../constant/localStorage";
 import { payloadCreator } from "../utils/helper";
 
 export const getHotels = createAsyncThunk(
-  "hotel/search",
+  "filter-hotels",
   // "hotels/filter",
   payloadCreator(hotelApi.searchHotel)
 );

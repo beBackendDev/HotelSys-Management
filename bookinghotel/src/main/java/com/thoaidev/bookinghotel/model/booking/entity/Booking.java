@@ -10,6 +10,7 @@ import com.thoaidev.bookinghotel.model.enums.BookingStatus;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
+import com.thoaidev.bookinghotel.model.voucher.entity.Voucher;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -67,6 +68,15 @@ public class Booking {
 
     @Column(name = "total_price")
     private BigDecimal totalPrice;
+
+    @Column(name = "discount_amount")
+    private BigDecimal discountAmount;// số tiền được giảm
+
+
+
+    @ManyToOne
+    @JoinColumn(name = "voucher_id")
+    private Voucher voucher;
 
     @CreationTimestamp
     @Column(name = "created_at")

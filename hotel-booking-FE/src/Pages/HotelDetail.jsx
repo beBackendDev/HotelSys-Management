@@ -170,14 +170,39 @@ const HotelDetail = () => {
   /* ================= FETCH ================= */
 
   const fetchReviews = async (pageNo, pageSize) => {
-    const res = await fetch(
-      `http://localhost:8080/api/user/hotel/${id}/reviews-list?pageNo=${pageNo - 1}&pageSize=${pageSize}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const data = await res.json();
-    setHotelReviews(data?.content || []);
-    setPagination({ pageNo, pageSize, totalElements: data.totalElements });
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/user/public/hotel/${id}/reviews-list?pageNo=${pageNo - 1}&pageSize=${pageSize}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch reviews");
+      }
+
+      const data = await res.json();
+
+      setHotelReviews(data?.content ?? []);
+      setPagination({
+        pageNo,
+        pageSize,
+        totalElements: data?.totalElements ?? 0,
+      });
+    } catch (error) {
+      console.error("Fetch reviews error:", error);
+      setHotelReviews([]);
+      setPagination({
+        pageNo,
+        pageSize,
+        totalElements: 0,
+      });
+    }
   };
+
 
   useEffect(() => {
     fetchReviews(pagination.pageNo, pagination.pageSize);
@@ -197,27 +222,76 @@ const HotelDetail = () => {
   }, [id]);
   console.log("hotel api (hoteldetail)", hotelInfo);
   console.log("room api (hoteldetail)", rooms);
+
+  // Fetch owner info
   useEffect(() => {
-    if (!ownerId) return;
-    fetch(`http://localhost:8080/api/user/profile/${ownerId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
-      .then(setOwner);
+    const fetchOwner = async () => {
+      if (!ownerId) return;
+
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/user/public/profile/${ownerId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch owner");
+        }
+
+        const data = await res.json();
+        setOwner(data ?? null);
+      } catch (error) {
+        console.error("Fetch owner error:", error);
+        setOwner(null); // fallback tránh crash UI
+      }
+    };
+
+    fetchOwner();
   }, [ownerId]);
+
   console.log("owner(hoteldetail): ", owner);
 
 
   useEffect(() => {
-    if (!hotelReviews.length) return;
-    Promise.all(
-      hotelReviews.map((r) =>
-        fetch(`http://localhost:8080/api/user/profile/${r.userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).then((res) => res.json())
-      )
-    ).then(setUserInfo);
+    const fetchUsers = async () => {
+      if (!hotelReviews?.length) {
+        setUserInfo([]);
+        return;
+      }
+
+      try {
+        const users = await Promise.all(
+          hotelReviews.map(async (r) => {
+            try {
+              const res = await fetch(
+                `http://localhost:8080/api/user/profile/${r.userId}`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+
+              if (!res.ok) throw new Error("Failed to fetch user");
+
+              return await res.json();
+            } catch (err) {
+              console.error(`Fetch user ${r.userId} error:`, err);
+              return null;
+            }
+          })
+        );
+
+        setUserInfo(users.filter(Boolean)); // bỏ user null
+      } catch (error) {
+        console.error("Fetch users error:", error);
+        setUserInfo([]);
+      }
+    };
+
+    fetchUsers();
   }, [hotelReviews]);
+
   console.log("userinf : ", hotelReviews);
 
   if (!hotelInfo) {
@@ -318,7 +392,7 @@ const HotelDetail = () => {
 
           <div className="border rounded-xl p-4 flex items-center gap-4">
             <img
-              src={owner?.urlImg || userplaceholder}
+              src={`http://localhost:8080${owner?.urlImg}` || userplaceholder}
               className="w-14 h-14 rounded-full object-cover"
             />
             <div>
@@ -427,7 +501,7 @@ const HotelDetail = () => {
             <div key={index} className="flex space-x-4 p-4 border-t border-b">
               {/* Avatar */}
               <img
-                src={userInfo?.[index]?.urlImg || userplaceholder}
+                src={hotelReviews?.[index]?.urlImg || userplaceholder}
                 alt="avatar"
                 className="w-12 h-12 rounded-full object-cover"
               />

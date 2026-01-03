@@ -25,7 +25,17 @@ public interface HotelService {
 
     public List<Hotel> getHotelsByName(String name);
 
-    public HotelResponse filterHotels(String hotelName, String hotelAddress, BigDecimal hotelAveragePrice, List<String> hotelFacilities, Double ratingPoint, Integer ownerId);
+    public HotelResponse filterHotels(
+            String hotelName,
+            String hotelAddress,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            List<String> hotelFacilities,
+            Double ratingPoint,
+            LocalDate checkin,
+            LocalDate checkout,
+            int pageNo,
+            int pageSize);
 
     //Get in rapidApi
     public List<HotelDto> fetchHotelsFromRapidAPI(LocalDate checkin, LocalDate checkout);

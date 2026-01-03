@@ -2,29 +2,29 @@ import { Button, DatePicker, Form, InputNumber, Select } from "antd";
 import { province } from "../../constant/province";
 import styles from "./styles.module.scss";
 import { useHistory } from "react-router-dom";
-import qs from "query-string"; import { FilterOutlined } from "@ant-design/icons";
+import qs from "query-string";
+import { FilterOutlined } from "@ant-design/icons";
 import React from "react";
 
 const { Option } = Select;
 
-const Hero = () => {
+const Hero = ({ toggleFilter, showFilter, onFilterChange }) => {
   const provinceData = province;
   const history = useHistory();
 
   const onFinish = (values) => {
     const rangeValue = values["date"];
-    const params ={
-      checkin_date: rangeValue?.[0]?.format("YYYY-MM-DD"),
-      checkout_date: rangeValue?.[1]?.format("YYYY-MM-DD"),
+    const params = {
+      checkin: rangeValue?.[0]?.format("YYYY-MM-DD"),
+      checkout: rangeValue?.[1]?.format("YYYY-MM-DD"),
       hotelAddress: values.province_name,
       guestCount: values.guestCount,
     };
 
     // Điều hướng sang trang /search
     console.log("data sent: ", qs.stringify(params));
-    
 
-    //thực hiện đẩy các key của location gồm có pathname & search đến pathname có route là /hotel/search
+
     history.push({
       pathname: "/hotel/search",
       search: qs.stringify(params),
@@ -101,6 +101,7 @@ const Hero = () => {
                 type="primary"
                 className="h-10 mt-6 bg-blue-500 hover:bg-blue-600 text-white"
                 htmlType="submit"
+                onFinish={onFinish}
               >
                 Tìm kiếm
               </Button>

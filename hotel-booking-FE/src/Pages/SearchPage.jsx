@@ -7,6 +7,7 @@ import qs from "query-string";
 import { Content } from "antd/lib/layout/layout";
 import Filter from "../components/Filter/Filter";
 import { Col, Pagination, Row } from "antd";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const SearchPage = () => {
   const [currPage, setCurrPage] = useState(1);
@@ -16,6 +17,7 @@ const SearchPage = () => {
 
   const location = useLocation();
   const query = useQuery();
+  const history = useHistory();
 
   useEffect(() => {
     const pageFromQuery = parseInt(query.page) || 1;
@@ -27,7 +29,7 @@ const SearchPage = () => {
         console.log("location-search(SearchPage): ", location?.search);
 
         const res = await fetch(
-          `http://localhost:8080/api/user/public/hotels/filter?${location?.search}`,
+          `http://localhost:8080/api/user/public/hotels/filter${location?.search}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
@@ -52,20 +54,26 @@ const SearchPage = () => {
   };
 
   const toggleFilter = () => setShowFilter(!showFilter);
+  const handleFilterChange = (filters) => {
+    history.push({
+      pathname: "/hotel/search",
+      search: qs.stringify(filters),
+    });
+  };
 
-  const handleFilterChange = async (filters) => {
-    const queryString = qs.stringify(filters);
-    const res = await fetch(
-      `http://localhost:8080/api/user/public/hotels/filter?${queryString}`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+  // const handleFilterChange = async (filters) => {
+  //   const queryString = qs.stringify(filters);
+  //   const res = await fetch(
+  //     `http://localhost:8080/api/user/public/hotels/filter?${queryString}`,
+  //     {
+  //       method: "GET",
+  //       headers: { "Content-Type": "application/json" },
+  //     }
+  //   );
 
-    const data = await res.json();
-    setHotels(data?.content || []);
-  }
+  //   const data = await res.json();
+  //   setHotels(data?.content || []);
+  // }
   return (
     <HomeLayout>
       <Content className="max-w-6xl min-h-screen mx-auto mt-10">
@@ -73,8 +81,8 @@ const SearchPage = () => {
           {/* FILTER */}
           {showFilter && (
             <Col span={6} className="transition-all duration-500 ease-in-out">
-              <Filter toggleFilter={toggleFilter} showFilter={showFilter} 
-                onFilterChange = {handleFilterChange}
+              <Filter toggleFilter={toggleFilter} showFilter={showFilter}
+                onFilterChange={handleFilterChange}
               />
             </Col>
           )}
@@ -103,8 +111,8 @@ const SearchPage = () => {
                   <p>Đang tải dữ liệu...</p>
                 ) : hotels.length > 0 ? (
                   <div>
-                    {hotels.map((hotel) => (
-                      <Col span={24} key={hotel.hotelId}>
+                    {hotels?.map((hotel) => (
+                      <Col span={24} key={hotel?.hotelId}>
                         <HotelDesc hotelInfo={hotel} />
                       </Col>
                     ))}

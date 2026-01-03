@@ -1,5 +1,7 @@
 import { unwrapResult } from "@reduxjs/toolkit";
 import { Button, Col, DatePicker, Form, Input, Row, Modal } from "antd";
+import { formatDate, formatMoney } from "../utils/helper";
+
 import { Content } from "antd/lib/layout/layout";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -44,12 +46,20 @@ const Booking = () => {
   const [showModal, setShowModal] = useState(false);
   const location = useLocation();
   const { checkIn, checkOut } = location.state || {};
+  const roomPricePerNight = 800000; // demo, sau này lấy từ API
+  const nights =
+    checkIn && checkOut
+      ? moment(checkOut).diff(moment(checkIn), "days")
+      : 0;
+
+  const totalPrice = nights * roomPricePerNight;
+
   // Hàm định dạng ngày từ "YYYY-MM-DD" sang "DD-MM-YYYY"
   const formatDate = (dateStr) =>
-  dateStr ? moment(dateStr, "YYYY-MM-DD").format("DD-MM-YYYY") : "";
+    dateStr ? moment(dateStr, "YYYY-MM-DD").format("DD-MM-YYYY") : "";
 
-  console.log("in out: ",checkIn, checkOut);
-  
+  console.log("in out: ", checkIn, checkOut);
+
   // useEffect(() => {
   //   if (!checkIn || !checkOut) {
   //     Modal.warning({
@@ -88,10 +98,12 @@ const Booking = () => {
       ...values,
       checkinDate: checkIn,
       checkoutDate: checkOut,
-      user_id,
+
+      // user_id,
       hotelId: Number(hotelId),
       roomId: Number(roomId),
     };
+      console.log("input res:", _val);
 
     try {
       const res = await fetch(`http://localhost:8080/api/user/hotels/bookings`, {
@@ -241,6 +253,68 @@ const Booking = () => {
                     </p>
                   )}
 
+                  <Row gutter={16}>
+                    {/* CHECKIN / CHECKOUT */}
+                    <Col span={8}>
+                      <div className="flex gap-4">
+                        <Form.Item label="Thời gian lưu trú">
+                          <Input.Group compact>
+                            <Input
+                              value={formatDate(checkIn)}
+                              disabled
+                              style={{ width: "50%" }}
+                              placeholder="Ngày nhận phòng"
+                            />
+                            <Input
+                              value={formatDate(checkOut)}
+                              disabled
+                              style={{ width: "50%" }}
+                              placeholder="Ngày trả phòng"
+                            />
+                          </Input.Group>
+                        </Form.Item>
+
+
+                      </div>
+
+                      {checkIn && checkOut && (
+                        <p className="text-gray-600 mt-2">
+                          Ngày nhận: <b>{checkIn}</b> | Ngày trả: <b>{checkOut}</b>
+                        </p>
+                      )}
+                    </Col>
+
+                    {/* PRICE */}
+                    <Col span={6}>
+                      <Form.Item label="Giá phòng">
+                        <Input
+                          value={
+                            nights > 0
+                              ? `${formatMoney(totalPrice)} (${nights} đêm)`
+                              : ""
+                          }
+                          disabled
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    {/* VOUCHER */}
+                    <Col span={6}>
+                      <Form.Item
+                        label="Mã voucher"
+                        name="voucherCode"
+                      >
+                        <Input placeholder="Nhập mã giảm giá" />
+                      </Form.Item>
+                    </Col>
+
+                    {/* APPLY BUTTON (optional) */}
+                    <Col span={4} className="flex items-end">
+                      <Button className="w-full" type="default">
+                        Áp dụng
+                      </Button>
+                    </Col>
+                  </Row>
 
                   <div className="flex justify-center my-10">
                     <Form.Item>

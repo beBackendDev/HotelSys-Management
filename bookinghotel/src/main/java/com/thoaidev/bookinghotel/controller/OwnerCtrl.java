@@ -175,16 +175,30 @@ public class OwnerCtrl {
     }
 //lấy thông tin dựa theo nhiều tiêu chí(tên, đánh giá...)
 
-    @PostMapping("/owner/hotels/filter")
+    @GetMapping("/owner/hotels/filter")
     public ResponseEntity<HotelResponse> getAllHotels(
             @RequestParam(value = "hotelName", required = false) String hotelName,
             @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
-            @RequestParam(value = "hotelAveragePrice", required = false) BigDecimal hotelAveragePrice,
+            @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
             @RequestParam(value = "hotelFacilities", required = false) List<String> hotelFacilities,
             @RequestParam(value = "ratingPoint", required = false) Double ratingPoint,
-            @RequestParam(value = "ownerId", required = false) Integer ownerId
+            @RequestParam(value = "checkin", required = false) LocalDate checkin,
+            @RequestParam(value = "checkout", required = false) LocalDate checkout,
+            @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
-        HotelResponse hotels = hotelService.filterHotels(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId);
+        HotelResponse hotels = hotelService.filterHotels(
+            hotelName, 
+            hotelAddress, 
+            minPrice, 
+            maxPrice,
+            hotelFacilities, 
+            ratingPoint,
+            checkin,
+            checkout,
+            pageNo, 
+            pageSize);
         return ResponseEntity.ok(hotels);
     }
 // Tạo khách sạn mới

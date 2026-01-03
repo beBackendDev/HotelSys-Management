@@ -54,7 +54,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/user/profile/${userId}`, {
+        const res = await fetch(`http://localhost:8080/api/user/public/profile/${userId}`, {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,

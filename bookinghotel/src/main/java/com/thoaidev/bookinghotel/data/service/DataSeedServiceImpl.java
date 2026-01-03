@@ -8,8 +8,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoaidev.bookinghotel.data.dto.HotelSeedDto;
 import com.thoaidev.bookinghotel.data.dto.RoomSeedDto;
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
@@ -31,18 +31,19 @@ public class DataSeedServiceImpl implements DataSeedService {
     private final HotelRepository hotelRepo;
     private final UserRepository userRepo;
 
-    @Transactional
     public void importSeedData() throws IOException {
 
         InputStream isHotel = new ClassPathResource("data/seed/hotels.json").getInputStream();
         List<HotelSeedDto> hotels = objectMapper.readValue(
                 isHotel,
-                new TypeReference<List<HotelSeedDto>>() {}
+                new TypeReference<List<HotelSeedDto>>() {
+        }
         );
         InputStream isRoom = new ClassPathResource("data/seed/rooms.json").getInputStream();
         List<RoomSeedDto> rooms = objectMapper.readValue(
                 isRoom,
-                new TypeReference<List<RoomSeedDto>>() {}
+                new TypeReference<List<RoomSeedDto>>() {
+        }
         );
 
         for (HotelSeedDto h : hotels) {
@@ -84,6 +85,7 @@ public class DataSeedServiceImpl implements DataSeedService {
             });
 
             // ===== ROOMS =====
+            // ===== ROOMS =====
             rooms.forEach(r -> {
 
                 Room room = new Room();
@@ -92,26 +94,29 @@ public class DataSeedServiceImpl implements DataSeedService {
                 room.setRoomOccupancy(r.getRoomOccupancy());
                 room.setRoomPricePerNight(r.getRoomPricePerNight());
                 room.setRoomStatus(r.getRoomStatus());
-                room.setDateAvailable(r.getDateAvailable());
                 room.setHotel(hotel);
 
-                // Room images
-                r.getRoomImageUrls().forEach(url -> {
-                    Image img = new Image();
-                    img.setUrl(url);
-                    img.setRoom(room);
-                    room.getRoomImages().add(img);
-                });
+                // ===== ROOM IMAGES =====
+                if (r.getRoomImageUrls() != null) {
+                    r.getRoomImageUrls().forEach(url -> {
+                        Image img = new Image();
+                        img.setUrl(url);
+                        img.setRoom(room);
+                        room.getRoomImages().add(img);
+                    });
+                }
 
-                // Room facilities
-                r.getFacilities().forEach(f -> {
-                    RoomFacility rf = RoomFacility.builder()
-                            .name(f.getName())
-                            .icon(f.getIcon())
-                            .room(room)
-                            .build();
-                    room.getFacilities().add(rf);
-                });
+                // ===== ROOM FACILITIES (QUAN TRỌNG) =====
+                if (r.getFacilities() != null) {
+                    r.getFacilities().forEach(f -> {
+                        RoomFacility rf = RoomFacility.builder()
+                                .name(f.getName())
+                                .icon(f.getIcon())
+                                .room(room)
+                                .build();
+                        room.getFacilities().add(rf);
+                    });
+                }
 
                 hotel.getRooms().add(room);
             });
@@ -121,4 +126,3 @@ public class DataSeedServiceImpl implements DataSeedService {
         }
     }
 }
-

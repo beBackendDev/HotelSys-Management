@@ -1,23 +1,23 @@
 export const province = [
   {
     id: 1,
-    name: "Kỳ Co",
+    name: "Đà Lạt",
   },
   {
     id: 2,
-    name: "Eo Gió",
+    name: "Quy Nhơn",
   },
   {
     id: 3,
-    name: "Đảo Hòn Khô",
+    name: "Hồ Chí Minh",
   },
   {
     id: 4,
-    name: "Cù Lao Xanh",
+    name: "Bình Định",
   },
   {
     id: 5,
-    name: "Đồi cát Phương Mai",
+    name: "Nha Trang",
   },
   {
     id: 6,

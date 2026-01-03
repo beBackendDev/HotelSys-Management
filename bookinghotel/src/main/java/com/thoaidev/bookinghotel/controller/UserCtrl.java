@@ -112,24 +112,40 @@ public class UserCtrl {
     public ResponseEntity<HotelResponse> getAllHotels(
             @RequestParam(value = "hotelName", required = false) String hotelName,
             @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
-            @RequestParam(value = "hotelAveragePrice", required = false) BigDecimal hotelAveragePrice,
+            @RequestParam(value = "minPrice",required = false) BigDecimal minPrice,
+            @RequestParam(value = "maxPrice",required = false) BigDecimal maxPrice,
             @RequestParam(value = "hotelFacilities", required = false) List<String> hotelFacilities,
             @RequestParam(value = "ratingPoint", required = false) Double ratingPoint,
-            @RequestParam(value = "ownerId", required = false) Integer ownerId
+            @RequestParam(value = "checkin", required = false) LocalDate checkin,
+            @RequestParam(value = "checkout", required = false) LocalDate checkout,
+            @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
-        HotelResponse hotels = hotelService.filterHotels(hotelName, hotelAddress, hotelAveragePrice, hotelFacilities, ratingPoint, ownerId);
+        HotelResponse hotels = hotelService.filterHotels(
+                hotelName,
+                hotelAddress,
+                minPrice,
+                maxPrice,
+                hotelFacilities,
+                ratingPoint,
+                checkin,
+                checkout,
+                pageNo,
+                pageSize);
         return ResponseEntity.ok(hotels);
     }
+
     //kiem tra phòng trống
     @GetMapping("/public/room-available")
     public ResponseEntity<RoomResponse> getAvailableRoom(
-        @RequestParam(required = true) LocalDate checkIn,
-        @RequestParam(required = true) LocalDate checkOut,
-        @RequestParam(required = false) Integer numPeople
-    ){
+            @RequestParam(required = true) LocalDate checkIn,
+            @RequestParam(required = true) LocalDate checkOut,
+            @RequestParam(required = false) Integer numPeople
+    ) {
         RoomResponse rooms = roomService.searchAvailableRooms(checkIn, checkOut, numPeople);
         return ResponseEntity.ok(rooms);
     }
+
     //Kiểm tra tình trạng phòng
     @GetMapping("/check-availability")
     public ResponseEntity<?> checkAvailability(
@@ -180,8 +196,8 @@ public class UserCtrl {
     @GetMapping("public/booking-list/room/{roomId}")
     public ResponseEntity<?> bookingsByRoom(
             @PathVariable Integer roomId) {
-                LocalDate today = LocalDate.now();
-                List<BookingDTO> bookings = bookingService.getBookingByRoomId(roomId, today);
+        LocalDate today = LocalDate.now();
+        List<BookingDTO> bookings = bookingService.getBookingByRoomId(roomId, today);
         return ResponseEntity.ok(bookings);
 
     }
@@ -253,7 +269,7 @@ public class UserCtrl {
     }
     // Xem danh sách đánh giá theo hotelId
 
-    @GetMapping("/hotel/{id}/reviews-list")
+    @GetMapping("/public/hotel/{id}/reviews-list")
     public ResponseEntity<ReviewResponse> reviews_list_hotel(
             @RequestParam(value = "pageNo", defaultValue = "", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "", required = false) int pageSize,
@@ -326,6 +342,7 @@ public class UserCtrl {
         String avtUrl = userService.uploadUserAvatar(userId, files);
         return ResponseEntity.ok(avtUrl);
     }
+//Xem thông tin cá nhân theo token (được đăng nhập rồi)
 
     @GetMapping("/profile")
     public ResponseEntity<UserDto> userDetail(@AuthenticationPrincipal CustomUserDetail user) {
@@ -333,8 +350,8 @@ public class UserCtrl {
         return ResponseEntity.ok(userDto);
     }
 
-    //Xem theo Id
-    @GetMapping("/profile/{userId}")
+//Xem thông tin cá nhân theo id bất kỳ
+    @GetMapping("/public/profile/{userId}")
     public ResponseEntity<UserDto> userDetailById(@PathVariable Integer userId) {
         UserDto userDto = userService.getUserById(userId);
         return ResponseEntity.ok(userDto);

@@ -34,8 +34,11 @@ import com.thoaidev.bookinghotel.model.room.entity.Room;
 import com.thoaidev.bookinghotel.model.room.repository.RoomRepository;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
-
-;
+import com.thoaidev.bookinghotel.model.voucher.entity.Voucher;
+import com.thoaidev.bookinghotel.model.voucher.entity.VoucherUsage;
+import com.thoaidev.bookinghotel.model.voucher.repository.VoucherRepository;
+import com.thoaidev.bookinghotel.model.voucher.repository.VoucherUsageRepository;
+import com.thoaidev.bookinghotel.model.voucher.service.VoucherService;
 
 @Service
 public class BookingSerImpl implements BookingSer {
@@ -54,6 +57,13 @@ public class BookingSerImpl implements BookingSer {
 
     @Autowired
     private BookingMapper bookingMapper;
+
+    @Autowired
+    private VoucherRepository voucherRepository;
+    @Autowired
+    private VoucherUsageRepository voucherUsageRepository;
+    @Autowired
+    private VoucherService voucherService;
 
     //  Check room availability
     @Override
@@ -88,6 +98,28 @@ public class BookingSerImpl implements BookingSer {
             // Tính tổng tiền
             BigDecimal totalPrice = room.getRoomPricePerNight()
                     .multiply(BigDecimal.valueOf(nights));
+
+            // Áp dụng voucher nếu có
+            BigDecimal discount = BigDecimal.ZERO;
+            //Kiểm tra tồn tại Voucher
+            if (bookingDTO.getVoucherCode() != null && !bookingDTO.getVoucherCode().isEmpty()) {
+                // Validate voucher
+                Voucher voucher = voucherService.validateVoucher(
+                        bookingDTO.getVoucherCode(),
+                        totalPrice);
+                //  Không cho user dùng lại
+                if (voucherUsageRepository
+                        .existsByIdAndUserId(voucher.getVoucherId(), user.getUserId())) {
+                    throw new RuntimeException("Voucher is used by user before");
+                }
+                // Tính toán giảm giá
+                discount = voucherService.calculateDiscount(voucher, totalPrice);
+                // Cập nhật số lần sử dụng voucher
+                voucher.setUsedCount(voucher.getUsedCount() + 1);
+                voucherRepository.save(voucher);
+                // Gán voucher cho booking
+                booking.setVoucher(voucher);
+            }
             //Tạo booking
             booking.setHotel(hotel);
             booking.setUser(user);
@@ -96,7 +128,8 @@ public class BookingSerImpl implements BookingSer {
 
             booking.setCheckinDate(bookingDTO.getCheckinDate());
             booking.setCheckoutDate(bookingDTO.getCheckoutDate());
-            booking.setTotalPrice(totalPrice);
+            booking.setDiscountAmount(discount);
+            booking.setTotalPrice(totalPrice.subtract(discount));// giá sau khi đã trừ giảm giá
             booking.setStatus(BookingStatus.PENDING_PAYMENT);//auto pending _payment
             booking.setCreatedAt(LocalDateTime.now());
             // Lưu người ở
@@ -104,6 +137,16 @@ public class BookingSerImpl implements BookingSer {
             booking.setGuestPhone(bookingDTO.getGuestPhone());
             booking.setGuestEmail(bookingDTO.getGuestEmail());
             booking.setGuestCccd(bookingDTO.getGuestCccd());
+// Lưu booking
+            if (booking.getVoucher() != null) {
+                VoucherUsage usage = new VoucherUsage();
+                usage.setVoucher(booking.getVoucher());
+                usage.setUserId(user.getUserId());
+                usage.setBookingId(booking.getBookingId());
+                usage.setUsedAt(LocalDateTime.now());
+
+                voucherUsageRepository.save(usage);
+            }
             return bookingRepository.save(booking);
         }
 
@@ -111,7 +154,7 @@ public class BookingSerImpl implements BookingSer {
 
     //  Cron job: huỷ booking quá hạn
     @Override
-    @Scheduled(fixedRate = 60000)//cứ 60s thì thực hiện check 1 lần
+    @Scheduled(fixedRate = 600000)//cứ 60s thì thực hiện check 1 lần
     @Transactional
     public void cancelExpiredBookings() {
         LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(5);// thực hiện để thời gian tồn tại booking là 5 phút
@@ -131,7 +174,7 @@ public class BookingSerImpl implements BookingSer {
     }
 
     //Cron job thực hiện set booking_status
-    @Scheduled(fixedRate = 60000)//60s/time
+    @Scheduled(fixedRate = 600000)//60s/time
     @Transactional
     public void releaseCheckedOutRooms() {
         //Thực hiện lấy thông tin ngày giờ hiện tại
@@ -152,6 +195,31 @@ public class BookingSerImpl implements BookingSer {
             bookingRepository.saveAll(checkedOut);
             System.out.println("Released " + checkedOut.size() + " rooms after checkout.");
         }
+    }
+
+    @Transactional
+    public void rollbackVoucher(Integer bookingId) {
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow();
+
+        if (booking.getVoucher() == null) {
+            return;
+        }
+
+        Voucher voucher = booking.getVoucher();
+        voucher.setUsedCount(voucher.getUsedCount() - 1);
+        voucherRepository.save(voucher);
+
+        voucherUsageRepository
+                .findByBookingId(bookingId)
+                .forEach(voucherUsageRepository::delete);
+
+        booking.setVoucher(null);
+        booking.setDiscountAmount(BigDecimal.ZERO);
+        booking.setTotalPrice(booking.getTotalPrice());
+
+        bookingRepository.save(booking);
     }
 
     // Cancel Booking
