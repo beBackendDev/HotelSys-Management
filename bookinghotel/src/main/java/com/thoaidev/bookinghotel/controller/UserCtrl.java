@@ -140,9 +140,9 @@ public class UserCtrl {
     public ResponseEntity<RoomResponse> getAvailableRoom(
             @RequestParam(required = true) LocalDate checkIn,
             @RequestParam(required = true) LocalDate checkOut,
-            @RequestParam(required = false) Integer numPeople
+            @RequestParam(required = true) Integer hotelId
     ) {
-        RoomResponse rooms = roomService.searchAvailableRooms(checkIn, checkOut, numPeople);
+        RoomResponse rooms = roomService.searchAvailableRooms(hotelId, checkIn, checkOut);
         return ResponseEntity.ok(rooms);
     }
 
@@ -211,6 +211,15 @@ public class UserCtrl {
         return new ResponseEntity<>(booking, HttpStatus.OK);
     }
 
+    //GỬI THÔNG TIN BOOKING ĐẾN USER QUA EMAIL
+    @PostMapping("/public/test-send")
+    public ResponseEntity<String> testSendBookingInfo(
+            @RequestParam String toEmail,
+            @RequestBody BookingDTO bookingDto
+    ) {
+        userService.sendBookingInformation(toEmail, bookingDto);
+        return ResponseEntity.ok("Booking information sent to user email.");
+    }
 // ------------------- PAYMENT -------------------    
     //Trả về kết quả đặt phòng
     @GetMapping("/result/vnpay-payment")
@@ -375,7 +384,7 @@ public class UserCtrl {
     }
 
 // // quên mật khẩu (email)
-// //gửi mã code về email để thực hiện đổi mật khẩu
+// //gửi mã OTP về email để thực hiện đổi mật khẩu
     @PostMapping("/public/forgot-password")
     public ResponseEntity<String> sendResetCode(@RequestBody ForgetPwRequest email) {
         userService.sendResetPasswordCode(email);

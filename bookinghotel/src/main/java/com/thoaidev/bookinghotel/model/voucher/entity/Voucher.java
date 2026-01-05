@@ -1,7 +1,6 @@
 package com.thoaidev.bookinghotel.model.voucher.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.thoaidev.bookinghotel.model.voucher.enums.VoucherStatus;
@@ -15,8 +14,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Setter;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "vouchers")
@@ -46,7 +45,7 @@ public class Voucher {
     private BigDecimal minOrderAmount;
 
     @Column(name = "quantity")
-    private int quantity;
+    private int quantity; // Số lượng voucher
     
     @Column(name = "used-count")
     private int usedCount;

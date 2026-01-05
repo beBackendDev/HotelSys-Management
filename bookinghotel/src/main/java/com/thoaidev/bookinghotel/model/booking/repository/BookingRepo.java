@@ -7,10 +7,12 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
+import com.thoaidev.bookinghotel.model.enums.BookingStatus;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 import com.thoaidev.bookinghotel.summary.owner.TrendingRoomProjection;
 import com.thoaidev.bookinghotel.summary.owner.dto.DashboardTrendingRoomDTO;
@@ -76,6 +78,20 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     // Tìm các booking đã quá hạn chưa thanh toán
     @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.status  = 'PENDING_PAYMENT' AND b.createdAt< :expiredTime")
     List<Booking> findExpiredBookings(@Param("expiredTime") LocalDateTime expiredTime);
+
+    // Hủy các booking đã quá hạn
+    @Modifying
+    @Query("""
+    UPDATE Booking b
+    SET b.status = :cancelled
+    WHERE b.status = :pending
+    AND b.createdAt < :expiryTime
+    """)
+    int cancelExpiredBookings(
+            @Param("pending") BookingStatus pending,
+            @Param("cancelled") BookingStatus cancelled,
+            @Param("expiryTime") LocalDateTime expiryTime
+    );
 
     //Tìm booking tới hạn checkout
     @Query("SELECT b FROM Booking b JOIN FETCH b.room WHERE b.status = 'PAID' AND DATE(b.checkoutDate) <= :today")
@@ -165,7 +181,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
 //DASHBOARD timf trending room để tao BXH
 //Sử dụng GroupBy để thực hiện nhóm theo từng attribute cụ thể và dùng hàm COUNT để tính tổng booking
 //Sử dụng ORDER BY thực hiện sắp xếp
-@Query("""
+    @Query("""
     SELECT
         r.roomId AS roomId,
         r.roomName AS roomName,

@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.dto.OtpData;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
+import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.mapper.BookingMapper;
 import com.thoaidev.bookinghotel.model.enums.OwnerRequestStatus;
 import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
@@ -42,6 +44,8 @@ import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 import com.thoaidev.bookinghotel.model.user.mapper.UserMapper;
 import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
@@ -276,6 +280,7 @@ public class UserServiceImplement implements UserService {
 //GỬI MÃ XÁC THỰC VÀO MAIL ĐỂ ĐỔI MẬT KHẨU
     @Override
     public void sendResetPasswordCode(ForgetPwRequest rq) {
+        //Tìm kiếm người dùng thông qua username( email)
         UserEntity user = userRepository.findByUsername(rq.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
@@ -292,8 +297,8 @@ public class UserServiceImplement implements UserService {
     private void sendOtpEmail(String toEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Reset your password");
-        message.setText("Your reset code is: " + otp + "\nIt expires in 5 minutes.");
+        message.setSubject("Reset your password");//TITLE MAIL
+        message.setText("Your reset code is: " + otp + "\nIt expires in 5 minutes.");//NỘI DUNG MAIL
 
         mailSender.send(message);
     }
@@ -322,6 +327,124 @@ public class UserServiceImplement implements UserService {
 
         otpStorage.remove(request.getEmail()); // Xoá OTP sau khi dùng
     }
+//GUI THÔNG TIN ĐẶT PHÒNG ĐẾN NGƯỜI DÙNG
+
+    public void sendBookingInformation(Integer userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+    }
+
+//
+    @Override
+    public void sendBookingInformation(String toEmail, BookingDTO bookingDto) {
+        MimeMessage message = mailSender.createMimeMessage();
+
+        try {
+            MimeMessageHelper helper
+                    = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom("AdminQNTraveling@hotel.com");
+            helper.setTo(toEmail);
+            helper.setSubject("THÔNG TIN ĐẶT PHÒNG - QN TRAVELING");
+            String html = String.format("""
+<div style="
+    max-width:600px;
+    margin:0 auto;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#333;
+    line-height:1.6;
+">
+
+    <h2 style="color:#2c3e50; text-align:center;">
+        🎉 Đặt phòng thành công
+    </h2>
+
+    <p>Xin chào <b>%s</b>,</p>
+    <p>
+        Cảm ơn bạn đã đặt phòng tại
+        <b>%s</b>.
+        Dưới đây là thông tin chi tiết:
+    </p>
+
+    <div style="
+        border:1px solid #eee;
+        border-radius:8px;
+        padding:16px;
+        background:#fafafa;
+        margin:20px 0;
+    ">
+        <p>
+            <b>Mã booking:</b>
+            <span style="
+                color:#e74c3c;
+                font-size:18px;
+                font-weight:bold;
+            ">
+                %s
+            </span>
+        </p>
+
+        <p><b>Phòng:</b> %s</p>
+        <p><b>Check-in:</b> %s</p>
+        <p><b>Check-out:</b> %s</p>
+
+        <hr style="border:none;border-top:1px solid #ddd;"/>
+
+        <p style="font-size:16px;">
+            <b>Tổng tiền:</b>
+            <span style="
+                color:#e74c3c;
+                font-weight:bold;
+                font-size:18px;
+            ">
+                %,.0f VND
+            </span>
+        </p>
+    </div>
+
+    <div style="text-align:center; margin:24px 0;">
+        <a href="#"
+           style="
+             background:#2c3e50;
+             color:white;
+             padding:12px 20px;
+             text-decoration:none;
+             border-radius:6px;
+             display:inline-block;
+           ">
+           Xem chi tiết đặt phòng
+        </a>
+    </div>
+
+    <p style="font-size:13px;color:#777;">
+        Vui lòng mang theo email này khi nhận phòng.
+        Nếu cần hỗ trợ, hãy liên hệ chúng tôi.
+    </p>
+
+    <p style="font-size:12px;color:#aaa;">
+        © 2026 YourHotel. All rights reserved.
+    </p>
+</div>
+""",
+                    bookingDto.getGuestFullName(),
+                    bookingDto.getHotelName(),
+                    bookingDto.getBookingId(),
+                    bookingDto.getRoomName(),
+                    bookingDto.getCheckinDate(),
+                    bookingDto.getCheckoutDate(),
+                    bookingDto.getTotalPrice()
+            );
+
+            helper.setText(html, true);
+
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Send mail failed", e);
+        }
+    }
+//
 
     @Override
     public Integer findOwnerIdByUsername(String username) {
@@ -403,34 +526,4 @@ public class UserServiceImplement implements UserService {
     }
 //
 
-    //_____________Other Methods_____________
-    // @Override
-    // public UserDto mapToUserDto(UserEntity user) {
-    //     String roleName = user.getRoles()
-    //             .stream()
-    //             .findFirst()
-    //             .map(Role::getRoleName)
-    //             .orElse(null);
-    //     List<BookingDTO> bookingList = user.getBookings().stream()
-    //             .map(bookingMapper::toDTO)
-    //             .collect(Collectors.toList());
-    //     List<HotelReviewDTO> reviewList = user.getReviews().stream()
-    //             .map(reviewMapper::toDTO)
-    //             .collect(Collectors.toList());
-    //     UserDto userDto = UserDto
-    //             .builder()
-    //             .userId(user.getUserId())
-    //             .username(user.getUsername())
-    //             .fullname(user.getFullname())
-    //             .password(user.getPassword())
-    //             .roleName(roleName)
-    //             .phone(user.getUserPhone())
-    //             .birthday(user.getBirthday())
-    //             .gender(user.getGender())
-    //             .urlImg(user.getImgUrl())
-    //             .bookings(bookingList)
-    //             .reviews(reviewList)
-    //             .build();
-    //     return userDto;
-    // }
 }

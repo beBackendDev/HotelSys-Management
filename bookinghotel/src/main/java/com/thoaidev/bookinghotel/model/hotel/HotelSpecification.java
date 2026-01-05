@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.thoaidev.bookinghotel.exceptions.BadRequestException;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.common.HotelFacility;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -114,7 +113,7 @@ public class HotelSpecification {
             //Khởi tạo một tập các điều kiện truy vấn (predicates)
             List<Predicate> predicates = new ArrayList<>();
             Predicate predicate;
-                       // Lọc theo khoảng giá
+            // Lọc theo khoảng giá
             if (minPrice != null || maxPrice != null) {
                 if (minPrice != null) {
                     predicate = cb.ge(root.get("hotelAveragePrice"), minPrice);
@@ -177,21 +176,53 @@ public class HotelSpecification {
         };
     }
 
-    public static Specification<Room> filter(LocalDate checkin, LocalDate checkout) {
+    public static Specification<Room> filter(Integer hotelId, LocalDate checkin, LocalDate checkout) {
+        //SQL tương đương:
+// SELECT r
+// FROM Room r
+// WHERE
+//     r.hotel_id = :hotelId
+//     AND NOT EXISTS (
+//         SELECT 1
+//         FROM Booking b
+//         WHERE
+//             b.room_id = r.room_id
+//             AND b.checkin < :checkout
+//             AND b.checkout > :checkin
+//             AND b.status IN ('PAID', 'PENDING')
+//     )
 
         return (root, query, cb) -> {
+            // chỉ lấy room thuộc hotel đang xem
+            Predicate hotelPredicate
+                    = cb.equal(root.get("hotel").get("hotelId"), hotelId);
             //tạo một query con
             Subquery<Long> sub = query.subquery(Long.class);
             Root<Booking> bookingRoot = sub.from(Booking.class);
 
-            sub.select(bookingRoot.get("bookingId"))
+            // sub.select(bookingRoot.get("bookingId")) //Kiểm tra toàn bộ trong booking với bookingId
+            sub.select(cb.literal(1L)) //Chỉ cần select 1 tồn tại thì được
                     .where(
-                            cb.equal(bookingRoot.get("room").get("roomId"), root.get("roomId")),
-                            cb.greaterThan(bookingRoot.get("checkoutDate"), checkin),
-                            cb.lessThan(bookingRoot.get("checkinDate"), checkout),
-                            bookingRoot.get("status").in("PAID", "PENDING")
+                            cb.equal(
+                                    bookingRoot.get("room").get("roomId"),
+                                    root.get("roomId")
+                            ),
+                            cb.greaterThan(
+                                    bookingRoot.get("checkoutDate"),
+                                    checkin
+                            ),
+                            cb.lessThan(
+                                    bookingRoot.get("checkinDate"),
+                                    checkout
+                            ),
+                            bookingRoot.get(
+                                    "status")
+                                    .in("PAID", "PENDING")
                     );
-            return cb.not(cb.exists(sub));
+            return cb.and(
+                    hotelPredicate,
+                    cb.not(cb.exists(sub))
+            );
         };
     }
 }

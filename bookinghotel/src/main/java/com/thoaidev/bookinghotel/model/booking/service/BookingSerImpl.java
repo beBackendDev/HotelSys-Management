@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,13 +22,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.thoaidev.bookinghotel.exceptions.BadRequestException;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
+import com.thoaidev.bookinghotel.model.booking.dto.BookingConfirmedEvent;
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.mapper.BookingMapper;
 import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
 import com.thoaidev.bookinghotel.model.enums.BookingStatus;
-import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
@@ -45,6 +46,8 @@ public class BookingSerImpl implements BookingSer {
 
     @Autowired
     private BookingRepo bookingRepository;
+    @Autowired
+    private  ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private HotelRepository hotelRepository;
@@ -116,6 +119,8 @@ public class BookingSerImpl implements BookingSer {
                 discount = voucherService.calculateDiscount(voucher, totalPrice);
                 // Cập nhật số lần sử dụng voucher
                 voucher.setUsedCount(voucher.getUsedCount() + 1);
+                // Cập nhật số lượng voucher
+                voucher.setQuantity(voucher.getQuantity() - 1);
                 voucherRepository.save(voucher);
                 // Gán voucher cho booking
                 booking.setVoucher(voucher);
@@ -124,7 +129,8 @@ public class BookingSerImpl implements BookingSer {
             booking.setHotel(hotel);
             booking.setUser(user);
             booking.setRoom(room);
-            room.setRoomStatus(RoomStatus.TEMP_HOLD);// thực hiện đặt room status là đang đợi thanh toán
+
+            // room.setRoomStatus(RoomStatus.TEMP_HOLD);// thực hiện đặt room status là đang đợi thanh toán
 
             booking.setCheckinDate(bookingDTO.getCheckinDate());
             booking.setCheckoutDate(bookingDTO.getCheckoutDate());
@@ -157,19 +163,36 @@ public class BookingSerImpl implements BookingSer {
     @Scheduled(fixedRate = 600000)//cứ 60s thì thực hiện check 1 lần
     @Transactional
     public void cancelExpiredBookings() {
-        LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(5);// thực hiện để thời gian tồn tại booking là 5 phút
-        List<Booking> expired = bookingRepository.findExpiredBookings(expiryTime);
-        for (Booking booking : expired) {
-            booking.setStatus(BookingStatus.CANCELLED);
-            Integer roomId = booking.getRoom().getRoomId();
-            Room room = roomRepository.findById(roomId)
-                    .orElseThrow(() -> new RuntimeException("Room not found"));
-            room.setRoomStatus(RoomStatus.AVAILABLE);// đưa về mặc định
-        }
-        bookingRepository.saveAll(expired);
+        // CÁCH 1 thực hiện dựa trên room status -> nặng query
 
-        if (!expired.isEmpty()) {
-            System.out.println("Canceled  " + expired.size() + " Time out.");
+        // LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(5);// thực hiện để thời gian tồn tại booking là 5 phút
+        // List<Booking> expired = bookingRepository.findExpiredBookings(expiryTime);
+        // for (Booking booking : expired) {
+        //     booking.setStatus(BookingStatus.CANCELLED);
+        //     Integer roomId = booking.getRoom().getRoomId();
+        //     Room room = roomRepository.findById(roomId)
+        //             .orElseThrow(() -> new RuntimeException("Room not found"));
+        //     room.setRoomStatus(RoomStatus.AVAILABLE);// đưa về mặc định
+        // }
+        // bookingRepository.saveAll(expired);
+
+        // if (!expired.isEmpty()) {
+        //     System.out.println("Canceled  " + expired.size() + " Time out.");
+        // }
+
+
+        //Cách 2 nhẹ hơn không phụ thuộc room
+        LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(5);
+
+        int cancelledCount = bookingRepository.cancelExpiredBookings(
+                BookingStatus.PENDING_PAYMENT,
+                BookingStatus.CANCELLED,
+                expiryTime
+        );
+
+        if (cancelledCount > 0) {
+
+            System.out.println("Cancelled {} expired bookings" + cancelledCount);
         }
     }
 
@@ -187,7 +210,7 @@ public class BookingSerImpl implements BookingSer {
         for (Booking booking : checkedOut) {
             booking.setStatus(BookingStatus.COMPLETED); // đã hoàn tất lưu trú
             Room room = booking.getRoom();
-            room.setRoomStatus(RoomStatus.AVAILABLE);
+            // room.setRoomStatus(RoomStatus.AVAILABLE);
             room.setDateAvailable(today);
         }
         System.out.println("Found(BookingService): " + checkedOut.size());
@@ -355,5 +378,24 @@ public class BookingSerImpl implements BookingSer {
         bookingResponse.setTotalPage(bookings.getTotalPages());
         bookingResponse.setLast(bookings.isLast());
         return bookingResponse;
+    }
+
+    @Override
+    public void confirmBooking(Integer bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Booking not Found"));
+        if (!booking.getStatus().equals(BookingStatus.PENDING_PAYMENT)) {
+            throw new RuntimeException("Booking expired");
+        }
+
+        if (booking.getStatus().equals(BookingStatus.PAID) || booking.getStatus().equals(BookingStatus.COMPLETED) || booking.getStatus().equals(BookingStatus.CANCELLED)) return;
+
+        booking.setStatus(BookingStatus.PAID);
+        bookingRepository.save(booking);
+
+        eventPublisher.publishEvent(
+            new BookingConfirmedEvent(booking.getBookingId())
+        );
+
     }
 }

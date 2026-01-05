@@ -181,11 +181,12 @@ public class RoomServiceImplement implements RoomService {
     //Filter
     @Override
     public RoomResponse searchAvailableRooms(
+            Integer hotelId,
             LocalDate checkin,
-            LocalDate checkout,
-            Integer numPeople) {
+            LocalDate checkout
+            ) {
         RoomResponse roomRes = new RoomResponse();
-        List<Room> rooms = roomRepository.findAll(HotelSpecification.filter(checkin, checkout));
+        List<Room> rooms = roomRepository.findAll(HotelSpecification.filter(hotelId, checkin, checkout));
         List<RoomDto> content = rooms.stream()
                 .map(roomMapper::mapToRoomDTO)
                 .collect(Collectors.toList());

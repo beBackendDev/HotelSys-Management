@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -32,9 +33,8 @@ import com.google.gson.JsonObject;
 import com.thoaidev.bookinghotel.config.VNPayConfig;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
-import com.thoaidev.bookinghotel.model.enums.BookingStatus;
+import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
 import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
-import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentQueryRequest;
 import com.thoaidev.bookinghotel.model.payment.entity.Payment;
@@ -54,6 +54,8 @@ public class VNPayService {
     private PaymentRepository paymentRepository;
     private BookingRepo bookingRepository;
     private RoomRepository roomRepository;
+    @Autowired
+    private BookingSer bookingService;
 
     public String createOrder(PaymentInitRequest request, HttpServletRequest servletRequest) throws UnsupportedEncodingException {
 
@@ -204,18 +206,19 @@ public class VNPayService {
             room = roomRepository.getReferenceById(roomId);
             //Chỉ khi tới ngayf checkin (nếu tồn tại booking) thì mưới set phòng BOOKED
             if (booking.getCheckinDate() == today) {
-                room.setRoomStatus(RoomStatus.BOOKED);
+                // room.setRoomStatus(RoomStatus.BOOKED);
                 //thực hiện set ngày mà phòng available (checkout + 1)
                 LocalDate checkoutDate = booking.getCheckoutDate();
                 room.setDateAvailable(checkoutDate.plusDays(1));//thực hiện set ngày mà phòng available là checkout + 1
             }
             //Update trạng thái
-            booking.setStatus(BookingStatus.PAID);
+            // booking.setStatus(BookingStatus.PAID);
+            bookingService.confirmBooking(booking.getBookingId()); //gọi service để confirm booking
             payment.setStatus(PaymentStatus.SUCCESS);
             bookingRepository.save(booking);
             return 1;
         }
-        room.setRoomStatus(RoomStatus.AVAILABLE);
+        // room.setRoomStatus(RoomStatus.AVAILABLE);
         return 0;
     }
 

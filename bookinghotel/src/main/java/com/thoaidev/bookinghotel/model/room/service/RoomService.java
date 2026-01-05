@@ -20,11 +20,10 @@ public interface RoomService {
     RoomDto createRoom(Integer hotelId, RoomDto roomDto);
 
     RoomResponse searchAvailableRooms(
+            Integer hotelId,
             LocalDate checkin,
-            LocalDate checkout,
-            Integer numPeople);
+            LocalDate checkout);
 
-    
 //PUT methods
     RoomDto updateRoom(Integer hotelId, Integer roomId, RoomDto roomDto);
 //DELETE methods

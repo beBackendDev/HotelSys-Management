@@ -31,5 +31,7 @@ public interface BookingSer {
     public Booking bookRoom(BookingDTO bookingDTO, UserEntity user);
 
     public void cancelBooking(Integer id);
+//VALIDATE BOOKING 
+    void confirmBooking(Integer bookingId);
 
 }

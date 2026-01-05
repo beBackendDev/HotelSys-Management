@@ -19,10 +19,8 @@ import com.thoaidev.bookinghotel.config.VNPayConfig;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
-import com.thoaidev.bookinghotel.model.enums.BookingStatus;
+import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
 import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
-import com.thoaidev.bookinghotel.model.enums.RoomStatus;
-import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
 import com.thoaidev.bookinghotel.model.notification.service.NotificationService;
 import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
@@ -39,7 +37,7 @@ import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
 public class PaymentSerImpl implements PaymentService {
 
     @Autowired
-    private HotelRepository hotelRepository;
+    private BookingSer bookingService;
     @Autowired
     private NotificationService notificationService;
     @Autowired
@@ -66,7 +64,7 @@ public class PaymentSerImpl implements PaymentService {
         for (Booking booking : bookingToday) {
             time += 1;
             Room room = booking.getRoom();
-            room.setRoomStatus(RoomStatus.BOOKED);
+            // room.setRoomStatus(RoomStatus.BOOKED);
             room.setDateAvailable(booking.getCheckoutDate().plusDays(1));
 
             roomRepository.save(room);
@@ -102,7 +100,9 @@ public class PaymentSerImpl implements PaymentService {
                 .paymentMethod("CASH")
                 .createdAt(LocalDateTime.now())
                 .build();
-        booking.setStatus(BookingStatus.PAID);
+        
+                bookingService.confirmBooking(booking.getBookingId());//gọi service để confirm booking
+                // booking.setStatus(BookingStatus.PAID);
 
         //send notification
         notificationService.notifyOwnerNewBooking(ownerId, booking);

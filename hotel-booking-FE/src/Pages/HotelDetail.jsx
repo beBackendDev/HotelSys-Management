@@ -136,13 +136,14 @@ const HotelDetail = () => {
   const ownerId = hotelInfo?.ownerId;
   // Kiểm tra phòng trống
   const handleCheckAvailability = async () => {
-    if (!checkIn || !checkOut) return;
+    const hotelId = hotelInfo?.hotelId;
+    if (!hotelId || !checkIn || !checkOut) return;
 
     setLoadingRooms(true);
 
     try {
       const res = await fetch(
-        `http://localhost:8080/api/user/public/room-available?checkIn=${checkIn.format("YYYY-MM-DD")}&checkOut=${checkOut.format("YYYY-MM-DD")}`
+        `http://localhost:8080/api/user/public/room-available?hotelId=${hotelId}&checkIn=${checkIn.format("YYYY-MM-DD")}&checkOut=${checkOut.format("YYYY-MM-DD")}`
       );
 
       const data = await res.json();
@@ -465,6 +466,7 @@ const HotelDetail = () => {
           ) : rooms.length ? (
             rooms.map((room) => (
               <RoomCardItem
+                hotelId={hotelInfo?.hotelId}
                 room={room}
                 checkIn={checkIn}
                 checkOut={checkOut}

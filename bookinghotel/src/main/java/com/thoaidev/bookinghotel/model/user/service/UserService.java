@@ -2,6 +2,7 @@ package com.thoaidev.bookinghotel.model.user.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.role.OwnerResponseDTO;
 import com.thoaidev.bookinghotel.model.user.dto.UserDto;
 import com.thoaidev.bookinghotel.model.user.dto.request.ChangePasswordRequest;
@@ -13,6 +14,8 @@ import com.thoaidev.bookinghotel.model.user.dto.response.UserResponse;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 
 public interface UserService {
+//Transactional methods
+
 
 //GET methods
     public UserEntity findByUsername(String username);
@@ -37,6 +40,8 @@ public interface UserService {
     void sendResetPasswordCode(ForgetPwRequest rq);
 
     void resetPasswordWithCode(ResetPasswordRequest request);
+
+    void sendBookingInformation(String toEmail, BookingDTO bookingDto);
 //DELETE methods
 
     void deleteUserById(Integer userId);
