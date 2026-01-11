@@ -9,9 +9,11 @@ import com.thoaidev.bookinghotel.model.common.RoomFacilityDTO;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 public class RoomDto {
 
@@ -27,8 +29,8 @@ public class RoomDto {
     // private Hotel hotel;
     private Integer hotelId;// chỉ cần lấy hotelId trong Dto để truy vấn
 
-    public List<String> getRoomImageUrls() {
-        return roomImageUrls != null ? roomImageUrls : Collections.emptyList();
-    }
+    // public List<String> getRoomImageUrls() {
+    //     return roomImageUrls != null ? roomImageUrls : Collections.emptyList();
+    // }
 
 }

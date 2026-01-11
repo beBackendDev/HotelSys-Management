@@ -30,7 +30,7 @@ export function humanDate(date, opts = {}) {
   return dfDate;
 }
 
-export const formatDate = (date) =>
-  moment(date).format("YYYY-MM-DD").toString();
+export const formatDate = (dateStr) =>
+  dateStr ? moment(dateStr, "YYYY-MM-DD").format("DD-MM-YYYY") : "";
 
 export const getDayOfBooking = (date) => moment(date).format("DD").toString();

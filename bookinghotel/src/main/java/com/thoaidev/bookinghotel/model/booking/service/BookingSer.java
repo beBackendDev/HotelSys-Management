@@ -24,7 +24,7 @@ public interface BookingSer {
 
     public BookingResponse getAllBookings(int pageNo, int pageSize);
 
-    public boolean isRoomAvailable(Integer roomId, LocalDate checkin, LocalDate checkout);// kiểm tra phòng có sẵn không hay đã được đặt( giữ chỗ)
+    public boolean isRoomAvailable(Integer hotelId, Integer roomId, LocalDate checkin, LocalDate checkout);// kiểm tra phòng có sẵn không hay đã được đặt( giữ chỗ)
 
     public void cancelExpiredBookings();//tự độngg kiểm tra xem booking nào đã hết hạn thanh toán( >15p)
 

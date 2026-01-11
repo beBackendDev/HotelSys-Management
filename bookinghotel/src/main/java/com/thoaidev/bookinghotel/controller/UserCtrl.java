@@ -149,11 +149,12 @@ public class UserCtrl {
     //Kiểm tra tình trạng phòng
     @GetMapping("/check-availability")
     public ResponseEntity<?> checkAvailability(
+            @RequestParam Integer hotelId,
             @RequestParam Integer roomId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate checkin,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate checkout
     ) {
-        boolean available = bookingService.isRoomAvailable(roomId, checkin, checkout);
+        boolean available = bookingService.isRoomAvailable(hotelId, roomId, checkin, checkout);
         return ResponseEntity.ok(Map.of("available", available));
     }
 

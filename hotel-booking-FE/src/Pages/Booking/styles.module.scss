@@ -1,0 +1,180 @@
+.bookingWrapper {
+  max-width: 1100px;
+  margin: 50px auto;
+  padding: 24px;
+}
+
+/* ===== MAIN CARD ===== */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px 36px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== TITLE ===== */
+.title {
+  text-align: center;
+  margin-bottom: 36px;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+  }
+}
+
+/* ===== FORM ===== */
+.form {
+  width: 100%;
+}
+
+/* ===== SECTION ===== */
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.sectionCard {
+  background: #fafafa;
+  padding: 24px;
+  border-radius: 12px;
+}
+
+
+/* ===== GRID ===== */
+.inlineRow {
+  display: flex;
+  gap: 16px;
+
+  > div {
+    flex: 1;
+  }
+}
+
+/* ===== INFO BOX ===== */
+.infoGroup {
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+/* ===== DATE ===== */
+.dateBox {
+  font-size: 14px;
+  color: #666;
+  margin-top: 6px;
+
+  b {
+    color: #222;
+  }
+}
+
+/* ===== PRICE ===== */
+.priceInput {
+  font-size: 16px;
+  font-weight: 700;
+  color: #d4380d;
+
+  :global(.ant-input) {
+    background: #fff7e6;
+    border-color: #ffd591;
+  }
+}
+
+/* ===== VOUCHER ===== */
+.voucherRow {
+  display: flex;
+  align-items: flex-end;
+
+  button {
+    height: 40px;
+    font-weight: 600;
+  }
+}
+
+
+/* ===== SUBMIT ===== */
+.submitWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+
+  button {
+    min-width: 300px;
+    height: 52px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 12px;
+  }
+}
+
+
+/* ===== ANT OVERRIDE (SCOPE) ===== */
+:global {
+  .ant-form-item-label > label {
+    font-weight: 600;
+  }
+
+  .ant-input,
+  .ant-picker {
+    height: 40px;
+    border-radius: 8px;
+  }
+
+  .ant-input[disabled] {
+    background: #f5f5f5;
+    color: #333;
+  }
+}
+
+//DATE FORM
+.dateRange {
+  display: flex;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+
+
+.dateDivider {
+  width: 2px;
+  background: #d0d0d0;
+}
+
+
+.dateInput {
+  flex: 1;
+
+  :global(.ant-input) {
+    height: 40px;
+    text-align: center;
+    font-weight: 500;
+    background: #f5f5f5;
+    color: #333;
+  }
+}
+
+/* bo góc trái */
+.dateInput:first-child :global(.ant-input) {
+  border-radius: 8px 0 0 8px;
+  border-right: none;
+}
+
+/* bo góc phải */
+.dateInput:last-child :global(.ant-input) {
+  border-radius: 0 8px 8px 0;
+}
+
+/* đường phân cách */
+.dateDivider {
+  width: 10px;
+  background: #d9d9d9;
+}
+

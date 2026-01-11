@@ -10,4 +10,6 @@ import com.thoaidev.bookinghotel.model.voucher.enums.VoucherStatus;
 public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
 
     Optional<Voucher> findByCodeAndStatus(String code, VoucherStatus status);
+
+    Optional<Voucher> findByCode(String code);
 }

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -293,8 +294,13 @@ public class HotelServiceImplement implements HotelService {
         Hotel hotel = hotelRepository.findById(id).orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
         hotelRepository.delete(hotel);
     }
-//Admin: Cập nhật khách sạn
+// Chuẩn hóa chuỗi
 
+    private String normalize(String name) {
+        return name == null ? null : name.trim().toLowerCase();
+    }
+
+//Admin: Cập nhật khách sạn
     @Override
     public HotelDto updateHotel(HotelDto hotelDto, Integer id) {
         Hotel hotel = hotelRepository.findById(id).orElseThrow(() -> new NotFoundException("Khách sạn không tồn tại"));
@@ -312,21 +318,34 @@ public class HotelServiceImplement implements HotelService {
         }
 // Facilities
         if (hotelDto.getHotelFacilities() != null) {
-            // Lấy danh sách facility hiện tại từ entity
+
             List<HotelFacility> currentFacilities = hotel.getFacilities();
 
-            for (HotelFacilityDTO fDto : hotelDto.getHotelFacilities()) {
-                // Kiểm tra xem facility này đã tồn tại chưa
-                boolean exists = currentFacilities.stream()
-                        .anyMatch(f -> f.getName().equalsIgnoreCase(fDto.getName()));
-                // hoặc so sánh theo id nếu DTO luôn gửi id
+            // Set các name hiện tại (đã chuẩn hóa)
+            Set<String> existingNames = currentFacilities.stream()
+                    .map(f -> normalize(f.getName()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
 
-                if (!exists) {
+            for (HotelFacilityDTO fDto : hotelDto.getHotelFacilities()) {
+
+                String newName = normalize(fDto.getName());
+
+                // Bỏ qua facility không có name
+                if (newName == null || newName.isBlank()) {
+                    continue;
+                }
+
+                // Nếu chưa tồn tại thì mới thêm
+                if (!existingNames.contains(newName)) {
+
                     HotelFacility newFacility = new HotelFacility();
+                    newFacility.setName(fDto.getName().trim());
                     newFacility.setIcon(fDto.getIcon());
-                    newFacility.setName(fDto.getName());
                     newFacility.setHotel(hotel);
+
                     currentFacilities.add(newFacility);
+                    existingNames.add(newName); // cập nhật set
                 }
             }
         }
@@ -356,8 +375,8 @@ public class HotelServiceImplement implements HotelService {
 
         }
 //Images
-        if (hotelDto.getHotelImageUrls() != null) {
-            // Lấy danh sách facility hiện tại từ entity
+        if (hotelDto.getHotelImageUrls() != null && !hotelDto.getHotelImageUrls().isEmpty()) {
+            // Lấy danh sách image hiện tại từ entity
             List<Image> currentHotelImages = hotel.getHotelImages();
             List<String> newHotelImagesUrls = hotelDto.getHotelImageUrls();
 

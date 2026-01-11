@@ -37,16 +37,30 @@ const ChangePass = () => {
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
-  return (
-    <User>
-      <div className="px-8 bg-white h-screen rounded">
-        <Typography.Title level={3} className="pt-5">
+return (
+  <User>
+    <div
+      className="min-h-screen flex justify-center items-start bg-gray-100 pt-20"
+    >
+      <div
+        className="bg-white rounded-xl shadow-lg px-10 py-8 w-full max-w-md"
+      >
+        {/* TITLE */}
+        <Typography.Title
+          level={3}
+          style={{
+            textAlign: "center",
+            marginBottom: 32,
+            fontWeight: 600,
+          }}
+        >
           Đổi mật khẩu
         </Typography.Title>
+
+        {/* FORM */}
         <Form
-          initialValues={{
-            remember: true,
-          }}
+          layout="vertical"
+          initialValues={{ remember: true }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
@@ -57,40 +71,42 @@ const ChangePass = () => {
             rules={rules.password}
             help={error || null}
           >
-            <Input.Password />
+            <Input.Password
+              placeholder="Nhập mật khẩu hiện tại"
+              size="large"
+            />
           </Form.Item>
+
           <Form.Item
             label="Mật khẩu mới"
             name="newPassword"
             rules={[
-              {
-                required: true,
-                message: "Vui lòng nhập mật khẩu mới!",
-              },
+              { required: true, message: "Vui lòng nhập mật khẩu mới!" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("oldPassword") === value) {
-                    return Promise.reject(
-                      new Error("Mật khẩu mới trùng với mật khẩu cũ")
-                    );
+                  if (!value || getFieldValue("oldPassword") !== value) {
+                    return Promise.resolve();
                   }
-                  return Promise.resolve();
+                  return Promise.reject(
+                    new Error("Mật khẩu mới trùng với mật khẩu cũ")
+                  );
                 },
               }),
             ]}
           >
-            <Input.Password />
+            <Input.Password
+              placeholder="Nhập mật khẩu mới"
+              size="large"
+            />
           </Form.Item>
+
           <Form.Item
-            name="confirm"
             label="Xác nhận mật khẩu"
-            dependencies={["password"]}
+            name="confirm"
+            dependencies={["newPassword"]}
             hasFeedback
             rules={[
-              {
-                required: true,
-                message: "Vui lòng xác nhận mật khẩu!",
-              },
+              { required: true, message: "Vui lòng xác nhận mật khẩu!" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue("newPassword") === value) {
@@ -101,20 +117,29 @@ const ChangePass = () => {
               }),
             ]}
           >
-            <Input.Password />
+            <Input.Password
+              placeholder="Nhập lại mật khẩu mới"
+              size="large"
+            />
           </Form.Item>
 
-          <div className="flex justify-center mt-6">
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Đổi mật khẩu
-              </Button>
-            </Form.Item>
+          {/* SUBMIT */}
+          <div className="flex justify-center mt-8">
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              className="w-full h-12 text-base font-semibold rounded-lg"
+            >
+              Đổi mật khẩu
+            </Button>
           </div>
         </Form>
       </div>
-    </User>
-  );
+    </div>
+  </User>
+);
+
 };
 
 export default ChangePass;

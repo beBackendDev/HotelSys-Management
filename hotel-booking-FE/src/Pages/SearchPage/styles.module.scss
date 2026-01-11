@@ -1,0 +1,82 @@
+/* ===== PAGE ===== */
+.pageWrapper {
+  max-width: 72rem; // ~ max-w-6xl
+  min-height: 100vh;
+  margin: 40px auto 0;
+  padding: 0 16px;
+}
+
+.mainRow {
+  transition: all 0.5s ease-in-out;
+}
+
+/* ===== FILTER ===== */
+.filterCol {
+  transition: all 0.5s ease-in-out;
+}
+
+/* ===== LIST COLUMN ===== */
+.listCol {
+  transition: all 0.5s ease-in-out;
+}
+
+/* ===== FILTER TOGGLE ===== */
+.filterToggleWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin: 40px 0 12px;
+}
+
+.filterToggleBtn {
+  border: 1px solid #e5e7eb;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+}
+
+/* ===== LIST ===== */
+.listContainer {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.listTitle {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.hotelList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loadingText {
+  color: #374151;
+}
+
+.emptyText {
+  color: #6b7280;
+}
+
+/* ===== PAGINATION ===== */
+.paginationWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 32px;
+
+  :global {
+    .ant-pagination {
+      font-size: 15px;
+    }
+  }
+}

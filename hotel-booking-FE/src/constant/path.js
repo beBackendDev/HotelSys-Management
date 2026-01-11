@@ -3,6 +3,7 @@ class Path {
     this.home = "/";
     this.destinations = "/destinations";
     this.searchHotel = "/hotel/search";
+    this.contact = "/contact";
     this.register = "/register";
     this.login = "/login";
     this.registerMember = "/register-member";

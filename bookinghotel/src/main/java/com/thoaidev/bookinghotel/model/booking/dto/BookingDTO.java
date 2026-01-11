@@ -25,7 +25,9 @@ public class BookingDTO {
     private LocalDate checkinDate;
     private LocalDate checkoutDate;
     private BigDecimal totalPrice;
-    private String voucherCode;// mã voucher áp dụng
+    private String voucherCode;
+    private BigDecimal discountAmount;
+    private BigDecimal totalPriceAfterDiscount;
     private BookingStatus status;
     private LocalDateTime createdAt;
 

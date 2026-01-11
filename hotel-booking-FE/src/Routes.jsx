@@ -7,22 +7,23 @@ import UnAuth from "./core/guards/UnAuth";
 import Dashboard from "./core/layout/Dashboard";
 import NotFound from "./core/layout/NotFound";
 import Success from "./core/layout/SuccessPage";
-import Booking from "./Pages/Booking";
-import Payment from "./Pages/Payment";
+import Booking from "./Pages/Booking/Booking";
+import Payment from "./Pages/Payment/Payment";
 import HomePage from "./Pages/HomePage";
 import Destinations from "./Pages/Destinations";
+import Contact from "./Pages/Contact/Contact";
 import BookingManagement from "./Pages/Hotel/BookingManagement";
 import BookingDetail from "./Pages/Hotel/BookingDetailAdmin";
 import PaymentManagement from "./Pages/Hotel/PaymentManagement";
 import PaymentDetail from "./Pages/Hotel/PaymentDetailAdmin";
 import CreateRoom from "./Pages/Hotel/CreateRoom";
 import Overview from "./Pages/Hotel/Overview";
-import HotelDetail from "./Pages/HotelDetail";
+import HotelDetail from "./Pages/HotelDetail/HotelDetail";
 import RoomDetail from "./Pages/RoomDetail";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
-import RegisterMember from "./Pages/RegisterMember";
-import SearchPage from "./Pages/SearchPage";
+import RegisterMember from "./Pages/RegisterMember/RegisterMember";
+import SearchPage from "./Pages/SearchPage/SearchPage";
 import ChangePass from "./Pages/User/ChangePass";
 import ForgetPw from "./Pages/User/ForgetPw";
 import Profile from "./Pages/User/Profile";
@@ -52,6 +53,10 @@ const Routes = () => {
       {/* Khám phá */}
       <Route exact path={path.destinations} >
         <Destinations />
+      </Route>
+      {/* Liên hệ */}
+      <Route exact path={path.contact} >
+        <Contact />
       </Route>
       {/* Tìm kiếm */}
       <Route exact path={path.searchHotel}>

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.common.RoomFacility;
+import com.thoaidev.bookinghotel.model.common.RoomFacilityDTO;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.hotel.HotelSpecification;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -118,6 +120,10 @@ public class RoomServiceImplement implements RoomService {
         return roomMapper.mapToRoomDTO(createdRoom);
 
     }
+    // Normalize string by trimming and converting to lower case
+        private String normalize(String name) {
+        return name == null ? null : name.trim().toLowerCase();
+    }
 //UPDATE methods
 
     @Override
@@ -131,15 +137,46 @@ public class RoomServiceImplement implements RoomService {
         if (roomDto.getRoomName() != null) {
             room.setRoomName(roomDto.getRoomName());
         }
-        // if (roomDto.getRoomImageUrls() != null) {
-        //     List<Image> imageEntities = roomDto.getRoomImageUrls().stream()
-        //             .map(url -> Image.builder()
-        //             .url(url)
-        //             .room(room) // liên kết ngược
-        //             .build())
-        //             .collect(Collectors.toList());
-        //     room.setRoomImages(imageEntities);
-        // }
+        if (roomDto.getRoomFacilities() != null) {
+            List<RoomFacility> currentFacilities = room.getFacilities();
+            Set<String> existingFacilityNames = currentFacilities.stream()
+                    .map(f -> normalize(f.getName()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            for (RoomFacilityDTO dtoFacility : roomDto.getRoomFacilities()) {
+                String newName = normalize(dtoFacility.getName());
+                if(newName == null || newName.isBlank()) {
+                    continue; // Bỏ qua nếu tên mới là null hoặc rỗng
+                }
+                if (!existingFacilityNames.contains(newName)) {
+                    RoomFacility newFacility = new RoomFacility();
+                    newFacility.setName(dtoFacility.getName());
+                    newFacility.setIcon(dtoFacility.getIcon());
+                    newFacility.setRoom(room);
+                    currentFacilities.add(newFacility);
+                    existingFacilityNames.add(newName); // Cập nhật tập hợp để tránh trùng lặp
+                }
+        }
+    }
+        if (roomDto.getRoomImageUrls() != null && !roomDto.getRoomImageUrls().isEmpty()) {
+            List<Image> currentImages = room.getRoomImages();
+            List<String> newImageUrls = roomDto.getRoomImageUrls();
+            Set<String> currentUrls = currentImages.stream()
+                    .map(Image::getUrl)
+                    .collect(Collectors.toSet());
+            // Xoá ảnh không còn trong danh sách mới
+            currentImages.removeIf(img -> !newImageUrls.contains(img.getUrl()));
+            // Thêm ảnh mới chưa có
+            for (String url : newImageUrls) {
+                if (!currentUrls.contains(url)) {
+                    Image newImage = Image.builder()
+                            .url(url)
+                            .room(room)
+                            .build();
+                    currentImages.add(newImage);
+                }
+            }
+        }
 //thực hiện kiểm tra ảnh được thêm vào có trùng với url ảnh cũ không?xóa:giữ thêm mới
         if (roomDto.getRoomImageUrls() != null) {
             Set<String> newUrls = new HashSet<>(roomDto.getRoomImageUrls());
@@ -184,7 +221,7 @@ public class RoomServiceImplement implements RoomService {
             Integer hotelId,
             LocalDate checkin,
             LocalDate checkout
-            ) {
+    ) {
         RoomResponse roomRes = new RoomResponse();
         List<Room> rooms = roomRepository.findAll(HotelSpecification.filter(hotelId, checkin, checkout));
         List<RoomDto> content = rooms.stream()

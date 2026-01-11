@@ -68,13 +68,19 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
             @Param("currentDate") LocalDate currentDate);
 
     // Kiểm tra trùng lịch
-    @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId "
-            + "AND b.status IN ('PENDING_PAYMENT', 'PAID') "
-            + "AND (:startDate <= b.checkoutDate AND :endDate >= b.checkinDate)")
-    List<Booking> findConflictingBookings(@Param("roomId") Integer roomId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate);
-
+@Query("""
+    SELECT b FROM Booking b
+    WHERE b.hotel.hotelId = :hotelId
+      AND b.room.roomId = :roomId
+      AND b.status IN ('PENDING_PAYMENT', 'PAID')
+      AND (:startDate <= b.checkoutDate AND :endDate >= b.checkinDate)
+""")
+List<Booking> findConflictingBookings(
+        @Param("hotelId") Integer hotelId,
+        @Param("roomId") Integer roomId,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate
+);
     // Tìm các booking đã quá hạn chưa thanh toán
     @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.status  = 'PENDING_PAYMENT' AND b.createdAt< :expiredTime")
     List<Booking> findExpiredBookings(@Param("expiredTime") LocalDateTime expiredTime);

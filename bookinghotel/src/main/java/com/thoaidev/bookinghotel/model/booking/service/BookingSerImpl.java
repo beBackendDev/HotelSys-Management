@@ -70,8 +70,8 @@ public class BookingSerImpl implements BookingSer {
 
     //  Check room availability
     @Override
-    public boolean isRoomAvailable(Integer roomId, LocalDate checkin, LocalDate checkout) {
-        List<Booking> conflicts = bookingRepository.findConflictingBookings(roomId, checkin, checkout);
+    public boolean isRoomAvailable(Integer hotelId, Integer roomId, LocalDate checkin, LocalDate checkout) {
+        List<Booking> conflicts = bookingRepository.findConflictingBookings(hotelId, roomId, checkin, checkout);
         return conflicts.isEmpty(); // true ? no conflict : conflict
     }
 
@@ -79,7 +79,7 @@ public class BookingSerImpl implements BookingSer {
     // Book Room
     @Override
     public Booking bookRoom(BookingDTO bookingDTO, UserEntity user) {
-        if (!isRoomAvailable(bookingDTO.getRoomId(), bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate())) {
+        if (!isRoomAvailable(bookingDTO.getHotelId(), bookingDTO.getRoomId(), bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate())) {
             throw new BadRequestException("Phòng đã có người đặt trong thời gian bạn chọn.");
         } else {
             //Khởi tạo một Booking mới
@@ -129,13 +129,13 @@ public class BookingSerImpl implements BookingSer {
             booking.setHotel(hotel);
             booking.setUser(user);
             booking.setRoom(room);
-
+            final BigDecimal totalPriceAfterDiscount = totalPrice.subtract(discount);
             // room.setRoomStatus(RoomStatus.TEMP_HOLD);// thực hiện đặt room status là đang đợi thanh toán
 
             booking.setCheckinDate(bookingDTO.getCheckinDate());
             booking.setCheckoutDate(bookingDTO.getCheckoutDate());
             booking.setDiscountAmount(discount);
-            booking.setTotalPrice(totalPrice.subtract(discount));// giá sau khi đã trừ giảm giá
+            booking.setTotalPrice(totalPriceAfterDiscount);// giá sau khi đã trừ giảm giá
             booking.setStatus(BookingStatus.PENDING_PAYMENT);//auto pending _payment
             booking.setCreatedAt(LocalDateTime.now());
             // Lưu người ở
