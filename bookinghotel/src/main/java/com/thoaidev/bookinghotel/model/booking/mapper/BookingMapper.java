@@ -30,6 +30,8 @@ public class BookingMapper {
                 .checkinDate(booking.getCheckinDate())
                 .checkoutDate(booking.getCheckoutDate())
                 .totalPrice(booking.getTotalPrice())
+                .discountAmount(booking.getDiscountAmount())
+                .totalPriceAfterDiscount(booking.getFinalAmount())
                 .status(booking.getStatus())
                 .guestFullName(booking.getGuestFullName())
                 .guestPhone(booking.getGuestPhone())

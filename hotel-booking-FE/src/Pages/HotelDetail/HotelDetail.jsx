@@ -102,12 +102,30 @@ const HotelDetail = () => {
 
             {/* ===== PRICE + ACTION ===== */}
             <div className="flex items-end justify-between mt-4">
-              <div>
-                <div className="text-gray-500 text-sm">Giá / đêm</div>
-                <div className="text-lg font-bold text-red-500">
-                  {formatMoney(room?.roomPricePerNight)} VND
-                </div>
-              </div>
+              {/* Price */}
+                  <div className={styles['room-price']}>
+                    <Text className="text-gray-500">Giá mỗi đêm</Text>
+
+                    <div className={styles['price-wrapper']}>
+                      {room?.discountPercent > 0 && (
+                        <span className={styles['discount-badge']}>
+                          -{room.discountPercent}%
+                        </span>
+                      )}
+
+                      {/* Giá gốc (gạch ngang) */}
+                      {room?.finalPrice < room?.roomPricePerNight && (
+                        <span className={styles['original-price']}>
+                          {formatMoney(room?.roomPricePerNight)} VND
+                        </span>
+                      )}
+
+                      {/* Giá sau giảm */}
+                      <span className={styles['final-price']}>
+                        {formatMoney(room?.finalPrice)} VND
+                      </span>
+                    </div>
+                  </div>
 
               {/* <Button
                 type="primary"
@@ -134,7 +152,7 @@ const HotelDetail = () => {
   const images = hotelInfo?.hotelImageUrls || [];
   const extraImages = images?.length - 5;
   const roomImages = selectedRoom?.roomImageUrls || [];
-const roomExtraImages = roomImages.length - 5;
+  const roomExtraImages = roomImages.length - 5;
 
   const [openGallery, setOpenGallery] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -631,40 +649,40 @@ const roomExtraImages = roomImages.length - 5;
                 />
 
                 <div className={styles['room-modal-thumbnails']}>
-  {roomImages.slice(1, 5).map((url, index) => {
-    const realIndex = index + 1;
+                  {roomImages.slice(1, 5).map((url, index) => {
+                    const realIndex = index + 1;
 
-    return (
-      <div
-        key={index}
-        className={styles['room-thumbnail-wrapper']}
-      >
-        <img
-          src={`http://localhost:8080${url}`}
-          alt={`Room view ${realIndex}`}
-          className={styles['room-modal-thumbnail']}
-          onClick={() => {
-            setRoomActiveIndex(realIndex);
-            setOpenRoomGallery(true);
-          }}
-        />
+                    return (
+                      <div
+                        key={index}
+                        className={styles['room-thumbnail-wrapper']}
+                      >
+                        <img
+                          src={`http://localhost:8080${url}`}
+                          alt={`Room view ${realIndex}`}
+                          className={styles['room-modal-thumbnail']}
+                          onClick={() => {
+                            setRoomActiveIndex(realIndex);
+                            setOpenRoomGallery(true);
+                          }}
+                        />
 
-        {/* OVERLAY +X ẢNH */}
-        {index === 3 && roomExtraImages > 0 && (
-          <div
-            className={styles['room-gallery-overlay']}
-            onClick={() => {
-              setRoomActiveIndex(realIndex);
-              setOpenRoomGallery(true);
-            }}
-          >
-            <span>+{roomExtraImages} ảnh</span>
-          </div>
-        )}
-      </div>
-    );
-  })}
-</div>
+                        {/* OVERLAY +X ẢNH */}
+                        {index === 3 && roomExtraImages > 0 && (
+                          <div
+                            className={styles['room-gallery-overlay']}
+                            onClick={() => {
+                              setRoomActiveIndex(realIndex);
+                              setOpenRoomGallery(true);
+                            }}
+                          >
+                            <span>+{roomExtraImages} ảnh</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
 
               </div>
 
@@ -712,10 +730,28 @@ const roomExtraImages = roomImages.length - 5;
                   {/* Price */}
                   <div className={styles['room-price']}>
                     <Text className="text-gray-500">Giá mỗi đêm</Text>
-                    <div className={styles['price-value']}>
-                      {formatMoney(selectedRoom?.roomPricePerNight)} VND
+
+                    <div className={styles['price-wrapper']}>
+                      {selectedRoom?.discountPercent > 0 && (
+                        <span className={styles['discount-badge']}>
+                          -{selectedRoom.discountPercent}%
+                        </span>
+                      )}
+
+                      {/* Giá gốc (gạch ngang) */}
+                      {selectedRoom?.finalPrice < selectedRoom?.roomPricePerNight && (
+                        <span className={styles['original-price']}>
+                          {formatMoney(selectedRoom?.roomPricePerNight)} VND
+                        </span>
+                      )}
+
+                      {/* Giá sau giảm */}
+                      <span className={styles['final-price']}>
+                        {formatMoney(selectedRoom?.finalPrice)} VND
+                      </span>
                     </div>
                   </div>
+
                 </div>
 
                 {/* Booking Button */}

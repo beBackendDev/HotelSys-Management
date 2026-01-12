@@ -36,8 +36,15 @@ public class RoomMapper {
                 .roomOccupancy(room.getRoomOccupancy())
                 .dateAvailable(room.getDateAvailable())
                 .roomStatus(room.getRoomStatus())
+                //
                 .roomPricePerNight(room.getRoomPricePerNight())
-                
+                .finalPrice(room.getFinalPrice())
+                .discountPercent(room.getDiscountPercent())
+                .discountType(room.getDiscountType())
+                .discountStart(room.getDiscountStart())
+                .discountEnd(room.getDiscountEnd())
+                .active(room.isActive())
+                //
                 .hotelId(room.getHotel().getHotelId())//thực hiện lấy id HOtel
                 .build();
                 

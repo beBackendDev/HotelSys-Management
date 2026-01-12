@@ -72,7 +72,8 @@ public class Booking {
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;// số tiền được giảm
 
-
+    @Column(name = "final_amount")
+    private BigDecimal finalAmount;
 
     @ManyToOne
     @JoinColumn(name = "voucher_id")

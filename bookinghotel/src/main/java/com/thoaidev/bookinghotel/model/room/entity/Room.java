@@ -2,11 +2,13 @@ package com.thoaidev.bookinghotel.model.room.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.common.RoomFacility;
+import com.thoaidev.bookinghotel.model.enums.DiscountType;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.image.entity.Image;
@@ -64,10 +66,30 @@ public class Room {
     @Enumerated(EnumType.STRING)
     @Column(name = "room_status")
     private RoomStatus roomStatus;
-
+//Xu lý giá phòng và khuyến mãi
     @Column(name = "room_price_per_night")
-    private BigDecimal roomPricePerNight;
+    private BigDecimal roomPricePerNight; //originalPrice
 
+    @Column(name = "final_price")
+    private BigDecimal finalPrice;
+
+    @Column(name = "discount_percent")
+    private BigDecimal discountPercent;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_type")
+    private DiscountType discountType;
+
+    /**
+     * Thời gian hiệu lực
+     */
+    @Column(name = "discount_start")
+    private LocalDateTime discountStart;
+    @Column(name = "discount_end")
+    private LocalDateTime discountEnd;
+    @Column(name = "active")
+    private boolean active;
+    //
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id") // đây là cột khóa ngoại trỏ tới Hotel
     private Hotel hotel;

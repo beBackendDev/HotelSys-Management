@@ -85,7 +85,7 @@ public class PaymentSerImpl implements PaymentService {
         Room room = roomRepository.findById(booking.getRoom().getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
         Integer ownerId = booking.getHotel().getOwner().getUserId();
-        String transactionAmount = booking.getTotalPrice()
+        String transactionAmount = booking.getFinalAmount()
                 .multiply(new BigDecimal("100")) // nhân 100
                 .setScale(0, RoundingMode.HALF_UP) // làm tròn về số nguyên
                 .toPlainString(); // chuyển sang String không có dấu phẩy

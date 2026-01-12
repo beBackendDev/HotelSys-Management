@@ -171,8 +171,10 @@ public class UserCtrl {
 
         return ResponseEntity.ok(Map.of(
                 "bookingId", booking.getBookingId(),
-                "bookingStatus", booking.getStatus(),
+                "booking Status", booking.getStatus(),
                 "totalPrice", booking.getTotalPrice(),
+                "discountAmount", booking.getDiscountAmount(),
+                "totalPrice", booking.getFinalAmount(),
                 "redirectToPayment", true
         ));
     }

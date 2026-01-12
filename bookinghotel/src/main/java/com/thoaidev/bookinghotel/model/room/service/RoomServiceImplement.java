@@ -1,7 +1,9 @@
 package com.thoaidev.bookinghotel.model.room.service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,6 +22,7 @@ import com.thoaidev.bookinghotel.exceptions.BadRequestException;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.common.RoomFacility;
 import com.thoaidev.bookinghotel.model.common.RoomFacilityDTO;
+import com.thoaidev.bookinghotel.model.enums.DiscountType;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.hotel.HotelSpecification;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -74,9 +77,61 @@ public class RoomServiceImplement implements RoomService {
     }
 
 //POST methods
+    //Tinhs giá tiền phòng 
+    public BigDecimal calculateFinalPrice(
+            BigDecimal originalPrice,
+            BigDecimal discountPercent,
+            DiscountType discountType,
+            LocalDateTime discountStart,
+            LocalDateTime discountEnd
+    ) {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Không discount
+        if (discountType == null
+                || discountType == DiscountType.NONE
+                || discountPercent == null
+                || discountPercent.compareTo(BigDecimal.ZERO) <= 0
+                || discountStart == null
+                || discountEnd == null
+                || now.isBefore(discountStart)
+                || now.isAfter(discountEnd)) {
+            return originalPrice;
+        }
+
+        BigDecimal discountAmount = originalPrice
+                .multiply(discountPercent)
+                .divide(BigDecimal.valueOf(100));
+
+        BigDecimal finalPrice = originalPrice.subtract(discountAmount);
+
+        // Không cho âm
+        return finalPrice.max(BigDecimal.ZERO);
+    }
+
+    //validate input
+    private void validateCreateRoom(RoomDto request) {
+        //Check input Price off Room
+        if (request.getRoomPricePerNight().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Room price must be > 0");
+        }
+        //validate discount percent
+        if (request.getDiscountPercent() != null
+                && request.getDiscountPercent().compareTo(BigDecimal.valueOf(100)) > 0) {
+            throw new IllegalArgumentException("Discount percent invalid");
+        }
+        //required attribute 
+        if (request.getDiscountType() != null
+                && request.getDiscountType() != DiscountType.NONE
+                && (request.getDiscountStart() == null || request.getDiscountEnd() == null)) {
+            throw new IllegalArgumentException("Discount time required");
+        }
+    }
+
     //Tao moi phong trong 1 hotel
     @Override
     public RoomDto createRoom(Integer hotelId, RoomDto roomDto) {
+        validateCreateRoom(roomDto);
         Hotel hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
 
         Room room = new Room();
@@ -87,7 +142,29 @@ public class RoomServiceImplement implements RoomService {
         room.setRoomStatus(RoomStatus.AVAILABLE); // Mặc định
         room.setRoomType(roomDto.getRoomType());
         room.setRoomPricePerNight(roomDto.getRoomPricePerNight());
+        room.setDiscountPercent(roomDto.getDiscountPercent());
+        room.setDiscountType(
+                roomDto.getDiscountType() == null
+                ? DiscountType.NONE
+                : roomDto.getDiscountType()
+        );
+        room.setDiscountStart(roomDto.getDiscountStart());
+        room.setDiscountEnd(roomDto.getDiscountEnd());
+        room.setActive(
+                roomDto.getActive() != null
+                ? roomDto.getActive().booleanValue()
+                : true // default
+        );
+// room.setActive(Boolean.TRUE.equals(roomDto.getActive()));
 
+        BigDecimal finalPrice = calculateFinalPrice(
+                room.getRoomPricePerNight(),
+                room.getDiscountPercent(),
+                room.getDiscountType(),
+                room.getDiscountStart(),
+                room.getDiscountEnd()
+        );
+        room.setFinalPrice(finalPrice);
 //  Gán danh sách ảnh
         List<Image> imageEntities = Optional.ofNullable(roomDto.getRoomImageUrls())
                 .orElse(Collections.emptyList())
@@ -121,8 +198,9 @@ public class RoomServiceImplement implements RoomService {
         return roomMapper.mapToRoomDTO(createdRoom);
 
     }
+
     // Normalize string by trimming and converting to lower case
-        private String normalize(String name) {
+    private String normalize(String name) {
         return name == null ? null : name.trim().toLowerCase();
     }
 //UPDATE methods
@@ -146,7 +224,7 @@ public class RoomServiceImplement implements RoomService {
                     .collect(Collectors.toSet());
             for (RoomFacilityDTO dtoFacility : roomDto.getRoomFacilities()) {
                 String newName = normalize(dtoFacility.getName());
-                if(newName == null || newName.isBlank()) {
+                if (newName == null || newName.isBlank()) {
                     continue; // Bỏ qua nếu tên mới là null hoặc rỗng
                 }
                 if (!existingFacilityNames.contains(newName)) {
@@ -157,8 +235,8 @@ public class RoomServiceImplement implements RoomService {
                     currentFacilities.add(newFacility);
                     existingFacilityNames.add(newName); // Cập nhật tập hợp để tránh trùng lặp
                 }
+            }
         }
-    }
         if (roomDto.getRoomImageUrls() != null && !roomDto.getRoomImageUrls().isEmpty()) {
             List<Image> currentImages = room.getRoomImages();
             List<String> newImageUrls = roomDto.getRoomImageUrls();
@@ -204,6 +282,37 @@ public class RoomServiceImplement implements RoomService {
         if (roomDto.getRoomPricePerNight() != null) {
             room.setRoomPricePerNight(roomDto.getRoomPricePerNight());
         }
+
+        if (roomDto.getDiscountPercent() != null) {
+            room.setDiscountPercent(roomDto.getDiscountPercent());
+        }
+
+        if (roomDto.getDiscountType() != null) {
+            room.setDiscountType(roomDto.getDiscountType());
+        }
+
+        if (roomDto.getDiscountStart() != null) {
+            room.setDiscountStart(roomDto.getDiscountStart());
+        }
+
+        if (roomDto.getDiscountEnd() != null) {
+            room.setDiscountEnd(roomDto.getDiscountEnd());
+        }
+
+        if (roomDto.getActive() != null) {
+            System.out.println("active: "+roomDto.getActive());
+            room.setActive(roomDto.getActive());
+        }
+
+        BigDecimal finalPrice = calculateFinalPrice(
+                room.getRoomPricePerNight(),
+                room.getDiscountPercent(),
+                room.getDiscountType(),
+                room.getDiscountStart(),
+                room.getDiscountEnd()
+        );
+        room.setFinalPrice(finalPrice);
+
         if (roomDto.getRoomStatus() != null) {
             room.setRoomStatus(roomDto.getRoomStatus());
         }
@@ -287,12 +396,12 @@ public class RoomServiceImplement implements RoomService {
         }
     }
 //check room belong to hotel
-@Override
-public Room validateRoomBelongsToHotel(Integer hotelId, Integer roomId) {
-    return roomRepository.findByIdAndHotelId(roomId, hotelId)
-            .orElseThrow(() ->
-                new BadRequestException("Room doesnt belong to the specified hotel"));
-}
 
+    @Override
+    public Room validateRoomBelongsToHotel(Integer hotelId, Integer roomId) {
+        return roomRepository.findByIdAndHotelId(roomId, hotelId)
+                .orElseThrow(()
+                        -> new BadRequestException("Room doesnt belong to the specified hotel"));
+    }
 
 }

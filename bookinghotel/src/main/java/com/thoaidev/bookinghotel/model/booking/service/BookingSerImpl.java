@@ -110,7 +110,7 @@ public class BookingSerImpl implements BookingSer {
             }
 
             // Tính tổng tiền
-            BigDecimal totalPrice = room.getRoomPricePerNight()
+            BigDecimal totalPrice = room.getFinalPrice()
                     .multiply(BigDecimal.valueOf(nights));
 
             // Áp dụng voucher nếu có
@@ -126,7 +126,7 @@ public class BookingSerImpl implements BookingSer {
                         .existsByIdAndUserId(voucher.getVoucherId(), user.getUserId())) {
                     throw new RuntimeException("Voucher is used by user before");
                 }
-                // Tính toán giảm giá
+                // Tính giá tiền giảm giá
                 discount = voucherService.calculateDiscount(voucher, totalPrice);
                 // Cập nhật số lần sử dụng voucher
                 voucher.setUsedCount(voucher.getUsedCount() + 1);
@@ -140,13 +140,15 @@ public class BookingSerImpl implements BookingSer {
             booking.setHotel(hotel);
             booking.setUser(user);
             booking.setRoom(room);
+            //totalPrice -= discount
             final BigDecimal totalPriceAfterDiscount = totalPrice.subtract(discount);
             // room.setRoomStatus(RoomStatus.TEMP_HOLD);// thực hiện đặt room status là đang đợi thanh toán
 
             booking.setCheckinDate(bookingDTO.getCheckinDate());
             booking.setCheckoutDate(bookingDTO.getCheckoutDate());
             booking.setDiscountAmount(discount);
-            booking.setTotalPrice(totalPriceAfterDiscount);// giá sau khi đã trừ giảm giá
+            booking.setTotalPrice(totalPrice);// giá gốc
+            booking.setFinalAmount(totalPriceAfterDiscount);// giá sau khi đã trừ giảm giá
             booking.setStatus(BookingStatus.PENDING_PAYMENT);//auto pending _payment
             booking.setCreatedAt(LocalDateTime.now());
             // Lưu người ở

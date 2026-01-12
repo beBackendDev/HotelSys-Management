@@ -43,19 +43,19 @@ import com.thoaidev.bookinghotel.model.room.entity.Room;
 import com.thoaidev.bookinghotel.model.room.repository.RoomRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class VNPayService {
-
-    private PaymentRepository paymentRepository;
-    private BookingRepo bookingRepository;
-    private RoomRepository roomRepository;
-    @Autowired
-    private BookingSer bookingService;
+    
+    private final PaymentRepository paymentRepository;
+    
+    private final BookingRepo bookingRepository;
+    
+    private final RoomRepository roomRepository;
+    
+    private final BookingSer bookingService;
 
     public String createOrder(PaymentInitRequest request, HttpServletRequest servletRequest) throws UnsupportedEncodingException {
 
@@ -63,11 +63,13 @@ public class VNPayService {
         String vnp_TxnRef = VNPayConfig.getRandomNumber(8);// đây chính là giá trị được gán vào transactionId trong Pyament
         // Lấy bookingId từ request
         Integer bookingId = request.getBookingId();
+        System.out.println("bookingId: "+ bookingId);
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
+                System.out.println("bookingId: "+ booking.getBookingId());
         String vnp_IpAddr = "127.0.0.1";
         String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
-        String vnp_Amount = booking.getTotalPrice()
+        String vnp_Amount = booking.getFinalAmount()
                 .multiply(new BigDecimal("100")) // nhân 100
                 .setScale(0, RoundingMode.HALF_UP) // làm tròn về số nguyên
                 .toPlainString(); // chuyển sang String không có dấu phẩy

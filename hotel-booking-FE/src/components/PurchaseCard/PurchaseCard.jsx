@@ -11,7 +11,8 @@ const PurchaseCard = ({ purchase }) => {
   const [room, setRoom] = useState({});
 
   const statusConfig = {
-    COMPLETED: { color: "green", label: "Hoàn thành" },
+    COMPLETED: { color: "gray", label: "Đã check-out" },
+    PAID: { color: "green", label: "Đang ở" },
     CANCELLED: { color: "red", label: "Đã hủy" },
     PENDING: { color: "orange", label: "Đang xử lý" },
   };

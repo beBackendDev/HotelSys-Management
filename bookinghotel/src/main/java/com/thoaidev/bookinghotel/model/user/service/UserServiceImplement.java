@@ -433,7 +433,7 @@ public class UserServiceImplement implements UserService {
                     bookingDto.getRoomName(),
                     bookingDto.getCheckinDate(),
                     bookingDto.getCheckoutDate(),
-                    bookingDto.getTotalPrice()
+                    bookingDto.getTotalPriceAfterDiscount()
             );
 
             helper.setText(html, true);
