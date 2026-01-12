@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.room.dto.RoomDto;
 import com.thoaidev.bookinghotel.model.room.dto.response.RoomResponse;
+import com.thoaidev.bookinghotel.model.room.entity.Room;
 
 public interface RoomService {
 //GET methods
@@ -15,6 +16,7 @@ public interface RoomService {
     List<RoomDto> getRoomByHotelId(Integer id);
 
     RoomDto getRoomById(Integer roomId, Integer hotelId);
+    Room validateRoomBelongsToHotel(Integer hotelId, Integer roomId);
 //POST methods
 
     RoomDto createRoom(Integer hotelId, RoomDto roomDto);

@@ -40,7 +40,7 @@ const ChangePass = () => {
 return (
   <User>
     <div
-      className="min-h-screen flex justify-center items-start bg-gray-100 pt-20"
+      className="min-h-screen flex justify-center items-start bg-gray-100 py-10"
     >
       <div
         className="bg-white rounded-xl shadow-lg px-10 py-8 w-full max-w-md"

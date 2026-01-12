@@ -3,16 +3,16 @@ import { Button, Checkbox, Col, Form, Input, Row, Typography } from "antd";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import { rules } from "../constant/rules";
-import { login } from "../slices/auth.slice";
-import authApi from "../api/auth.api"; // thêm import getMe
-import { setProfile } from "../slices/auth.slice"; // import action
+import { rules } from "../../constant/rules";
+import { login } from "../../slices/auth.slice";
+import authApi from "../../api/auth.api"; // thêm import getMe
+import { setProfile } from "../../slices/auth.slice"; // import action
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
-import styles from "../styles/pages/login.module.scss";
+import styles from "./auth.module.scss";
 import { toast } from "react-toastify";
-import Logo from "../assets/images/Logo.png";
-import { path } from "../constant/path";
+import Logo from "../../assets/images/Logo.png";
+import { path } from "../../constant/path";
 
 
 const Login = ({ heading, role }) => {
@@ -72,61 +72,63 @@ const Login = ({ heading, role }) => {
 
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Row
-        gutter={0}
-        className="bg-white shadow-lg rounded-2xl overflow-hidden w-[90%] md:w-[70%] lg:w-[60%]"
+    <div className={styles.authWrapper}>
+    <Row className={styles.authCard}>
+      {/* LEFT - Form */}
+      <Col
+        xs={24}
+        lg={role !== 2 ? 12 : 24}
+        className={styles.formCol}
       >
-        {/* Cột trái - Form */}
-        <Col
-          xs={24}
-          lg={role !== 2 ? 12 : 24}
-          className="p-8 flex flex-col justify-center bg-slate-200"
+        <Typography.Title level={2} className={styles.formHeading}>
+          {heading || "Đăng nhập"}
+        </Typography.Title>
+
+        <Form
+          className={styles.form}
+          layout="vertical"
+          name="login"
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
         >
-          <Typography.Title
-            level={2}
-            className="text-center text-blue-600 mb-8"
+          {/* Email */}
+          <Form.Item
+            label="Email"
+            name="username"
+            rules={
+              rules?.email || [
+                { required: true, message: "Vui lòng nhập email!" },
+              ]
+            }
           >
-            {heading || "Đăng nhập"}
-          </Typography.Title>
+            <Input placeholder="Nhập email" />
+          </Form.Item>
 
-          <Form
-            layout="vertical"
-            name="login"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
+          {/* Password */}
+          <Form.Item
+            label="Mật khẩu"
+            name="password"
+            rules={
+              rules?.password || [
+                { required: true, message: "Vui lòng nhập mật khẩu!" },
+              ]
+            }
+            validateStatus={error ? "error" : ""}
+            help={error || ""}
           >
-            {/* Email */}
-            <Form.Item
-              label="Email"
-              name="username"
-              rules={rules?.email || [{ required: true, message: "Vui lòng nhập email!" }]}
-            >
-              <Input placeholder="Nhập email" />
-            </Form.Item>
+            <Input.Password placeholder="Nhập mật khẩu" />
+          </Form.Item>
 
-            {/* Mật khẩu */}
-            <Form.Item
-              label="Mật khẩu"
-              name="password"
-              rules={rules?.password || [{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-              validateStatus={error ? "error" : ""}
-              help={error || ""}
-            >
-              <Input.Password placeholder="Nhập mật khẩu" />
-            </Form.Item>
-
-            {/* Lưu thông tin + Quên mật khẩu */}
-            <div className="flex justify-between items-center mb-4">
+          {/* Remember + Forgot */}
+          <div className={styles.submitLayout}>
+            <div className={styles.submitLeft}>
               <Checkbox>Ghi nhớ đăng nhập</Checkbox>
-              <Link
-                to={path.forgetPw}
-                className="text-blue-500 hover:underline"
-              >
-                Quên mật khẩu?
-              </Link>
             </div>
+            <div className={styles.submitRight}>
+              <Link to={path.forgetPw}>Quên mật khẩu?</Link>
+            </div>
+          </div>
 
             {/* Nút đăng nhập */}
             <Form.Item className="text-center mt-6">

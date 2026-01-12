@@ -1,5 +1,7 @@
 import { unwrapResult } from "@reduxjs/toolkit";
-import dayjs from "dayjs";
+
+
+import moment from "moment";
 import Icon, {
   UserOutlined,//user inf
   IdcardOutlined,//llocation
@@ -9,7 +11,6 @@ import Icon, {
 } from "@ant-design/icons";
 import { Avatar, Col, Row, Typography, Descriptions, Divider, Button, Form, Input, Select, Upload, DatePicker, message } from "antd";
 
-import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import UploadImage from "../../common/UploadImage";
@@ -19,7 +20,8 @@ import { updateMe } from "../../slices/auth.slice";
 import { formatDate } from "../../utils/helper";
 import User from "./User";
 import { Link } from "react-router-dom";
-import { Option } from "antd/lib/mentions";
+const { Option } = Select;
+
 
 const UpdateUser = () => {
   const [form] = Form.useForm();
@@ -58,45 +60,47 @@ const UpdateUser = () => {
         fullname: userInf?.fullname,
         phone: userInf?.phone,
         email: userInf?.email,
-        birthday: userInf?.birthday ? dayjs(userInf?.birthday, "DD-MM-YYYY") : null,
+        birthday: userInf.birthday
+          ? moment(userInf.birthday, "YYYY-MM-DD")
+          : null,
         gender: gender,
       });
     }
   }, [userInf, form]);
 
- const handleUpload = async (options) => {
-  const { file, onSuccess, onError } = options;
-  const formData = new FormData();
-  formData.append("files", file);
+  const handleUpload = async (options) => {
+    const { file, onSuccess, onError } = options;
+    const formData = new FormData();
+    formData.append("files", file);
 
-  setLoading(true);
-  try {
-    const res = await fetch(`http://localhost:8080/api/user/image/${userId}/upload`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-      body: formData,
-    });
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:8080/api/user/image/${userId}/upload`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      message.success("Upload thành công!");
+      console.log("Avatar URL:", data);
+
+      onSuccess(data); // ✅ dùng data, không phải res.data
+      return data;
+    } catch (error) {
+      console.error("Upload error:", error);
+      message.error("Upload thất bại!");
+      onError(error);
+    } finally {
+      setLoading(false);
     }
-
-    const data = await res.json();
-    message.success("Upload thành công!");
-    console.log("Avatar URL:", data);
-
-    onSuccess(data); // ✅ dùng data, không phải res.data
-    return data;
-  } catch (error) {
-    console.error("Upload error:", error);
-    message.error("Upload thất bại!");
-    onError(error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const onFinish = async (values) => {
@@ -105,10 +109,9 @@ const UpdateUser = () => {
       const payload = {
         ...values,
         birthday: values.birthday
-          ? dayjs(values.birthday).format("YYYY-MM-DD")
+          ? values.birthday.format("YYYY-MM-DD")
           : null,
-        gender: values.gender == "Nam"
-          ? true : false,
+        gender: values.gender,
       };
       console.log("Payload gửi API:", payload);
       const res = await fetch(`http://localhost:8080/api/user/profile/update`, {
@@ -128,7 +131,7 @@ const UpdateUser = () => {
       // cập nhật lại form với dữ liệu mới
       form.setFieldsValue({
         ...data,
-        birthday: data.birthday ? dayjs(data.birthday, "YYYY-MM-DD") : null,
+        birthday: data.birthday ? moment(data.birthday, "YYYY-MM-DD") : null,
       });
     } catch (err) {
       console.error(err);
@@ -170,9 +173,7 @@ const UpdateUser = () => {
             label="Ngày sinh"
             name="birthday"
           >
-
             <DatePicker format="DD-MM-YYYY" />
-
           </Form.Item>
 
           <Form.Item
@@ -192,16 +193,15 @@ const UpdateUser = () => {
 
           </Form.Item>
 
-          <Form.Item
-            label="Giới tính"
-            name="gender"
-          >
-            <Select>
-              <Option value="MALE">Nam</Option>
-              <Option value="FEMALE">Nữ</Option>
-              <Option value="OTHER">Khác</Option>
-            </Select>
+          <Form.Item label="Giới tính" name="gender">
+            <Select
+              options={[
+                { value: true, label: "Nam" },
+                { value: false, label: "Nữ" },
+              ]}
+            />
           </Form.Item>
+
 
           <Form.Item>
             <Button

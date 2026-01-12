@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.thoaidev.bookinghotel.exceptions.BadRequestException;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.common.RoomFacility;
 import com.thoaidev.bookinghotel.model.common.RoomFacilityDTO;
@@ -285,27 +286,13 @@ public class RoomServiceImplement implements RoomService {
             throw new RuntimeException("Lỗi đọc file upload: " + e.getMessage(), e);
         }
     }
+//check room belong to hotel
+@Override
+public Room validateRoomBelongsToHotel(Integer hotelId, Integer roomId) {
+    return roomRepository.findByIdAndHotelId(roomId, hotelId)
+            .orElseThrow(() ->
+                new BadRequestException("Room doesnt belong to the specified hotel"));
+}
 
-//_____________Other Methods_____________
-    private RoomDto mapToRoomDto(Room room) {
-        // Lấy danh sách URL từ danh sách ảnh
-        List<String> imageUrls = room.getRoomImages().stream()
-                .map(Image::getUrl)
-                .collect(Collectors.toList());
-
-        RoomDto roomDto = RoomDto.builder()
-                .roomId(room.getRoomId())
-                .roomImageUrls(imageUrls)
-                .roomName(room.getRoomName())
-                .roomType(room.getRoomType())
-                .dateAvailable(room.getDateAvailable())
-                .roomOccupancy(room.getRoomOccupancy())
-                .roomStatus(room.getRoomStatus())
-                .roomPricePerNight(room.getRoomPricePerNight())
-                .hotelId(room.getHotel().getHotelId())// foreign key 
-
-                .build();
-        return roomDto;
-    }
 
 }

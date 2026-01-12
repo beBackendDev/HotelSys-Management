@@ -33,6 +33,7 @@ import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
 import com.thoaidev.bookinghotel.model.room.repository.RoomRepository;
+import com.thoaidev.bookinghotel.model.room.service.RoomService;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 import com.thoaidev.bookinghotel.model.user.repository.UserRepository;
 import com.thoaidev.bookinghotel.model.voucher.entity.Voucher;
@@ -67,6 +68,8 @@ public class BookingSerImpl implements BookingSer {
     private VoucherUsageRepository voucherUsageRepository;
     @Autowired
     private VoucherService voucherService;
+        @Autowired
+    private RoomService roomService;
 
     //  Check room availability
     @Override
@@ -89,11 +92,19 @@ public class BookingSerImpl implements BookingSer {
             Hotel hotel = hotelRepository.findById(bookingDTO.getHotelId())
                     .orElseThrow(() -> new RuntimeException("Hotel not found"));
             // Lấy thông tin phòng
-            Room room = roomRepository.findById(bookingDTO.getRoomId())
-                    .orElseThrow(() -> new RuntimeException("Room not found"));
 
+            Room room = roomService.validateRoomBelongsToHotel(
+                    hotel.getHotelId(),
+                    bookingDTO.getRoomId()
+            );
+
+            //Kiểm tra tính hợp lệ của checkin checkout
+            if(bookingDTO.getCheckinDate().isBefore(LocalDate.now())){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Checkin date must not be in the past");
+            }
             // Tính số đêm
             long nights = ChronoUnit.DAYS.between(bookingDTO.getCheckinDate(), bookingDTO.getCheckoutDate());
+            
             if (nights <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Checkout date must be after checkin date");
             }

@@ -24,10 +24,12 @@ public class BookingDTO {
     // private Integer userId;
     private LocalDate checkinDate;
     private LocalDate checkoutDate;
-    private BigDecimal totalPrice;
+
     private String voucherCode;
+    private BigDecimal totalPrice;
     private BigDecimal discountAmount;
     private BigDecimal totalPriceAfterDiscount;
+    
     private BookingStatus status;
     private LocalDateTime createdAt;
 

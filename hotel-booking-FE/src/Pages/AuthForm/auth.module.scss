@@ -1,0 +1,145 @@
+/* ===== Wrapper ===== */
+.authWrapper {
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f5f7fa;
+  overflow: hidden;
+}
+
+/* ===== Card ===== */
+.authCard {
+  width: 900px;
+  height: calc(100dvh - 80px);
+  max-height: 640px;
+  background: #e6e4e4;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.reverse {
+  flex-direction: row-reverse;
+}
+
+/* ===== Banner ===== */
+.bannerCol {
+  background: linear-gradient(135deg, #2db7f5, #1890ff);
+  display: flex;
+  justify-items: center;
+  align-content: center;
+}
+
+.logo {
+  width: 260px;
+  max-width: 80%;
+}
+
+/* ===== Form ===== */
+.formCol {
+  background: #e9eef4;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bannerCol,
+.formCol {
+  height: 100%;
+}
+
+.form {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.form :global(.ant-form-item) {
+  margin-bottom: 14px;
+}
+
+/* ===== Heading ===== */
+.formHeading {
+  text-align: center;
+  margin-bottom: 10px;
+
+  h1 {
+    font-size: 26px;
+  }
+}
+
+
+/* ===== Form item ===== */
+.formItem {
+  margin-bottom: 18px;
+
+  label {
+    font-weight: 500;
+    color: #111827;
+  }
+}
+
+/* input & password height đồng đều */
+.form :global(.ant-input),
+.form :global(.ant-input-password) {
+  height: 44px;
+  border-radius: 6px;
+}
+
+.form :global(.ant-input-password input) {
+  height: 42px;
+}
+
+/* ===== Submit ===== */
+.submitRow {
+  margin-top: 24px;
+}
+
+/* layout 2 cột */
+.submitLayout {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* LEFT: text */
+.submitLeft {
+  flex: 1;
+  font-size: 14px;
+  color: #374151;
+
+  a {
+    margin-left: 6px;
+    color: #1890ff;
+    font-weight: 500;
+  }
+}
+
+/* RIGHT: button */
+.submitRight {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    width: 100%;       /* chiếm nửa bên phải */
+    height: 46px;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+}
+
+
+/* ===== Footer ===== */
+.formFooter {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+
+  a {
+    margin-left: 6px;
+    color: #1890ff;
+    font-weight: 500;
+  }
+}

@@ -29,8 +29,5 @@ public class RoomDto {
     // private Hotel hotel;
     private Integer hotelId;// chỉ cần lấy hotelId trong Dto để truy vấn
 
-    // public List<String> getRoomImageUrls() {
-    //     return roomImageUrls != null ? roomImageUrls : Collections.emptyList();
-    // }
 
 }
