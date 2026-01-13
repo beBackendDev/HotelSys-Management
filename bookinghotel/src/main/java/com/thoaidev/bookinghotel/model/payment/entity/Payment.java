@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
+import com.thoaidev.bookinghotel.model.enums.PaymentMethod;
 import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
 
 import jakarta.persistence.Column;
@@ -46,9 +47,10 @@ public class Payment {
     private String orderInfo;
 
     // @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
     // private PaymentMethod paymentMethod; // VNPay, Momo, etc.
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
 
     @Column(name = "payment_amount")
     private BigDecimal paymentAmount;

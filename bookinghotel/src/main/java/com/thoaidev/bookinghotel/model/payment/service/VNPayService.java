@@ -34,6 +34,7 @@ import com.thoaidev.bookinghotel.config.VNPayConfig;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
+import com.thoaidev.bookinghotel.model.enums.PaymentMethod;
 import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentQueryRequest;
@@ -82,7 +83,7 @@ public class VNPayService {
                 .transactionId(vnp_TxnRef)
                 .paymentAmount(new BigDecimal(vnp_Amount))
                 .status(PaymentStatus.PENDING)
-                .paymentMethod("VNPAY")
+                .paymentMethod(PaymentMethod.VNPay)
                 .createdAt(LocalDateTime.now())
                 .build();
         paymentRepository.save(payment);

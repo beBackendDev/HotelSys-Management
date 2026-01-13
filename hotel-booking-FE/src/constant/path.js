@@ -11,6 +11,8 @@ class Path {
     this.roomDetail = "/hotels/:hotelid/rooms/:roomid"; // Ví dụ: /rooms/123
     this.bookingDetail = "/hotels/:hotelId/rooms/:roomId/booking";
     this.payment = "/payment/:bookingId";
+    this.mockVNPay = "/mock-vnpay";
+    this.vnpayCallback = "/mock-vnpay/callback";
 
     this.dashboard = "/dashboard";
     this.overview = this.dashboard + "/overview";

@@ -30,7 +30,7 @@ const Payment = () => {
   const getPaymentMethod = (method) => {
     switch (method) {
       case "VNPAY":
-        return "VNPay/create-payment";
+        return `Mock-VNPay/create-payment?bookingId=${bookingId}`;
       case "MOMO":
         return "MOMO/create-payment";
       default:
@@ -59,10 +59,11 @@ const Payment = () => {
       })
 
       const result = await res.json();
+      console.log("retsult :", result );
+      
 
-
-      if (result?.url) {
-        window.location.href = result?.url;
+      if (result?.paymentUrl) {
+        window.location.href = result?.paymentUrl;
       } else {
         // Trường hợp thanh toán tại quầy (CASH) hoặc ví MoMo có confirm ngay
         toast.success("Thanh toán thành công!");
@@ -133,7 +134,7 @@ const Payment = () => {
                 </p>
 
                 <div className={styles.totalPrice}>
-                  Tổng tiền: {formatMoney(booking?.totalPrice)} VND
+                  Tổng tiền: {formatMoney(booking?.finalPrice)} VND
                 </div>
               </div>
             </Card>

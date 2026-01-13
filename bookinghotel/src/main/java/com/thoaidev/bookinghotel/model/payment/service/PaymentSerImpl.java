@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,10 +21,14 @@ import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
+import com.thoaidev.bookinghotel.model.enums.BookingStatus;
+import com.thoaidev.bookinghotel.model.enums.PaymentMethod;
 import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
 import com.thoaidev.bookinghotel.model.notification.service.NotificationService;
 import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
+import com.thoaidev.bookinghotel.model.payment.dto.request.MockPaymentCallbackRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
+import com.thoaidev.bookinghotel.model.payment.dto.response.MockInitPaymentResponse;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
 import com.thoaidev.bookinghotel.model.payment.entity.Payment;
 import com.thoaidev.bookinghotel.model.payment.mapper.PaymentMapper;
@@ -91,18 +96,18 @@ public class PaymentSerImpl implements PaymentService {
                 .toPlainString(); // chuyển sang String không có dấu phẩy
 
         BigDecimal actualAmount = new BigDecimal(transactionAmount)
-        .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
         Payment payment = Payment.builder()
                 .booking(booking)
                 .transactionId(transactionId)
                 .paymentAmount(actualAmount)
                 .status(PaymentStatus.SUCCESS) // always success with Cash Method
-                .paymentMethod("CASH")
+                .paymentMethod(PaymentMethod.CASH)
                 .createdAt(LocalDateTime.now())
                 .build();
-        
-                bookingService.confirmBooking(booking.getBookingId());//gọi service để confirm booking
-                // booking.setStatus(BookingStatus.PAID);
+
+        bookingService.confirmBooking(booking.getBookingId());//gọi service để confirm booking
+        // booking.setStatus(BookingStatus.PAID);
 
         //send notification
         notificationService.notifyOwnerNewBooking(ownerId, booking);
@@ -113,6 +118,78 @@ public class PaymentSerImpl implements PaymentService {
         paymentRepo.save(payment);
 
         return 1;
+    }
+
+    //Mock VNPay 
+    public static String getRandomNumber(int len) {
+        Random rnd = new Random();
+        String chars = "0123456789";
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public MockInitPaymentResponse createPayment(Integer bookingId) {
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.PENDING_PAYMENT) {
+            throw new RuntimeException("Booking is not pending payment");
+        }
+
+        String transactionId = getRandomNumber(8); // random id giao dịch
+        // String transactionId = UUID.randomUUID().toString(); // random id giao dịch
+
+        Payment payment = Payment.builder()
+                .booking(booking)
+                .transactionId(transactionId)
+                .paymentAmount(booking.getFinalAmount())
+                .paymentMethod(PaymentMethod.VNPay)
+                .status(PaymentStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        paymentRepo.save(payment);
+        LocalDateTime createdAt = LocalDateTime.now();
+        String paymentUrl = "http://localhost:3000/mock-vnpay?"
+                + "txnRef=" + transactionId
+                + "&bookingId=" + bookingId
+                + "&amount=" + booking.getFinalAmount();
+
+        return new MockInitPaymentResponse(paymentUrl, transactionId, createdAt);
+    }
+
+    @Transactional
+    @Override
+    public void handlePaymentCallback(MockPaymentCallbackRequest req) {
+
+        Payment payment = paymentRepo
+                .findByTransactionId(req.getTransactionId())
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        Booking booking = payment.getBooking();
+        Integer ownerId = booking.getHotel().getOwner().getUserId();
+
+        if ("00".equals(req.getResponseCode())) {
+            payment.setStatus(PaymentStatus.SUCCESS);
+
+            bookingService.confirmBooking(req.getBookingId());//gọi service để confirm booking
+            //send notification
+            notificationService.notifyOwnerNewBooking(ownerId, booking);
+
+            // confirm booking
+        }
+        // else {
+
+        //     payment.setStatus(PaymentStatus.FAILED);
+        //     booking.setStatus(BookingStatus.CANCELLED);
+        // }
+        paymentRepo.save(payment);
+        bookingRepository.save(booking);
     }
 
     @Override

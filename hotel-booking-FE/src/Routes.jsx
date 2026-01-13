@@ -9,6 +9,8 @@ import NotFound from "./core/layout/NotFound";
 import Success from "./core/layout/SuccessPage";
 import Booking from "./Pages/Booking/Booking";
 import Payment from "./Pages/Payment/Payment";
+import VNPay from "./Pages/Payment/MockVNPay";
+import VNPayCallback from "./Pages/Payment/MockVNPayCallback";
 import HomePage from "./Pages/HomePage";
 import Destinations from "./Pages/Destinations";
 import Contact from "./Pages/Contact/Contact";
@@ -42,6 +44,7 @@ import UserDetailAdmin from "./Pages/User/UserDetailAdmin";
 import RoomDetailAdmin from "./Pages/Hotel/RoomDetailAdmin";
 import CreateHotel from "./Pages/Hotel/CreateHotel";
 import ReviewManagement from "./Pages/Hotel/ReviewManagement";
+import MockVNPay from "./Pages/Payment/MockVNPay";
 
 const Routes = () => {
   return (
@@ -81,6 +84,18 @@ const Routes = () => {
       <Route exact path={path.payment}>
         <AuthenticatedGuard>
           <Payment />
+        </AuthenticatedGuard>
+      </Route>
+      {/* MockVNPay route */}
+      <Route exact path={path.mockVNPay}>
+        <AuthenticatedGuard>
+          <VNPay />
+        </AuthenticatedGuard>
+      </Route>
+      {/* */}
+      <Route exact path={path.vnpayCallback}>
+        <AuthenticatedGuard>
+          <VNPayCallback />
         </AuthenticatedGuard>
       </Route>
       {/* Login/ Log out */}

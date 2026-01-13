@@ -3,6 +3,7 @@ package com.thoaidev.bookinghotel.model.payment.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.thoaidev.bookinghotel.model.enums.PaymentMethod;
 import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
 
 import lombok.Builder;
@@ -14,7 +15,7 @@ public class PaymentDto {
     private Integer paymentId;
     private String transactionId;
     private String orderInfo;
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
     private BigDecimal paymentAmount;
     private LocalDateTime createdAt;
     private PaymentStatus status;

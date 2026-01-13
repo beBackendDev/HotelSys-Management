@@ -1,12 +1,16 @@
 package com.thoaidev.bookinghotel.model.payment.service;
 
 import com.thoaidev.bookinghotel.model.payment.dto.PaymentDto;
+import com.thoaidev.bookinghotel.model.payment.dto.request.MockPaymentCallbackRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
+import com.thoaidev.bookinghotel.model.payment.dto.response.MockInitPaymentResponse;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResponse;
 
 public interface PaymentService {
     public void checkDateBooking();
     public int payByCash (PaymentInitRequest paymentRq);
+    public MockInitPaymentResponse createPayment(Integer bookingId);
+    public void handlePaymentCallback(MockPaymentCallbackRequest req);
     public PaymentDto getPaymentById(Integer id);
     public PaymentResponse getAllPayments(int pageNo, int pageSize);
     public PaymentResponse getPaymentByOwner(Integer ownerId, int pageNo, int pageSize);

@@ -2,6 +2,7 @@ package com.thoaidev.bookinghotel.controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
+import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
+import com.thoaidev.bookinghotel.model.enums.BookingStatus;
+import com.thoaidev.bookinghotel.model.enums.PaymentMethod;
+import com.thoaidev.bookinghotel.model.enums.PaymentStatus;
 import com.thoaidev.bookinghotel.model.favorite.FavoriteSer;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
@@ -36,8 +41,11 @@ import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.entity.HotelReviewDTO;
 import com.thoaidev.bookinghotel.model.hotel.mapper.HotelMapper;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
+import com.thoaidev.bookinghotel.model.payment.dto.request.MockPaymentCallbackRequest;
 import com.thoaidev.bookinghotel.model.payment.dto.request.PaymentInitRequest;
+import com.thoaidev.bookinghotel.model.payment.dto.response.MockInitPaymentResponse;
 import com.thoaidev.bookinghotel.model.payment.dto.response.PaymentResDTO;
+import com.thoaidev.bookinghotel.model.payment.entity.Payment;
 import com.thoaidev.bookinghotel.model.payment.service.PaymentService;
 import com.thoaidev.bookinghotel.model.payment.service.VNPayService;
 import com.thoaidev.bookinghotel.model.review.dto.ReviewResponse;
@@ -112,8 +120,8 @@ public class UserCtrl {
     public ResponseEntity<HotelResponse> getAllHotels(
             @RequestParam(value = "hotelName", required = false) String hotelName,
             @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
-            @RequestParam(value = "minPrice",required = false) BigDecimal minPrice,
-            @RequestParam(value = "maxPrice",required = false) BigDecimal maxPrice,
+            @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
             @RequestParam(value = "hotelFacilities", required = false) List<String> hotelFacilities,
             @RequestParam(value = "ratingPoint", required = false) Double ratingPoint,
             @RequestParam(value = "checkin", required = false) LocalDate checkin,
@@ -174,7 +182,7 @@ public class UserCtrl {
                 "booking Status", booking.getStatus(),
                 "totalPrice", booking.getTotalPrice(),
                 "discountAmount", booking.getDiscountAmount(),
-                "totalPrice", booking.getFinalAmount(),
+                "finalPrice", booking.getFinalAmount(),
                 "redirectToPayment", true
         ));
     }
@@ -225,6 +233,7 @@ public class UserCtrl {
     }
 // ------------------- PAYMENT -------------------    
     //Trả về kết quả đặt phòng
+
     @GetMapping("/result/vnpay-payment")
     public String GetMapping(HttpServletRequest request) {
         int paymentStatus = vnPayService.orderReturn(request);
@@ -263,6 +272,35 @@ public class UserCtrl {
         }
         return new ResponseEntity<>("Thanh toán không thành công, vui lòng thử lại", HttpStatus.NOT_ACCEPTABLE);
 
+    }
+
+    //VNPay mock
+    @PostMapping("/Mock-VNPay/create-payment")
+    public ResponseEntity<?> createPayment(
+            @RequestParam Integer bookingId
+    ) {
+
+        MockInitPaymentResponse response
+                = paymentService.createPayment(bookingId);
+
+        return ResponseEntity.ok(response);
+    }
+//callback
+
+    @PostMapping("/Mock-VNPay/callback-payment")
+    public ResponseEntity<?> paymentCallback(
+            @RequestBody MockPaymentCallbackRequest request
+    ) {
+
+        paymentService.handlePaymentCallback(request);
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "message", "Payment callback processed successfully",
+                        "transactionId", request.getTransactionId(),
+                        "responseCode", request.getResponseCode()
+                )
+        );
     }
 
 //------------------- REVIEW -------------------    
