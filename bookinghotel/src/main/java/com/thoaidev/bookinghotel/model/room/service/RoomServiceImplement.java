@@ -23,6 +23,7 @@ import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.common.RoomFacility;
 import com.thoaidev.bookinghotel.model.common.RoomFacilityDTO;
 import com.thoaidev.bookinghotel.model.enums.DiscountType;
+import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.enums.RoomStatus;
 import com.thoaidev.bookinghotel.model.hotel.HotelSpecification;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -300,7 +301,7 @@ public class RoomServiceImplement implements RoomService {
         }
 
         if (roomDto.getActive() != null) {
-            System.out.println("active: "+roomDto.getActive());
+            System.out.println("active: " + roomDto.getActive());
             room.setActive(roomDto.getActive());
         }
 
@@ -333,7 +334,7 @@ public class RoomServiceImplement implements RoomService {
             LocalDate checkout
     ) {
         RoomResponse roomRes = new RoomResponse();
-        List<Room> rooms = roomRepository.findAll(HotelSpecification.filter(hotelId, checkin, checkout));
+        List<Room> rooms = roomRepository.findAll(HotelSpecification.filter_User(hotelId, checkin, checkout));
         List<RoomDto> content = rooms.stream()
                 .map(roomMapper::mapToRoomDTO)
                 .collect(Collectors.toList());
@@ -402,6 +403,38 @@ public class RoomServiceImplement implements RoomService {
         return roomRepository.findByIdAndHotelId(roomId, hotelId)
                 .orElseThrow(()
                         -> new BadRequestException("Room doesnt belong to the specified hotel"));
+    }
+
+    @Override
+    public List<RoomDto> getRoomByHotelId_User(Integer id) {
+        Hotel hotel = hotelRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
+        if (hotel.getHotelStatus() == HotelStatus.INACTIVE) {
+            throw new BadRequestException("INACTIVE Hotel");
+        }
+        List<Room> rooms = roomRepository.findByHotel_HotelId(hotel.getHotelId());
+        return rooms.stream()
+                .map(room -> roomMapper.mapToRoomDTO(room))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public RoomDto getRoomById_User(Integer roomId, Integer hotelId) {
+        Room room
+                = roomRepository.findById(roomId).orElseThrow(() -> new NotFoundException("Đối tượng Room không tồn tại"));
+        Hotel hotel
+                = hotelRepository.findById(room.getHotel().getHotelId()).orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
+        if (hotel.getHotelStatus() == HotelStatus.INACTIVE ) {
+            throw new BadRequestException("INACTIVE Hotel");
+        }
+
+        return roomMapper.mapToRoomDTO(room);
+    }
+
+    @Override
+    public RoomResponse searchAvailableRooms_User(Integer hotelId, LocalDate checkin, LocalDate checkout) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'searchAvailableRooms_User'");
     }
 
 }

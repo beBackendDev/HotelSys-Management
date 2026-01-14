@@ -65,7 +65,7 @@ public class Hotel implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "hotel_status")
-    private HotelStatus hotalStatus;//Tình trạng khách sạn( còn hay hết phòng)
+    private HotelStatus hotelStatus;//Tình trạng khách sạn( còn hay hết phòng)
 
     @Column(name = "hotel_contact_mail")
     private String hotelContactMail;//Email liên hệ

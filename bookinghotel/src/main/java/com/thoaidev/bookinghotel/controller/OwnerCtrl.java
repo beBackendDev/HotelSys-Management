@@ -3,6 +3,7 @@ package com.thoaidev.bookinghotel.controller;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,8 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
+import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.service.HotelService;
@@ -156,7 +160,7 @@ public class OwnerCtrl {
 //----HOTEL
 //Lấy toàn bộ danh sách khách sạn của chủ sở hữu theo UserId
 
-    @GetMapping("/owner/hotel-list")
+    @GetMapping("/owner/hotels")
     public ResponseEntity<HotelResponse> hotelsOfOwner(
             @AuthenticationPrincipal CustomUserDetail user,
             @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
@@ -177,11 +181,13 @@ public class OwnerCtrl {
 
     @GetMapping("/owner/hotels/filter")
     public ResponseEntity<HotelResponse> getAllHotels(
+            @AuthenticationPrincipal CustomUserDetail user,
             @RequestParam(value = "hotelName", required = false) String hotelName,
             @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
             @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
             @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
             @RequestParam(value = "hotelFacilities", required = false) List<String> hotelFacilities,
+            @RequestParam(value = "hotelStatus", required = false) HotelStatus hotelStatus,
             @RequestParam(value = "ratingPoint", required = false) Double ratingPoint,
             @RequestParam(value = "checkin", required = false) LocalDate checkin,
             @RequestParam(value = "checkout", required = false) LocalDate checkout,
@@ -189,16 +195,18 @@ public class OwnerCtrl {
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
         HotelResponse hotels = hotelService.filterHotels(
-            hotelName, 
-            hotelAddress, 
-            minPrice, 
-            maxPrice,
-            hotelFacilities, 
-            ratingPoint,
-            checkin,
-            checkout,
-            pageNo, 
-            pageSize);
+                user.getId(),
+                hotelName,
+                hotelAddress,
+                minPrice,
+                maxPrice,
+                hotelFacilities,
+                hotelStatus,
+                ratingPoint,
+                checkin,
+                checkout,
+                pageNo,
+                pageSize);
         return ResponseEntity.ok(hotels);
     }
 // Tạo khách sạn mới
@@ -208,6 +216,26 @@ public class OwnerCtrl {
             @PathVariable("ownerId") Integer ownerId,
             @RequestBody HotelDto hotelDto) {
         return hotelService.createHotel(ownerId, hotelDto);
+    }
+//
+//IMAGE UPLOAD
+
+    @PostMapping("/owner/room/{roomId}/upload-image")
+    public ResponseEntity<List<String>> uploadImageToRoom(
+            @PathVariable Integer roomId,
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("hotel") String hotelName) {
+        List<String> imageUrls = roomService.imgUpload(roomId, files, hotelName);
+        return ResponseEntity.ok(imageUrls);
+    }
+
+    @PostMapping("/owner/hotel/{hotelId}/upload-image")
+    public ResponseEntity<List<String>> uploadImageToHotel(
+            @PathVariable Integer hotelId,
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("hotel") String hotelName) {
+        List<String> imageUrls = hotelService.imgUpload(hotelId, files, hotelName);
+        return ResponseEntity.ok(imageUrls);
     }
 //Cập nhật thông tin khách sạn
 
@@ -220,10 +248,18 @@ public class OwnerCtrl {
     }
 
 // Xóa khách sạn theo ID
-    @DeleteMapping("/owner/hotels/{id}/delete")
-    public ResponseEntity<String> deleteHotel(@PathVariable Integer id) {
-        hotelService.deleteHotelById(id);
-        return new ResponseEntity<>("Hotel deleted", HttpStatus.OK);
+    @DeleteMapping("/owner/hotels/{id}/delete-room")
+    public ResponseEntity<?> deleteHotel(
+            @AuthenticationPrincipal CustomUserDetail user,
+            @PathVariable Integer id
+    ) {
+        hotelService.deActiveHotel(user.getId(), id);
+        return ResponseEntity.ok(
+                Map.of(
+                        "success", true,
+                        "message", "Khách sạn đã được vô hiệu hóa"
+                )
+        );
     }
 //----ROOM
     //Xem toàn bộ phòng theo id khách sạn
@@ -270,6 +306,15 @@ public class OwnerCtrl {
         Integer ownerId = user.getId();
 
         return new ResponseEntity<>(bookingService.getBookingOfOwner(ownerId, pageNo, pageSize), HttpStatus.OK);
+    }
+
+    //Xem chi tiết booking
+    @GetMapping("/owner/hotels/booking/{id}")
+    public ResponseEntity<BookingDTO> getBooking(
+            @PathVariable Integer id
+    ) {
+        BookingDTO booking = bookingService.getBookingById(id);
+        return new ResponseEntity<>(booking, HttpStatus.OK);
     }
 
     @GetMapping("/owner/booking-today")

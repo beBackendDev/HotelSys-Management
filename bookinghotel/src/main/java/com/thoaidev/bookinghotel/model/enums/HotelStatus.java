@@ -1,6 +1,8 @@
 package com.thoaidev.bookinghotel.model.enums;
 
 public enum HotelStatus {
-    AVAILABLE,
-    FULL_BOOKED
+    PENDING,     // chờ duyệt
+    ACTIVE,      // đang hoạt động
+    INACTIVE,    // ngưng hoạt động
+    BANNED       // bị khóa
 }

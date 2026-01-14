@@ -15,7 +15,6 @@ import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.enums.BookingStatus;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
 import com.thoaidev.bookinghotel.summary.owner.TrendingRoomProjection;
-import com.thoaidev.bookinghotel.summary.owner.dto.DashboardTrendingRoomDTO;
 
 public interface BookingRepo extends JpaRepository<Booking, Integer> {
 
@@ -41,7 +40,7 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
     @Query("""
         SELECT b FROM Booking b 
         WHERE b.room.hotel.hotelId IN :hotelIds
-        ORDER BY b.checkinDate DESC
+        ORDER BY b.bookingId DESC
 """)
     Page<Booking> findAllByHotelIds(List<Integer> hotelIds, Pageable pageable);
 
@@ -55,7 +54,12 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
             + "AND b.status = 'PAID' ")
     List<Booking> findByRoomId(@Param("roomId") Integer roomId, @Param("today") LocalDate today
     );
-
+    //Query booking with hotelId
+    @Query("SELECT b FROM Booking b "
+            + "WHERE b.hotel.hotelId = :hotelId ")
+    List<Booking> findBookingByHotelId(
+            @Param("hotelId") Integer hotelId);
+    
     //kiểm tra tính khả thi khi viết Review của người dùng
     @Query("SELECT b FROM Booking b "
             + "WHERE b.user.userId = :userId "

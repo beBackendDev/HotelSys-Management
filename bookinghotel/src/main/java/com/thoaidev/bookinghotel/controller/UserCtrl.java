@@ -91,19 +91,19 @@ public class UserCtrl {
             @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
-        return new ResponseEntity<>(hotelService.getAllHotels(pageNo, pageSize), HttpStatus.OK);
+        return new ResponseEntity<>(hotelService.getAllHotelsByUser(pageNo, pageSize), HttpStatus.OK);
 
     }
 
     @GetMapping("/public/hotels/{hotelId}/rooms")
     public List<RoomDto> getRoomByHotelId(@PathVariable(value = "hotelId") Integer hotelId) {
-        return roomService.getRoomByHotelId(hotelId);
+        return roomService.getRoomByHotelId_User(hotelId);
     }
 
     // Xem chi tiết khách sạn + phòng
     @GetMapping("/public/hotels/{id}")
     public ResponseEntity<HotelDto> getHotelById(@PathVariable("id") Integer hotelId) {
-        HotelDto hotel = hotelService.getHotelById(hotelId);
+        HotelDto hotel = hotelService.getHotelById_User(hotelId);
         return ResponseEntity.ok(hotel);
 
     }
@@ -111,7 +111,7 @@ public class UserCtrl {
     //Xem chi tiết phòng trong khách sạn
     @GetMapping("/public/hotels/{hotelId}/rooms/{roomId}")
     public ResponseEntity<RoomDto> getRoomById(@PathVariable(value = "hotelId") Integer hotelId, @PathVariable(value = "roomId") Integer roomId) {
-        RoomDto roomDto = roomService.getRoomById(roomId, hotelId);
+        RoomDto roomDto = roomService.getRoomById_User(roomId, hotelId);
         return new ResponseEntity<>(roomDto, HttpStatus.OK);
     }
 
@@ -129,7 +129,7 @@ public class UserCtrl {
             @RequestParam(value = "pageNo", defaultValue = "1", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
-        HotelResponse hotels = hotelService.filterHotels(
+        HotelResponse hotels = hotelService.filterHotels_User(
                 hotelName,
                 hotelAddress,
                 minPrice,

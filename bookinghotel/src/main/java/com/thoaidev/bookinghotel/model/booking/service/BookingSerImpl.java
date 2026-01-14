@@ -29,6 +29,7 @@ import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.mapper.BookingMapper;
 import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
 import com.thoaidev.bookinghotel.model.enums.BookingStatus;
+import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
 import com.thoaidev.bookinghotel.model.hotel.repository.HotelRepository;
 import com.thoaidev.bookinghotel.model.room.entity.Room;
@@ -91,8 +92,11 @@ public class BookingSerImpl implements BookingSer {
             // Lấy thông tin khách sạn
             Hotel hotel = hotelRepository.findById(bookingDTO.getHotelId())
                     .orElseThrow(() -> new RuntimeException("Hotel not found"));
+            // Kiem tra trang thai khach san
+            if (hotel.getHotelStatus() != HotelStatus.ACTIVE){
+                throw new BadRequestException("INACTIVE Hotel");
+            }
             // Lấy thông tin phòng
-
             Room room = roomService.validateRoomBelongsToHotel(
                     hotel.getHotelId(),
                     bookingDTO.getRoomId()

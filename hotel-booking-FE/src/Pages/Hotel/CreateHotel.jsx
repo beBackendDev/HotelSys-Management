@@ -1,153 +1,388 @@
-import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Select, Upload, message, Typography } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-import axios from 'axios';
-import { useHistory } from 'react-router-dom';
-import DashboardLayout from '../../core/layout/Dashboard';
-import api from '../../api/api';
+import React, { useState } from "react";
+import {
+  Form,
+  Input,
+  Button,
+  Upload,
+  message,
+  Typography,
+  InputNumber,
+  Divider,
+  Alert,
+  Card,
+  Steps,
+  Row,
+  Col,
+  Space,
+  Checkbox,
+} from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { useHistory } from "react-router-dom";
+import DashboardLayout from "../../core/layout/Dashboard";
 
 const { TextArea } = Input;
-const { Option } = Select;
 
 const CreateHotel = () => {
-  const [owners, setOwners] = useState([]);
-  const [imageUrls, setImageUrls] = useState([]);
+  const [createdHotel, setCreatedHotel] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [customFacility, setCustomFacility] = useState("");
+  const [extraFacilities, setExtraFacilities] = useState([]);
+
   const history = useHistory();
-
-  useEffect(() => {
-    let mounted = true;
-    axios
-      .get('/api/admin/owners')
-      .then((res) => {
-        if (!mounted) return;
-        setOwners(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch((err) => {
-        console.error('Error fetching owners:', err);
-        message.error('Không tải được danh sách chủ sở hữu');
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handleUploadChange = (info) => {
-    const urls = (info.fileList || [])
-      .map((file) => file.response?.url || file.url)
-      .filter(Boolean);
-    setImageUrls(urls);
-  };
-
-  const onFinish = async (values) => {
+  const token = localStorage.getItem("accessToken");
+  const decodedToken = JSON.parse(atob(token.split('.')[1]));
+  // const role = decodedToken.role;//
+  const ownerId = decodedToken.userId;
+  const FACILITIES = [
+    { icon: "WifiOutlined", name: "Wifi miễn phí" },
+    { icon: "CarFilled", name: "Bãi đỗ xe miễn phí" },
+    { icon: "BulbFilled", name: "Hồ bơi" },
+    { icon: "BulbFilled", name: "Nhà hàng" },
+    { icon: "BulbFilled", name: "Phòng gym" },
+    { icon: "BulbFilled", name: "Spa & Massage" },
+    { icon: "BulbFilled", name: "Lễ tân 24/7" },
+    { icon: "BulbFilled", name: "Giặt sấy miễn phí" },
+    { icon: "BulbFilled", name: "Sử dụng toàn bộ tiện ích" },
+  ];
+  /* =========================
+     STEP 1: CREATE HOTEL
+  ========================== */
+  const onCreateHotel = async (values) => {
     try {
-        console.log("values: ", values);
-      await api.post('/admin/hotels/create', {
-        ...values,
-        hotelImageUrls: imageUrls || "",
+      const res = await fetch(
+        `http://localhost:8080/api/dashboard/owner/${ownerId}/hotels/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(values),
+        }
+      );
+
+      const contentType = res.headers.get("content-type");
+      const data =
+        contentType && contentType.includes("application/json")
+          ? await res.json()
+          : await res.text();
+
+      if (!res.ok) {
+        throw new Error(data?.message || data || "Create hotel failed");
       }
-    );
-      message.success('Tạo khách sạn thành công');
-      history.push('/dashboard/hotel-management');
+
+      setCreatedHotel(data);
+      message.success("Tạo khách sạn thành công");
     } catch (err) {
-      console.error('Error creating hotel:', err);
-      message.error('Tạo khách sạn thất bại');
+      console.error(err);
+      message.error(err.message || "Tạo khách sạn thất bại");
     }
   };
 
+  /* =========================
+     STEP 2: UPLOAD IMAGES
+  ========================== */
+  const uploadImages = async (fileList) => {
+    if (!createdHotel?.hotelId) {
+      message.error("Không tìm thấy khách sạn để upload ảnh");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      fileList.forEach((file) => {
+        formData.append("files", file.originFileObj);
+      });
+      formData.append("hotel", createdHotel.hotelName);
+      // ✅ DEBUG (rất quan trọng)
+    for (let [k, v] of formData.entries()) {
+        console.log(k, v);
+    }
+      const res = await fetch(
+        `http://localhost:8080/api/dashboard/owner/hotel/${createdHotel.hotelId}/upload-image`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      const data = await res.json();
+console.log("img response:",data);
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Upload image failed");
+      }
+
+      message.success("Upload hình ảnh thành công");
+      history.push("/dashboard/hotel-management");
+    } catch (err) {
+      console.error(err);
+      message.error(err.message || "Upload ảnh thất bại");
+    } finally {
+      setUploading(false);
+    }
+  };
   return (
     <DashboardLayout>
-      <main style={{ maxWidth: 800, margin: '0 auto' }}>
-        <header>
-          <h1 className="font-bold text-3xl mt-6 mb-10">
-            Tạo mới khách sạn
-          </h1>
-        </header>
+      <main style={{ padding: 24 }}>
+        {/* ===== Page Header ===== */}
+        <Typography.Title level={2} style={{ marginBottom: 24 }}>
+          Tạo mới khách sạn
+        </Typography.Title>
 
-        <section aria-labelledby="create-hotel-form">
-          <Typography.Text id="create-hotel-form" className="sr-only">
-            Form tạo mới khách sạn
-          </Typography.Text>
+        {/* ===== Step Indicator ===== */}
+        <Card style={{ marginBottom: 24 }}>
+          <Steps
+            current={createdHotel ? 1 : 0}
+            items={[
+              {
+                title: "Thông tin khách sạn",
+                description: "Nhập thông tin cơ bản",
+              },
+              {
+                title: "Upload hình ảnh",
+                description: "Thêm hình ảnh khách sạn",
+              },
+            ]}
+          />
+        </Card>
 
-          <Form layout="vertical" onFinish={onFinish}>
-            <Form.Item
-              label="Tên khách sạn"
-              name="hotelName"
-              rules={[{ required: true, message: 'Nhập tên khách sạn' }]}
+        {/* ================= STEP 1 ================= */}
+        {!createdHotel && (
+          
+          <Card
+            bordered={false}
+          >
+            <Typography.Title level={5} className="mb-0">
+                        Bước 1: Thông tin khách sạn
+                      </Typography.Title>
+            <Form
+              layout="vertical"
+              onFinish={onCreateHotel}
             >
-              <Input aria-required="true" />
-            </Form.Item>
+              <Row gutter={24}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Tên khách sạn"
+                    name="hotelName"
+                    rules={[{ required: true }]}
+                  >
+                    <Input placeholder="VD: Sunrise Hotel" />
+                  </Form.Item>
+                </Col>
 
-            <Form.Item
-              label="Địa chỉ"
-              name="hotelAddress"
-              rules={[{ required: true, message: 'Nhập địa chỉ' }]}
+                <Col span={12}>
+                  <Form.Item
+                    label="Giá trung bình (VNĐ)"
+                    name="hotelAveragePrice"
+                    rules={[{ required: true }]}
+                  >
+                    <InputNumber
+                      min={0}
+                      style={{ width: "100%" }}
+                      placeholder="500000"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item
+                    label="Địa chỉ"
+                    name="hotelAddress"
+                    rules={[{ required: true }]}
+                  >
+                    <Input placeholder="123 Nguyễn Huệ, Q1" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={24}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Email liên hệ"
+                    name="hotelContactMail"
+                    rules={[
+                      { required: true, type: "email" },
+                    ]}
+                  >
+                    <Input placeholder="contact@hotel.com" />
+                  </Form.Item>
+                </Col>
+
+                <Col span={12}>
+                  <Form.Item
+                    label="SĐT liên hệ"
+                    name="hotelContactPhone"
+                    rules={[{ required: true }]}
+                  >
+                    <Input placeholder="0909xxxxxx" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item
+                    label="Mô tả khách sạn"
+                    name="hotelDescription"
+                  >
+                    <TextArea
+                      rows={4}
+                      placeholder="Mô tả ngắn về khách sạn..."
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              {/* ===== FACILITIES (STATIC) ===== */}
+              <Form.Item label="Tiện ích khách sạn" required>
+                {/* ===== Facilities có sẵn ===== */}
+                <Form.Item name="hotelFacilities" noStyle>
+                  <Checkbox.Group style={{ width: "100%" }}>
+                    <Row>
+                      {FACILITIES.map((f) => (
+                        <Col span={12} key={f.id}>
+                          <Checkbox value={f}>{f.name}</Checkbox>
+                        </Col>
+                      ))}
+                    </Row>
+                  </Checkbox.Group>
+                </Form.Item>
+
+                <Divider style={{ margin: "12px 0" }} />
+
+                {/* ===== Facilities nhập tay ===== */}
+                <Space style={{ width: "100%" }}>
+                  <Input
+                    placeholder="Nhập tiện ích khác (VD: Khu vui chơi trẻ em)"
+                    value={customFacility}
+                    onChange={(e) => setCustomFacility(e.target.value)}
+                  />
+                  <Button
+                    type="dashed"
+                    onClick={() => {
+                      if (!customFacility.trim()) return;
+
+                      setExtraFacilities((prev) => [
+                        ...prev,
+                        { name: customFacility.trim() },
+                      ]);
+                      setCustomFacility("");
+                    }}
+                  >
+                    Thêm
+                  </Button>
+                </Space>
+
+                {/* Hiển thị facilities nhập tay */}
+                {extraFacilities.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    {extraFacilities.map((f, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          display: "inline-block",
+                          background: "#f0f0f0",
+                          padding: "4px 8px",
+                          borderRadius: 6,
+                          marginRight: 8,
+                          marginBottom: 8,
+                        }}
+                      >
+                        {f.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </Form.Item>
+
+              <Divider />
+
+              <Form.Item>
+                <Button
+                  type="primary"
+                  size="large"
+                  htmlType="submit"
+                >
+                  Tạo khách sạn
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        )}
+
+        {/* ================= STEP 2 ================= */}
+        {createdHotel && (
+          <Card
+            bordered={false}
+          >
+            <Typography.Title level={5} className="mb-0">
+                        Bước 2: Upload hình ảnh
+                      </Typography.Title>
+            <Alert
+              type="success"
+              showIcon
+              message="Tạo khách sạn thành công"
+              description="Bạn có thể upload hình ảnh cho khách sạn ngay bây giờ"
+              style={{ marginBottom: 24 }}
+            />
+
+            <Upload
+              listType="picture-card"
+              multiple
+              beforeUpload={() => false}
+              customRequest={({ onSuccess }) =>
+                onSuccess("ok")
+              }
+              onChange={({ fileList }) =>
+                uploadImages(fileList)
+              }
             >
-              <Input aria-required="true" />
-            </Form.Item>
-
-            <Form.Item label="Tiện ích" name="hotelFacility">
-              <TextArea rows={2} placeholder="Ví dụ: Wifi miễn phí, Bể bơi..." />
-            </Form.Item>
-
-            <Form.Item
-              label="Email liên hệ"
-              name="hotelContactMail"
-              rules={[{ required: true, type: 'email', message: 'Nhập email hợp lệ' }]}
-            >
-              <Input aria-required="true" type="email" />
-            </Form.Item>
-
-            <Form.Item
-              label="Số điện thoại liên hệ"
-              name="hotelContactPhone"
-              rules={[{ required: true, message: 'Nhập số điện thoại' }]}
-            >
-              <Input aria-required="true" type="tel" />
-            </Form.Item>
-
-            <Form.Item label="Mô tả" name="hotelDescription">
-              <TextArea rows={4} />
-            </Form.Item>
-
-            {/* <Form.Item
-              label="Chủ sở hữu (Owner)"
-              name="ownerId"
-              rules={[{ required: true, message: 'Chọn chủ sở hữu' }]}
-            >
-              <Select placeholder="Chọn Owner" showSearch optionFilterProp="children" aria-required="true">
-                {owners.map((owner) => (
-                  <Option key={owner.id ?? owner.ownerId} value={owner.id ?? owner.ownerId}>
-                    {owner.name ?? owner.fullName ?? 'Không tên'}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item> */}
-
-            <Form.Item label="Hình ảnh khách sạn">
-              <Upload
-                action="/api/upload"
-                listType="picture-card"
-                onChange={handleUploadChange}
-                multiple
-                aria-label="Tải lên hình ảnh khách sạn"
-              >
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>
+                  Upload
                 </div>
-              </Upload>
-            </Form.Item>
+              </div>
+            </Upload>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Tạo khách sạn
+            <Divider />
+
+            <Space>
+              <Button
+                type="primary"
+                onClick={() =>
+                  history.push(
+                    "/dashboard/hotel-management"
+                  )
+                }
+                loading={uploading}
+              >
+                Hoàn tất
               </Button>
-            </Form.Item>
-          </Form>
-        </section>
+
+              <Button
+                onClick={() =>
+                  history.push(
+                    "/dashboard/hotel-management"
+                  )
+                }
+              >
+                Bỏ qua
+              </Button>
+            </Space>
+          </Card>
+        )}
       </main>
     </DashboardLayout>
   );
+
 };
 
 export default CreateHotel;

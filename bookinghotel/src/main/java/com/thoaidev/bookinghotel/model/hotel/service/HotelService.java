@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
 import com.thoaidev.bookinghotel.model.hotel.entity.Hotel;
@@ -16,10 +17,13 @@ public interface HotelService {
 //GET methods
     HotelResponse getAllHotels(int pageNo, int pageSize);
 
+    public HotelResponse getAllHotelsByUser(int pageNo, int pageSize);
+
     HotelResponse getAllHotels(Integer ownerId, int pageNo, int pageSize);
 
     // HotelResponse filterHotels(FilterRequest fiter);
     public HotelDto getHotelById(Integer id);
+    public HotelDto getHotelById_User(Integer id);
 
     public List<Hotel> getHotelsByAddress(String location);
 
@@ -31,6 +35,31 @@ public interface HotelService {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             List<String> hotelFacilities,
+            Double ratingPoint,
+            LocalDate checkin,
+            LocalDate checkout,
+            int pageNo,
+            int pageSize);
+                public HotelResponse filterHotels_User(
+            String hotelName,
+            String hotelAddress,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            List<String> hotelFacilities,
+            Double ratingPoint,
+            LocalDate checkin,
+            LocalDate checkout,
+            int pageNo,
+            int pageSize);
+
+    public HotelResponse filterHotels(
+            Integer ownerId,
+            String hotelName,
+            String hotelAddress,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            List<String> hotelFacilities,
+            HotelStatus hotelStatus,
             Double ratingPoint,
             LocalDate checkin,
             LocalDate checkout,
@@ -51,5 +80,5 @@ public interface HotelService {
     public HotelDto updateHotel(HotelDto hotelDto, Integer id);
 //DELETE methods
 
-    public void deleteHotelById(Integer id);
+    public void deActiveHotel(Integer ownerId, Integer id);
 }

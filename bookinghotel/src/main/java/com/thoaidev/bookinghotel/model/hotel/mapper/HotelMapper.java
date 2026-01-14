@@ -45,7 +45,7 @@ public class HotelMapper {
                 .hotelImageUrls(imageUrls)
                 .hotelAveragePrice(hotel.getHotelAveragePrice())
                 .hotelFacilities(facilityDtos)
-                .hotelStatus(hotel.getHotalStatus())
+                .hotelStatus(hotel.getHotelStatus())
                 .hotelAddress(hotel.getHotelAddress())
                 .hotelContactMail(hotel.getHotelContactMail())
                 .hotelContactPhone(hotel.getHotelContactPhone())
@@ -73,7 +73,7 @@ public class HotelMapper {
         hotel.setHotelDescription(dto.getHotelDescription());
         hotel.setRatingPoint(dto.getRatingPoint());
         hotel.setTotalReview(dto.getTotalReview());
-        hotel.setHotalStatus(dto.getHotelStatus());
+        hotel.setHotelStatus(dto.getHotelStatus());
         hotel.setHotelCreatedAt(dto.getHotelCreatedAt());
         hotel.setHotelUpdatedAt(dto.getHotelUpdatedAt());
 

@@ -162,11 +162,11 @@ public class AdminCtrl {
 
 //DELETE methods
     // Xóa khách sạn theo ID
-    @DeleteMapping("/admin/hotels/{id}/delete")
-    public ResponseEntity<String> deleteHotel(@PathVariable Integer id) {
-        hotelService.deleteHotelById(id);
-        return new ResponseEntity<>("Hotel deleted", HttpStatus.OK);
-    }
+    // @DeleteMapping("/admin/hotels/{id}/delete")
+    // public ResponseEntity<String> deleteHotel(@PathVariable Integer id) {
+    //     hotelService.deActiveHotel(owwnerId, id);
+    //     return new ResponseEntity<>("Hotel deleted", HttpStatus.OK);
+    // }
 //------------------- ROOM -------------------   
 //GET methods
 

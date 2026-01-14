@@ -28,6 +28,17 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer>, JpaSpeci
             @Param("ownerId") Integer ownerId,
             Pageable pageable);
 
+            //Get all wwith active hotel
+    @Query("""
+        SELECT h FROM Hotel h
+        WHERE h.hotelStatus = 'ACTIVE'
+    """)
+    public Page<Hotel> findActiveHotel(
+            Pageable pageable);
+
+
+
+
     public List<Hotel> findAllByOwner_UserId(Integer ownerId);
     //DASHBOARD tính tổng số khách sạn của Owner
 
@@ -38,7 +49,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer>, JpaSpeci
 """)
     Integer countHotels(Integer ownerId);
 
-      @Query("""
+    @Query("""
         SELECT h.hotelId
         FROM Hotel h
         WHERE h.owner.userId = :ownerId

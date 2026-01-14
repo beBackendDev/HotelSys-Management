@@ -20,7 +20,7 @@ class Path {
     this.hotelProfileAdmin = (hotelId) => this.dashboard + `/hotel-profile/${hotelId}`; //Điều hướng trang( Navigate) chuyển sang trang chỉnh sửa hotel
     this.roomProfilePattern = this.dashboard + "/hotel/:hotelId/room-profile/:roomId"; //Dùng Route Matching
     this.roomProfileUrl = (hotelId, roomId) => this.dashboard + `/hotel/${hotelId}/room-profile/${roomId}`; //Điều hướng trang( Navigate)
-    this.createHotel = this.dashboard + "/create-hotel";
+    this.createHotel = this.dashboard + `/create-hotel`; //create hotel owner
     this.createRoom = (hotelId) => this.dashboard + `/${hotelId}/create-room`;
     this.hotelManagement = this.dashboard + "/hotel-management";
     this.roomManagement = this.dashboard + "/room-management";

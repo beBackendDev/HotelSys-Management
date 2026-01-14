@@ -55,7 +55,7 @@ public class DataSeedServiceImpl implements DataSeedService {
             hotel.setHotelDescription(h.getHotelDescription());
             hotel.setHotelContactMail(h.getHotelContactMail());
             hotel.setHotelContactPhone(h.getHotelContactPhone());
-            hotel.setHotalStatus(h.getHotelStatus());
+            hotel.setHotelStatus(h.getHotelStatus());
             hotel.setRatingPoint(h.getRatingPoint());
             hotel.setTotalReview(h.getTotalReview());
 

@@ -15,13 +15,23 @@ public interface RoomService {
 
     List<RoomDto> getRoomByHotelId(Integer id);
 
+    List<RoomDto> getRoomByHotelId_User(Integer id);
+
     RoomDto getRoomById(Integer roomId, Integer hotelId);
+
+    RoomDto getRoomById_User(Integer roomId, Integer hotelId);
+
     Room validateRoomBelongsToHotel(Integer hotelId, Integer roomId);
 //POST methods
 
     RoomDto createRoom(Integer hotelId, RoomDto roomDto);
 
     RoomResponse searchAvailableRooms(
+            Integer hotelId,
+            LocalDate checkin,
+            LocalDate checkout);
+
+    RoomResponse searchAvailableRooms_User(
             Integer hotelId,
             LocalDate checkin,
             LocalDate checkout);

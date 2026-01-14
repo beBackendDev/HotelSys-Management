@@ -4,21 +4,26 @@ import {
     Typography,
     Button,
     Space,
+    Spin,
+    Alert,
 } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useHistory } from "react-router-dom";
 import DashboardLayout from "../../core/layout/Dashboard";
+//Styles
 
+
+//
 const { Title } = Typography;
 
 const PaymentManagement = () => {
     const history = useHistory();
-    const [loading, setLoading] = useState(false);
-    const [payments, setPayments] = useState([]);
     const token = localStorage.getItem("accessToken");
-    const decodedToken = JSON.parse(atob(token.split('.')[1])); // decode JWT
-    const role = decodedToken.role; // ADMIN, OWNER, USER
+
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    const role = decodedToken.role; // ADMIN | OWNER | USER
+
     const getUrlByRole = (role) => {
         switch (role) {
             case "ADMIN":
@@ -26,95 +31,145 @@ const PaymentManagement = () => {
             case "OWNER":
                 return "owner";
             default:
-                return "user"; // USER or guest
+                return "user";
         }
     };
 
+    /* ================= STATE ================= */
+    const [payments, setPayments] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [total, setTotal] = useState(0);
+
+    // pagination giống HotelManagement
+    const [filters, setFilters] = useState({
+        page: 1,
+        per_page: 10,
+        sort_by: "createdAt",
+        order: "desc",
+    });
+
+    /* ================= FETCH PAYMENTS ================= */
     useEffect(() => {
         fetchPayments();
-    }, []);
+    }, [filters]);
 
     const fetchPayments = async () => {
         setLoading(true);
+        setError(null);
+
         try {
+            const params = new URLSearchParams({
+                pageNo: filters.page, // Spring page = 0
+                pageSize: filters.per_page,
+                sort: `${filters.sort_by},${filters.order}`,
+            });
+
             const res = await fetch(
-                `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/payment-management`,
+                `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/payment-management?${params}`,
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
+                        Authorization: `Bearer ${token}`,
                     },
                 }
             );
-            if (!res.ok) throw new Error("Failed to fetch payments.");
+
+            if (!res.ok) throw new Error("Fetch payments failed");
+
             const data = await res.json();
             const paymentList = data?.content || [];
 
-            // Gọi API lấy thêm thông tin Booking nếu cần
-            const updatedPayments = await Promise.all(
-                paymentList.map(async (payment) => {
-                    if (!payment?.bookingId) return payment;
-                    const bookingRes = await fetch(
-                        `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/booking/${payment.bookingId}`,
-                        {
-                            headers: {
-                                "Authorization": `Bearer ${token}`,
-                            },
-                        }
-                    );
-                    const bookingData = await bookingRes.json();
+            // (OPTIONAL) enrich booking info
+            const enriched = await Promise.all(
+                paymentList.map(async (p) => {
+                    if (!p.bookingId) return p;
 
-                    return { ...payment, booking: bookingData };
+                    try {
+                        const bookingRes = await fetch(
+                            `http://localhost:8080/api/dashboard/${getUrlByRole(
+                                role
+                            )}/hotels/booking/${p.bookingId}`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                },
+                            }
+                        );
+
+                        if (!bookingRes.ok) return p;
+
+                        const bookingData = await bookingRes.json();
+                        return { ...p, booking: bookingData };
+                    } catch {
+                        return p;
+                    }
                 })
             );
 
-            setPayments(updatedPayments);
-        } catch (error) {
-            console.error("Error fetching payments:", error);
+            setPayments(enriched);
+            setTotal(data?.totalElements || 0);
+        } catch (err) {
+            console.error(err);
+            setError("Tải danh sách payment thất bại");
         } finally {
             setLoading(false);
         }
     };
 
+    /* ================= STT ================= */
+    const paymentsWithStt = useMemo(() => {
+        return payments.map((p, index) => ({
+            ...p,
+            __stt:
+                (filters.page - 1) * filters.per_page +
+                index +
+                1,
+        }));
+    }, [payments, filters.page, filters.per_page]);
+
+    /* ================= HANDLERS ================= */
     const handleViewDetail = (paymentId) => {
         history.push(`/dashboard/payment-detail/${paymentId}`);
     };
 
+    /* ================= COLUMNS ================= */
     const columns = [
         {
-            title: "Payment ID",
-            key: "paymentId",
-            // render: (id) => <Tag color="blue">{id}</Tag>,
-            render: (_, payments) => {
-                const payment = payments;
-                return payment ? (
-                    <Tag color="purple">
-                        <div>{payment.paymentId}</div>
-                        <div className="text-xs text-gray-500">{payment.transactionId}</div>
-                    </Tag>
-                ) : (
-                    <Tag color="orange">Trống</Tag>
-                )
-            },
-            fixed: "left",
+            title: "STT",
+            dataIndex: "__stt",
+            key: "__stt",
+            width: 70,
+            sorter: (a, b) => a.__stt - b.__stt,
         },
         {
-            title: "Booking ID",
-            dataIndex: ["booking", "bookingId"],
-            key: "bookingId",
-            render: (id) => <Tag color="purple">{id}</Tag>,
+            title: "Payment",
+            key: "paymentId",
+            fixed: "left",
+            render: (_, p) => (
+                <Tag color="purple">
+                    <div>{p.paymentId}</div>
+                    <div className="text-xs text-gray-500">
+                        {p.transactionId}
+                    </div>
+                </Tag>
+            ),
         },
         {
             title: "Khách hàng",
             dataIndex: ["booking", "guestFullName"],
             key: "guestFullName",
+            render: (v) => v || "-",
         },
-
         {
             title: "Tổng tiền",
             dataIndex: "paymentAmount",
             key: "paymentAmount",
-            render: (price) => price ? `${parseFloat(price).toLocaleString()} VNĐ` : "-",
+            align: "right",
+            render: (p) =>
+                p
+                    ? `${Number(p).toLocaleString()} VNĐ`
+                    : "-",
         },
         {
             title: "Phương thức",
@@ -125,15 +180,19 @@ const PaymentManagement = () => {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
-            render: (status) => (
+            render: (s) => (
                 <Tag
                     color={
-                        status === "SUCCESS" ? "green" :
-                            status === "PENDING" ? "orange" :
-                                status === "FAILED" ? "volcano" : "blue"
+                        s === "SUCCESS"
+                            ? "green"
+                            : s === "PENDING"
+                                ? "orange"
+                                : s === "FAILED"
+                                    ? "volcano"
+                                    : "default"
                     }
                 >
-                    {status}
+                    {s}
                 </Tag>
             ),
         },
@@ -141,16 +200,18 @@ const PaymentManagement = () => {
             title: "Ngày thanh toán",
             dataIndex: "createdAt",
             key: "createdAt",
-            render: (date) => date ? new Date(date).toLocaleString() : "-",
+            render: (d) =>
+                d ? new Date(d).toLocaleString() : "-",
         },
         {
             title: "Hành động",
             key: "action",
-            render: (_, record) => (
+            render: (_, r) => (
                 <Button
-                    type="primary"
                     icon={<EyeOutlined />}
-                    onClick={() => handleViewDetail(record.paymentId)}
+                    onClick={() =>
+                        handleViewDetail(r.paymentId)
+                    }
                 >
                     Chi tiết
                 </Button>
@@ -158,21 +219,52 @@ const PaymentManagement = () => {
         },
     ];
 
+    /* ================= RENDER ================= */
     return (
         <DashboardLayout>
-            <div style={{ padding: "16px", background: "#fff", minHeight: "100vh" }}>
-                <Title level={3} style={{ marginBottom: 20 }}>
-                    Quản lý Payment
-                </Title>
+            <div className="p-6 bg-white min-h-screen">
+                <Title level={3}>Quản lý Payment</Title>
 
-                <Table
-                    rowKey="paymentId"
-                    loading={loading}
-                    columns={columns}
-                    dataSource={payments}
-                    pagination={false}
+                {error && (
+                    <Alert
+                        type="error"
+                        message={error}
+                        showIcon
+                        className="mb-4"
+                    />
+                )}
 
-                />
+                <Spin spinning={loading}>
+                    <Table
+                        rowKey="paymentId"
+                        columns={columns}
+                        dataSource={paymentsWithStt}
+                        pagination={{
+                            current: filters.page,
+                            pageSize: filters.per_page,
+                            total,
+                            showSizeChanger: true,
+                            onChange: (page, per_page) =>
+                                setFilters((f) => ({
+                                    ...f,
+                                    page,
+                                    per_page,
+                                })),
+                        }}
+                        onChange={(pagination, _f, sorter) => {
+                            if (sorter.field) {
+                                setFilters((f) => ({
+                                    ...f,
+                                    sort_by: sorter.field,
+                                    order:
+                                        sorter.order === "ascend"
+                                            ? "asc"
+                                            : "desc",
+                                }));
+                            }
+                        }}
+                    />
+                </Spin>
             </div>
         </DashboardLayout>
     );

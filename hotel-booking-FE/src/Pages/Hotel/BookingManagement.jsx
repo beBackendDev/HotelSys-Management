@@ -50,6 +50,12 @@ const BookingManagement = () => {
     const [selectedDate, setSelectedDate] = useState(null);
 
     const token = localStorage.getItem("accessToken");
+    const [filters, setFilters] = useState({
+        page: 1,
+        per_page: 7,
+    });
+    const [total, setTotal] = useState(0);
+
 
     /* ================= TOKEN ================= */
     const role = useMemo(() => {
@@ -60,6 +66,13 @@ const BookingManagement = () => {
             return null;
         }
     }, [token]);
+    const bookingsWithStt = useMemo(() => {
+        return bookings.map((b, index) => ({
+            ...b,
+            __stt: (filters.page - 1) * filters.per_page + index +1,
+        }));
+    }, [bookings, filters.page, filters.per_page]);
+
 
     const getUrlByRole = (role) => {
         switch (role) {
@@ -71,12 +84,7 @@ const BookingManagement = () => {
                 return "user";
         }
     };
-    // Pagination state (if needed in future)
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 10,
-        total: 0,
-    });
+
 
     /* ================= WEBSOCKET ================= */
     useEffect(() => {
@@ -150,34 +158,31 @@ const BookingManagement = () => {
     /* ================= FETCH BOOKINGS ================= */
     useEffect(() => {
         fetchBookings();
-    }, [mode, selectedDate]);
+    }, [mode, selectedDate, filters]);
 
     const fetchBookings = async () => {
         setLoadingBookings(true);
         try {
             let url = "";
-
+            let params = new URLSearchParams({
+                pageNo: filters.page, // Spring = 0
+                pageSize: filters.per_page,
+            });
             if (mode === "ALL") {
-                url = `http://localhost:8080/api/dashboard/${getUrlByRole(
-                    role
-                )}/bookings-management`;
+                url = `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/bookings-management`;
             }
 
             if (mode === "DATE" && selectedDate) {
-                url = `http://localhost:8080/api/dashboard/${getUrlByRole(
-                    role
-                )}/booking-today?date=${dayjs(
+                url = `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/booking-today?date=${dayjs(
                     selectedDate
                 ).format("YYYY-MM-DD")}`;
             }
 
             if (mode === "STAYING") {
-                url = `http://localhost:8080/api/dashboard/${getUrlByRole(
-                    role
-                )}/recent-bookings`;
+                url = `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/recent-bookings`;
             }
 
-            const res = await fetch(url, {
+            const res = await fetch(`${url}?${params}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -187,6 +192,7 @@ const BookingManagement = () => {
 
             const data = await res.json();
             setBookings(data?.content || []);
+            setTotal(data?.totalElements || 0);
         } catch (e) {
             console.error(e);
         } finally {
@@ -315,10 +321,13 @@ const BookingManagement = () => {
     const columns = [
         {
             title: "STT",
-            width: 60,
-            render: (_, __, index) =>
-                (pagination.current - 1) * pagination.pageSize + index + 1,
+            dataIndex: "__stt",
+            key: "__stt",
+            width: 70,
+            sorter: (a, b) => a.__stt - b.__stt,
+            sortDirections: ["ascend", "descend"],
         },
+
         {
             title: "Tên phòng",
             dataIndex: "roomName",
@@ -434,9 +443,25 @@ const BookingManagement = () => {
                     rowKey="bookingId"
                     loading={loadingBookings}
                     columns={columns}
-                    dataSource={bookings}
-                    pagination={pagination}
-                    onChange={(pagination) => setPagination(pagination)}
+                    dataSource={bookingsWithStt}
+                    pagination={{
+                                current: filters.page,
+                                pageSize: filters.per_page,
+                                total,
+                                showSizeChanger: true,
+                                onChange: (page, per_page) =>
+                                    setFilters((f) => ({ ...f, page, per_page })),
+                            }}
+                            onChange={(pagination, _filters, sorter) => {
+                                if (sorter.field) {
+                                    setFilters((f) => ({
+                                        ...f,
+                                        page:1,
+                                        sort_by: sorter.field,
+                                        order: sorter.order === "ascend" ? "asc" : "desc",
+                                    }));
+                                }
+                            }}
                 />
             </div>
         </DashboardLayout>
