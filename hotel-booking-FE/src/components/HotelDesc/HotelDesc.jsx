@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import styles from "./styles.module.scss";
 
 const HotelDesc = ({ hotelInfo }) => {
-  const defaultImage = "../assets/images/image.png";
+  const defaultImage = "../../assets/images/image.png";
  return (
     <div className={styles.card}>
       <div className={styles.cardInner}>

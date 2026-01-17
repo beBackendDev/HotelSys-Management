@@ -186,7 +186,8 @@ const HotelDetail = () => {
       }
 
       const data = await res.json();
-
+      console.log("hello: ", data);
+      
       setHotelReviews(data?.content ?? []);
       setPagination({
         pageNo,
@@ -267,7 +268,7 @@ const HotelDetail = () => {
           hotelReviews.map(async (r) => {
             try {
               const res = await fetch(
-                `http://localhost:8080/api/user/profile/${r.userId}`,
+                `http://localhost:8080/api/user/public/profile/${r.userId}`,
                 {
                   headers: { Authorization: `Bearer ${token}` },
                 }
@@ -282,7 +283,8 @@ const HotelDetail = () => {
             }
           })
         );
-
+        console.log("hello", users);
+        
         setUserInfo(users.filter(Boolean)); // bỏ user null
       } catch (error) {
         console.error("Fetch users error:", error);
@@ -503,7 +505,7 @@ const HotelDetail = () => {
             <div key={index} className="flex space-x-4 p-4 border-t border-b">
               {/* Avatar */}
               <img
-                src={hotelReviews?.[index]?.urlImg || userplaceholder}
+                src={userInfo?.[index]?.urlImg || userplaceholder}
                 alt="avatar"
                 className="w-12 h-12 rounded-full object-cover"
               />

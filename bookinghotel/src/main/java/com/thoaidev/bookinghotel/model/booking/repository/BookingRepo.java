@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.enums.BookingStatus;
 import com.thoaidev.bookinghotel.model.user.entity.UserEntity;
+import com.thoaidev.bookinghotel.summary.admin.TrendingHotelProjection;
 import com.thoaidev.bookinghotel.summary.owner.TrendingRoomProjection;
 
 public interface BookingRepo extends JpaRepository<Booking, Integer> {
@@ -54,12 +55,13 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
             + "AND b.status = 'PAID' ")
     List<Booking> findByRoomId(@Param("roomId") Integer roomId, @Param("today") LocalDate today
     );
+
     //Query booking with hotelId
     @Query("SELECT b FROM Booking b "
             + "WHERE b.hotel.hotelId = :hotelId ")
     List<Booking> findBookingByHotelId(
             @Param("hotelId") Integer hotelId);
-    
+
     //kiểm tra tính khả thi khi viết Review của người dùng
     @Query("SELECT b FROM Booking b "
             + "WHERE b.user.userId = :userId "
@@ -72,19 +74,20 @@ public interface BookingRepo extends JpaRepository<Booking, Integer> {
             @Param("currentDate") LocalDate currentDate);
 
     // Kiểm tra trùng lịch
-@Query("""
+    @Query("""
     SELECT b FROM Booking b
     WHERE b.hotel.hotelId = :hotelId
       AND b.room.roomId = :roomId
       AND b.status IN ('PENDING_PAYMENT', 'PAID')
       AND (:startDate <= b.checkoutDate AND :endDate >= b.checkinDate)
 """)
-List<Booking> findConflictingBookings(
-        @Param("hotelId") Integer hotelId,
-        @Param("roomId") Integer roomId,
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate
-);
+    List<Booking> findConflictingBookings(
+            @Param("hotelId") Integer hotelId,
+            @Param("roomId") Integer roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
     // Tìm các booking đã quá hạn chưa thanh toán
     @Query("SELECT b FROM Booking b  JOIN FETCH b.room WHERE b.status  = 'PENDING_PAYMENT' AND b.createdAt< :expiredTime")
     List<Booking> findExpiredBookings(@Param("expiredTime") LocalDateTime expiredTime);
@@ -216,4 +219,36 @@ List<Booking> findConflictingBookings(
             Pageable pageable
     );
 
+    //Dashboard admin
+    // Thêm vào BookingRepo interface
+    @Query("SELECT COUNT(b.bookingId) FROM Booking b WHERE YEAR(b.checkinDate) = :year AND MONTH(b.checkinDate) = :month")
+    Long countBookingsAllHotels(@Param("year") int year, @Param("month") int month);
+
+    @Query("SELECT COUNT(b.bookingId) FROM Booking b WHERE b.status = 'CANCELLED' AND YEAR(b.checkinDate) = :year AND MONTH(b.checkinDate) = :month")
+    Long countCancelledBookingsAllHotels(@Param("year") int year, @Param("month") int month);
+
+    @Query("SELECT COALESCE(SUM(DATEDIFF(b.checkoutDate, b.checkinDate)), 0) FROM Booking b WHERE YEAR(b.checkinDate) = :year AND MONTH(b.checkinDate) = :month")
+    Long getBookedRoomDaysAllHotels(@Param("year") int year, @Param("month") int month);
+
+    @Query(value = """
+    SELECT 
+    h.hotel_id AS hotelId, 
+    h.hotel_name AS hotelName, 
+    u.full_name AS fullname, 
+    COUNT(b.booking_id), 
+           SUM(DATEDIFF(b.check_in_date, b.check_in_date)), 
+           SUM(p.payment_amount)
+    FROM Hotel h
+    LEFT JOIN Room r ON h.hotel_id = r.hotel_id
+    LEFT JOIN Booking b ON r.room_id = b.room_id
+    LEFT JOIN Payment p ON b.booking_id = p.booking_id
+    LEFT JOIN user u ON h.owner_id = u.user_id
+    WHERE YEAR(b.check_in_date) = :year AND MONTH(b.check_in_date) = :month
+    GROUP BY h.hotel_id
+    ORDER BY COUNT(b.booking_id) DESC
+    """, nativeQuery = true)
+    List<TrendingHotelProjection> findTrendingHotel(
+            @Param("year") int year,
+            @Param("month") int month,
+            Pageable pageable);
 }

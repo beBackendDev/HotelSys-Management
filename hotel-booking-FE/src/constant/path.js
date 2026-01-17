@@ -16,6 +16,7 @@ class Path {
 
     this.dashboard = "/dashboard";
     this.overview = this.dashboard + "/overview";
+    //chỉnh sửa thông tin
     this.hotelProfile = this.dashboard + "/hotel-profile/:hotelId"; //Dùng Route Matching
     this.hotelProfileAdmin = (hotelId) => this.dashboard + `/hotel-profile/${hotelId}`; //Điều hướng trang( Navigate) chuyển sang trang chỉnh sửa hotel
     this.roomProfilePattern = this.dashboard + "/hotel/:hotelId/room-profile/:roomId"; //Dùng Route Matching

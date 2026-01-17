@@ -25,6 +25,14 @@ public interface RoomRepository extends JpaRepository<Room, Integer>, JpaSpecifi
 """)
     Integer countRooms(Integer ownerId);
 
+        //DASHBOARD tính tổng số phòng của admin
+    @Query("""
+        SELECT COUNT(r.roomId)
+        FROM Room r
+       
+""")
+    Integer countAllRooms();
+
 //validate room belongs to hotel
     @Query("""
     SELECT r

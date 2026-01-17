@@ -46,6 +46,7 @@ public class RoomMapper {
                 .active(room.isActive())
                 //
                 .hotelId(room.getHotel().getHotelId())//thực hiện lấy id HOtel
+                .hotelName(room.getHotel().getHotelName())//thực hiện lấy id HOtel
                 .build();
                 
         return roomDto;

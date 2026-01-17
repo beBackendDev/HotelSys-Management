@@ -1,30 +1,52 @@
-import { PictureOutlined } from "@ant-design/icons";
-import { unwrapResult } from "@reduxjs/toolkit";
+import React, { useEffect, useState } from "react";
+import { useParams, useHistory } from "react-router-dom";
 import {
-  Avatar,
-  Button,
-  Col,
   Form,
   Input,
+  Button,
+  Card,
   Row,
-  Typography,
+  Col,
   Spin,
   Alert,
-  Select,
+  Typography,
   InputNumber,
+  Divider,
+  Space,
+  Select,
+  Upload,
+  message,
+  DatePicker,
 } from "antd";
-import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
-import UploadImage from "../../common/UploadImage";
-import DashboardLayout from "../../core/layout/Dashboard";
-import { updateRoomById } from "../../slices/room.slice"; // bạn cần tạo slice này
+import {
+  ArrowLeftOutlined,
+  SaveOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import moment from "moment";
 
-const fetchRoomById = async (hotelId, roomId) => {
-  const token = localStorage.getItem("accessToken");
+import DashboardLayout from "../../core/layout/Dashboard";
+
+const { TextArea } = Input;
+const { Option } = Select;
+  const getUrlByRole = (role) => {
+    switch (role) {
+      case "ADMIN":
+        return "admin";
+      case "OWNER":
+        return "owner";
+      default:
+        return "user";
+    }
+  };
+/* =========================
+   FETCH ROOM
+========================= */
+const fetchRoomById = async (hotelId, roomId, role, token) => {
+
+
   const res = await fetch(
-    `http://localhost:8080/api/dashboard/admin/hotels/${hotelId}/rooms/${roomId}`,
+    `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}/rooms/${roomId}`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -33,191 +55,397 @@ const fetchRoomById = async (hotelId, roomId) => {
     }
   );
 
-  if (!res.ok) {
-    throw new Error("Không lấy được dữ liệu phòng");
-  }
+  if (!res.ok) throw new Error("Không lấy được dữ liệu phòng");
   return res.json();
 };
 
 const RoomProfile = () => {
   const { hotelId, roomId } = useParams();
+  const history = useHistory();
+  const [form] = Form.useForm();
+
+  const token = localStorage.getItem("accessToken");
+  const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  const role = (decodedToken?.role || "").toUpperCase();
+
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [newImage, setNewImage] = useState("");
-  const [progress, setProgress] = useState(0);
-  const dispatch = useDispatch();
-  const history = useHistory();
 
-  useEffect(() => {
-    const load = async () => {
+  const [uploading, setUploading] = useState(false);
+  const [fileList, setFileList] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
 
-      if (hotelId && roomId) {
+  const canEdit = role === "ADMIN" || role === "OWNER";
 
-        setLoading(true);
-        try {
-          const data = await fetchRoomById(hotelId, roomId);
-          setRoom(data);
-        } catch (e) {
-          setError(e.message);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-    load();
-  }, [hotelId, roomId]);
-
-  const onFinish = async (values) => {
-    const _data = {
-      ...values,
-      roomId: room?.roomId,
-      hotelId: room?.hotelId,
-      roomImageUrls: newImage ? [newImage.url] : room?.roomImageUrls,
-    };
-    //Cập nhật phòng
+  /* =========================
+     LOAD ROOM
+  ========================= */
+  const loadRoom = async () => {
+    setLoading(true);
     try {
-      const res = await dispatch(updateRoomById({hotelId, roomId, data: _data}));
-      console.log("res: ", res);
-      unwrapResult(res);
-      toast.success("Cập nhật phòng thành công");
-      const updated = await fetchRoomById(hotelId, roomId);
-      setRoom(updated);
+      const data = await fetchRoomById(hotelId, roomId, role, token);
+      setRoom(data);
+      setPreviewImages(data.roomImageUrls || []);
+
+      form.setFieldsValue({
+        roomName: data.roomName,
+        roomType: data.roomType,
+        roomOccupancy: data.roomOccupancy,
+        roomPricePerNight: data.roomPricePerNight,
+        discountPercent: data.discountPercent,
+        discountType: data.discountType,
+        discountStart: data.discountStart
+          ? moment(data.discountStart)
+          : null,
+
+        discountEnd: data.discountEnd
+          ? moment(data.discountEnd)
+          : null,
+        roomStatus: data.roomStatus,
+        roomDescription: data.roomDescription,
+      });
     } catch (e) {
-      console.error(e);
-      toast.error("Cập nhật thất bại");
+      setError(e.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading)
+  useEffect(() => {
+    loadRoom();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  /* =========================
+     UPDATE ROOM
+  ========================= */
+  const onFinish = async (values) => {
+    if (!canEdit) {
+      message.error("Bạn không có quyền chỉnh sửa phòng này");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/hotels/${hotelId}/update-room/${roomId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            ...values,
+            discountStart: values.discountStart
+      ? values.discountStart.toISOString()
+      : null,
+
+    discountEnd: values.discountEnd
+      ? values.discountEnd.toISOString()
+      : null,
+            roomId,
+            hotelId,
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Cập nhật phòng thất bại");
+
+      message.success("Cập nhật phòng thành công");
+      await loadRoom();
+    } catch (e) {
+      message.error(e.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /* =========================
+     UPLOAD IMAGES
+  ========================= */
+  const uploadImages = async () => {
+    if (fileList.length === 0) {
+      message.warning("Vui lòng chọn ảnh");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      fileList.forEach((file) =>
+        formData.append("files", file.originFileObj)
+      );
+        formData.append("hotel", room.hotelName);
+        
+
+      const res = await fetch(
+        `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/room/${roomId}/upload-image`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Upload ảnh thất bại");
+
+      message.success("Upload ảnh thành công");
+      setFileList([]);
+      await loadRoom();
+    } catch (e) {
+      message.error(e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  /* =========================
+     RENDER STATES
+  ========================= */
+  if (loading) {
     return (
       <DashboardLayout>
-        <div className="px-8 bg-white min-h-4/5 rounded flex justify-center items-center" style={{ minHeight: "300px" }}>
-          <Spin tip="Đang tải..." />
+        <div style={{ padding: 24, textAlign: "center" }}>
+          <Spin tip="Đang tải thông tin phòng..." />
         </div>
       </DashboardLayout>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <DashboardLayout>
-        <div className="px-8 bg-white min-h-4/5 rounded p-6">
-          <Alert type="error" message={error} />
+        <div style={{ padding: 24 }}>
+          <Alert type="error" message={error} showIcon />
         </div>
       </DashboardLayout>
     );
+  }
 
-  if (!room)
-    return (
-      <DashboardLayout>
-        <div className="px-8 bg-white min-h-4/5 rounded p-6">
-          <Typography.Text>Không tìm thấy phòng.</Typography.Text>
-        </div>
-      </DashboardLayout>
-    );
+  if (!room) return null;
 
+  /* =========================
+     RENDER UI
+  ========================= */
   return (
     <DashboardLayout>
-      <div className="px-8 bg-white min-h-4/5 rounded">
-        <Typography.Text className="inline-block font-bold text-3xl mt-6 mb-16">
-          Chỉnh sửa thông tin phòng
-        </Typography.Text>
-        <Form
-          name="roomForm"
-          initialValues={{
-            roomName: room?.roomName,
-            roomType: room?.roomType,
-            roomOccupancy: room?.roomOccupancy,
-            roomStatus: room?.roomStatus,
-            roomPricePerNight: room?.roomPricePerNight,
-          }}
-          onFinish={onFinish}
-          autoComplete="off"
-          layout="vertical"
+      <div
+        style={{
+          padding: 24,
+          background: "#f5f5f5",
+          minHeight: "100vh",
+        }}
+      >
+
+        {/* Header */}
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => history.goBack()}
+          style={{ marginBottom: 16 }}
         >
-          <Row gutter={[16, 16]}>
-            <Col sm={18}>
-              <Form.Item label="Tên phòng" name="roomName" rules={[{ required: true, message: "Tên phòng không được bỏ trống" }]}>
-                <Input />
-              </Form.Item>
+          Quay lại
+        </Button>
 
-              <Row gutter={[16, 16]}>
-                <Col sm={8}>
-                  <Form.Item label="Loại phòng" name="roomType" rules={[{ required: true, message: "Loại phòng không được bỏ trống" }]}>
-                    <Input />
-                  </Form.Item>
-                </Col>
-                <Col sm={8}>
-                  <Form.Item label="Số người tối đa" name="roomOccupancy" rules={[{ required: true, message: "Sức chứa không được bỏ trống" }]}>
-                    <InputNumber min={1} style={{ width: "100%" }} />
-                  </Form.Item>
-                </Col>
-                <Col sm={8}>
-                  <Form.Item label="Trạng thái" name="roomStatus" rules={[{ required: true, message: "Chọn trạng thái phòng" }]}>
-                    <Select>
-                      <Select.Option value="AVAILABLE">AVAILABLE</Select.Option>
-                      <Select.Option value="OCCUPIED">OCCUPIED</Select.Option>
-                      <Select.Option value="MAINTENANCE">MAINTENANCE</Select.Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
+        <Typography.Title level={2}>
+          Chỉnh sửa thông tin phòng
+        </Typography.Title>
 
-              <Row gutter={[16, 16]}>
-                <Col sm={12}>
-                  <Form.Item label="Giá / đêm" name="roomPricePerNight" rules={[{ required: true, message: "Giá phòng không được bỏ trống" }]}>
-                    <InputNumber
-                      min={0}
-                      style={{ width: "100%" }}
-                      formatter={(value) => `${value} VND`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                      parser={(value) => value.replace(/\s?VND|(,*)/g, "")}
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Col>
+        {/* FORM */}
+        <Card
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            borderRadius: 12,
+            boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+          }}
+        >
 
-            <Col sm={6} className="flex flex-col items-center">
-              <Avatar
-                className="ml-8 mt-12 border border-orange-400"
-                src={`http://localhost:8080${room?.roomImageUrls?.[0]}`}
-                size={{ lg: 130, xl: 180, xxl: 200 }}
-                icon={<PictureOutlined />}
-              />
-              <Form.Item className="ml-16 mt-6">
-                <UploadImage onChange={setNewImage} setProgress={setProgress} progress={progress} />
-              </Form.Item>
-            </Col>
-          </Row>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            disabled={!canEdit}
+          >
+            <Row gutter={[24, 16]}>
+              <Col xs={24} md={12}>
+                <Form.Item label="Tên phòng" name="roomName">
+                  <Input size="large" />
+                </Form.Item>
+              </Col>
 
-          {/* danh sách ảnh riêng một hàng */}
-          {room?.roomImageUrls?.length > 0 && (
-            <Row className="my-6">
-              <Col span={24}>
-                <Typography.Text className="font-semibold">Danh sách ảnh phòng:</Typography.Text>
-                <div className="flex flex-wrap gap-4 mt-2">
-                  {room.roomImageUrls.map((img, i) => (
-                    <Avatar
-                      key={i}
-                      src={`http://localhost:8080${img}`}
-                      size={100}
-                      shape="square"
-                      className="border"
-                    />
-                  ))}
-                </div>
+              <Col xs={24} md={12}>
+                <Form.Item label="Loại phòng" name="roomType">
+                  <Input size="large" />
+                </Form.Item>
               </Col>
             </Row>
-          )}
 
-          <div className="flex justify-center my-10">
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Cập nhật thông tin
-              </Button>
-            </Form.Item>
-          </div>
-        </Form>
+
+            <Row gutter={[24, 16]}>
+              <Col xs={24} md={8}>
+                <Form.Item label="Sức chứa" name="roomOccupancy">
+                  <InputNumber min={1} size="large" style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} md={8}>
+                <Form.Item label="Giá / đêm (VND)" name="roomPricePerNight">
+                  <InputNumber
+                    min={0}
+                    size="large"
+                    style={{ width: "100%" }}
+                    formatter={(v) =>
+                      `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} md={8}>
+                <Form.Item label="Trạng thái" name="roomStatus">
+                  <Select size="large">
+                    <Option value="AVAILABLE">Còn trống</Option>
+                    <Option value="BOOKED">Đã thuê</Option>
+                    <Option value="TEMP_HOLD">Bảo trì</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={[24, 16]}>
+              {/* Giá / đêm */}
+              <Col xs={24} md={6}>
+                <Form.Item label="Giá / đêm (VND)" name="roomPricePerNight">
+                  <InputNumber
+                    min={0}
+                    size="large"
+                    style={{ width: "100%" }}
+                    formatter={(v) =>
+                      `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                  />
+                </Form.Item>
+              </Col>
+
+              {/* Giá trị giảm */}
+              <Col xs={24} md={4}>
+                <Form.Item
+                  label="Giá trị giảm (%)"
+                  name="discountPercent"
+                  dependencies={["discountType"]}
+                  rules={[
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        const type = getFieldValue("discountType");
+                        if (!type) return Promise.resolve();
+                        if (value == null)
+                          return Promise.reject("Nhập giá trị giảm");
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                >
+                  <InputNumber
+                    min={0}
+                    max={100}
+                    size="large"
+                    style={{ width: "100%" }}
+                    placeholder="VD: 10"
+                  />
+                </Form.Item>
+              </Col>
+
+              {/* Loại giảm */}
+              <Col xs={24} md={5}>
+                <Form.Item label="Loại giảm giá" name="discountType">
+                  <Select size="large" allowClear placeholder="Chọn loại">
+                    <Option value="OWNER_PROMOTION">Chương trình mới</Option>
+                    <Option value="FLASH_SALE">Deal chớp nhoáng</Option>
+                    <Option value="VOUCHER">Voucher</Option>
+                    <Option value="MEMBER">Ưu đãi thành viên</Option>
+                    <Option value="NONE">Không có</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+
+              {/* Bắt đầu */}
+              <Col xs={24} md={4}>
+                <Form.Item label="Bắt đầu" name="discountStart">
+                  <DatePicker
+                    showTime
+                    size="large"
+                    style={{ width: "100%" }}
+                    format="DD/MM/YYYY HH:mm"
+                  />
+                </Form.Item>
+              </Col>
+
+              {/* Kết thúc */}
+              <Col xs={24} md={5}>
+                <Form.Item label="Kết thúc" name="discountEnd">
+                  <DatePicker
+                    showTime
+                    size="large"
+                    style={{ width: "100%" }}
+                    format="DD/MM/YYYY HH:mm"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+
+
+            <Divider />
+
+            {/* IMAGES */}
+            <Typography.Text strong>Hình ảnh phòng</Typography.Text>
+
+            <Upload
+              listType="picture-card"
+              multiple
+              beforeUpload={() => false}
+              fileList={fileList}
+              onChange={({ fileList }) => setFileList(fileList)}
+            >
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+              </div>
+            </Upload>
+
+            <Button
+              type="primary"
+              loading={uploading}
+              onClick={() => uploadImages(fileList)}
+            >
+              Upload ảnh
+            </Button>
+
+            <Divider />
+
+            {canEdit && (
+              <Row justify="center">
+                <Space>
+                  <Button onClick={() => history.goBack()}>Hủy</Button>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    icon={<SaveOutlined />}
+                    loading={submitting}
+                  >
+                    Cập nhật phòng
+                  </Button>
+                </Space>
+              </Row>
+            )}
+          </Form>
+        </Card>
       </div>
     </DashboardLayout>
   );

@@ -81,4 +81,5 @@ public interface HotelService {
 //DELETE methods
 
     public void deActiveHotel(Integer ownerId, Integer id);
+    public void deActiveHotel(Integer id);
 }

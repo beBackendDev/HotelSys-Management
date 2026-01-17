@@ -15,6 +15,9 @@ public class NotificationMapper {
     public NotificationDTO mapToDTO(Notifications notification) {
         NotificationDTO notificationDTO = NotificationDTO
                 .builder()
+                .notifyId(notification.getNotifyId())
+                .isRead(notification.getIsRead())
+                .createdAt(notification.getCreatedAt())
                 .type(notification.getType())
                 .title(notification.getTitle())
                 .content(notification.getContent())

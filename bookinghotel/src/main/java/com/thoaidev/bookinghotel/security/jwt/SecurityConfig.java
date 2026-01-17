@@ -63,7 +63,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers(
-                        "/ws/**", // 🔥 BẮT BUỘC
+                        "/ws/**", //  BẮT BUỘC
                         "/ws/info"
                 ).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
@@ -71,10 +71,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/user/**").authenticated()
                 .requestMatchers("/api/dashboard/admin/**").hasAuthority("ADMIN")
                 .requestMatchers("/api/dashboard/owner/**").hasAuthority("OWNER")
-                // .requestMatchers("/owner/**").hasAuthority("OWNER")
-                // .requestMatchers("/user/**").hasAnyAuthority("USER", "ADMIN", "OWNER")
                 .anyRequest().authenticated()
-                // .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

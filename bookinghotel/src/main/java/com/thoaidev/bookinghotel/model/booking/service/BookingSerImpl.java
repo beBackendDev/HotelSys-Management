@@ -88,7 +88,6 @@ public class BookingSerImpl implements BookingSer {
         } else {
             //Khởi tạo một Booking mới
             Booking booking = new Booking();
-
             // Lấy thông tin khách sạn
             Hotel hotel = hotelRepository.findById(bookingDTO.getHotelId())
                     .orElseThrow(() -> new RuntimeException("Hotel not found"));
@@ -116,7 +115,6 @@ public class BookingSerImpl implements BookingSer {
             // Tính tổng tiền
             BigDecimal totalPrice = room.getFinalPrice()
                     .multiply(BigDecimal.valueOf(nights));
-
             // Áp dụng voucher nếu có
             BigDecimal discount = BigDecimal.ZERO;
             //Kiểm tra tồn tại Voucher
@@ -160,7 +158,7 @@ public class BookingSerImpl implements BookingSer {
             booking.setGuestPhone(bookingDTO.getGuestPhone());
             booking.setGuestEmail(bookingDTO.getGuestEmail());
             booking.setGuestCccd(bookingDTO.getGuestCccd());
-// Lưu booking
+            // Lưu booking
             if (booking.getVoucher() != null) {
                 VoucherUsage usage = new VoucherUsage();
                 usage.setVoucher(booking.getVoucher());
@@ -180,26 +178,9 @@ public class BookingSerImpl implements BookingSer {
     @Scheduled(fixedRate = 600000)//cứ 60s thì thực hiện check 1 lần
     @Transactional
     public void cancelExpiredBookings() {
-        // CÁCH 1 thực hiện dựa trên room status -> nặng query
-
-        // LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(5);// thực hiện để thời gian tồn tại booking là 5 phút
-        // List<Booking> expired = bookingRepository.findExpiredBookings(expiryTime);
-        // for (Booking booking : expired) {
-        //     booking.setStatus(BookingStatus.CANCELLED);
-        //     Integer roomId = booking.getRoom().getRoomId();
-        //     Room room = roomRepository.findById(roomId)
-        //             .orElseThrow(() -> new RuntimeException("Room not found"));
-        //     room.setRoomStatus(RoomStatus.AVAILABLE);// đưa về mặc định
-        // }
-        // bookingRepository.saveAll(expired);
-
-        // if (!expired.isEmpty()) {
-        //     System.out.println("Canceled  " + expired.size() + " Time out.");
-        // }
-
-
+     
         //Cách 2 nhẹ hơn không phụ thuộc room
-        LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(15);
 
         int cancelledCount = bookingRepository.cancelExpiredBookings(
                 BookingStatus.PENDING_PAYMENT,

@@ -33,6 +33,8 @@ const CreateHotel = () => {
   const decodedToken = JSON.parse(atob(token.split('.')[1]));
   // const role = decodedToken.role;//
   const ownerId = decodedToken.userId;
+  const [fileList, setFileList] = useState([]);
+
   const FACILITIES = [
     { icon: "WifiOutlined", name: "Wifi miễn phí" },
     { icon: "CarFilled", name: "Bãi đỗ xe miễn phí" },
@@ -95,10 +97,7 @@ const CreateHotel = () => {
         formData.append("files", file.originFileObj);
       });
       formData.append("hotel", createdHotel.hotelName);
-      // ✅ DEBUG (rất quan trọng)
-    for (let [k, v] of formData.entries()) {
-        console.log(k, v);
-    }
+
       const res = await fetch(
         `http://localhost:8080/api/dashboard/owner/hotel/${createdHotel.hotelId}/upload-image`,
         {
@@ -111,7 +110,7 @@ const CreateHotel = () => {
       );
 
       const data = await res.json();
-console.log("img response:",data);
+      console.log("img response:", data);
 
       if (!res.ok) {
         throw new Error(data?.message || "Upload image failed");
@@ -153,13 +152,13 @@ console.log("img response:",data);
 
         {/* ================= STEP 1 ================= */}
         {!createdHotel && (
-          
+
           <Card
             bordered={false}
           >
             <Typography.Title level={5} className="mb-0">
-                        Bước 1: Thông tin khách sạn
-                      </Typography.Title>
+              Bước 1: Thông tin khách sạn
+            </Typography.Title>
             <Form
               layout="vertical"
               onFinish={onCreateHotel}
@@ -323,8 +322,8 @@ console.log("img response:",data);
             bordered={false}
           >
             <Typography.Title level={5} className="mb-0">
-                        Bước 2: Upload hình ảnh
-                      </Typography.Title>
+              Bước 2: Upload hình ảnh
+            </Typography.Title>
             <Alert
               type="success"
               showIcon
@@ -332,25 +331,34 @@ console.log("img response:",data);
               description="Bạn có thể upload hình ảnh cho khách sạn ngay bây giờ"
               style={{ marginBottom: 24 }}
             />
+            <Row align="middle">
+              <Col>
+                <Upload
+                  listType="picture-card"
+                  multiple
+                  beforeUpload={() => false}
+                  fileList={fileList}
+                  onChange={({ fileList }) => setFileList(fileList)}
+                >
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+                  </div>
+                </Upload>
+              </Col>
+              <Col>
+                <Button
+                  type="primary"
+                  loading={uploading}
+                  onClick={() => uploadImages(fileList)}
+                >
+                  Upload ảnh
+                </Button>
+              </Col>
 
-            <Upload
-              listType="picture-card"
-              multiple
-              beforeUpload={() => false}
-              customRequest={({ onSuccess }) =>
-                onSuccess("ok")
-              }
-              onChange={({ fileList }) =>
-                uploadImages(fileList)
-              }
-            >
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>
-                  Upload
-                </div>
-              </div>
-            </Upload>
+
+            </Row>
+
 
             <Divider />
 

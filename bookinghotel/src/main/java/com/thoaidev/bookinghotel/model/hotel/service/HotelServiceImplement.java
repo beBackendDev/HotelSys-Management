@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.thoaidev.bookinghotel.exceptions.BadRequestException;
-import com.thoaidev.bookinghotel.exceptions.ErrorObject;
 import com.thoaidev.bookinghotel.exceptions.NotFoundException;
 import com.thoaidev.bookinghotel.model.booking.entity.Booking;
 import com.thoaidev.bookinghotel.model.booking.repository.BookingRepo;
@@ -169,7 +168,16 @@ public class HotelServiceImplement implements HotelService {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Hotel> hotels = hotelRepository.findAll(
-                HotelSpecification.filterAll(ownerId, hotelName, hotelAddress, minPrice, maxPrice, hotelFacilities, hotelStatus, ratingPoint, checkin, checkout),
+                HotelSpecification.filterAll(ownerId, 
+                    hotelName, 
+                    hotelAddress, 
+                    minPrice, 
+                    maxPrice, 
+                    hotelFacilities, 
+                    hotelStatus, 
+                    ratingPoint, 
+                    checkin, 
+                    checkout),
                 pageable
         );
         List<Hotel> listOfHotels = hotels.getContent();
@@ -352,13 +360,33 @@ public class HotelServiceImplement implements HotelService {
         return hotelMapper.mapToHotelDto(savedHotel);
     }
 
-//Admin: Xóa khách sạn
+//owwner: Xóa khách sạn (phai kiem tra ownerid)
     @Override
     public void deActiveHotel(Integer ownerId, Integer id) {
         Hotel hotel = hotelRepository.findById(id).orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
         if (!hotel.getOwner().getUserId().equals(ownerId)) {
             throw new NotFoundException("Bạn chỉ có thể thao tác trên khách sạn của mình");
         }
+        List<Booking> bookings = bookingRepo.findBookingByHotelId(id);
+        if (bookings != null) {
+            for (Booking booking : bookings) {
+                if (booking.getStatus() == BookingStatus.PAID || booking.getStatus() == BookingStatus.PENDING_PAYMENT) {
+                    throw new BadRequestException("Khách sạn đang được sử dụng");
+                }
+                if (hotel.getHotelStatus() != HotelStatus.ACTIVE) {
+                    throw new BadRequestException("Khách sạn đã ngưng hoạt động");
+                }
+            }
+        }
+
+        hotel.setHotelStatus(HotelStatus.INACTIVE);// Vo hieu hoa hotel
+        hotelRepository.save(hotel);
+    }
+    //admin(khong can kiem tra)
+    @Override
+    public void deActiveHotel(Integer id) {
+        Hotel hotel = hotelRepository.findById(id).orElseThrow(() -> new NotFoundException("Đối tượng Hotel không tồn tại"));
+        
         List<Booking> bookings = bookingRepo.findBookingByHotelId(id);
         if (bookings != null) {
             for (Booking booking : bookings) {

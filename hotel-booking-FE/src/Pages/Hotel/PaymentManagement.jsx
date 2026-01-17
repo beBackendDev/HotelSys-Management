@@ -7,12 +7,26 @@ import {
     Spin,
     Alert,
 } from "antd";
+import moment from "moment";
 import { EyeOutlined } from "@ant-design/icons";
 import React, { useEffect, useState, useMemo } from "react";
 import { useHistory } from "react-router-dom";
 import DashboardLayout from "../../core/layout/Dashboard";
 //Styles
+const tableStyles = {
+    header: {
+        background: "#f0f7ff",
+        fontWeight: 600,
+        fontSize: 13,
+        color: "#1f2937",
+        textTransform: "uppercase",
+        borderBottom: "1px solid #e5e7eb",
+    }
+};
 
+const withHeaderStyle = () => ({
+    style: tableStyles.header,
+});
 
 //
 const { Title } = Typography;
@@ -138,6 +152,7 @@ const PaymentManagement = () => {
         {
             title: "STT",
             dataIndex: "__stt",
+            onHeaderCell: withHeaderStyle,
             key: "__stt",
             width: 70,
             sorter: (a, b) => a.__stt - b.__stt,
@@ -145,6 +160,7 @@ const PaymentManagement = () => {
         {
             title: "Payment",
             key: "paymentId",
+            onHeaderCell: withHeaderStyle,
             fixed: "left",
             render: (_, p) => (
                 <Tag color="purple">
@@ -158,12 +174,14 @@ const PaymentManagement = () => {
         {
             title: "Khách hàng",
             dataIndex: ["booking", "guestFullName"],
+            onHeaderCell: withHeaderStyle,
             key: "guestFullName",
             render: (v) => v || "-",
         },
         {
             title: "Tổng tiền",
             dataIndex: "paymentAmount",
+            onHeaderCell: withHeaderStyle,
             key: "paymentAmount",
             align: "right",
             render: (p) =>
@@ -174,11 +192,13 @@ const PaymentManagement = () => {
         {
             title: "Phương thức",
             dataIndex: "paymentMethod",
+            onHeaderCell: withHeaderStyle,
             key: "paymentMethod",
         },
         {
             title: "Trạng thái",
             dataIndex: "status",
+            onHeaderCell: withHeaderStyle,
             key: "status",
             render: (s) => (
                 <Tag
@@ -198,13 +218,14 @@ const PaymentManagement = () => {
         },
         {
             title: "Ngày thanh toán",
+            onHeaderCell: withHeaderStyle,
             dataIndex: "createdAt",
             key: "createdAt",
-            render: (d) =>
-                d ? new Date(d).toLocaleString() : "-",
+            render: (date) => date ? moment(date).format("DD/MM/YYYY") : "-",
         },
         {
             title: "Hành động",
+            onHeaderCell: withHeaderStyle,
             key: "action",
             render: (_, r) => (
                 <Button

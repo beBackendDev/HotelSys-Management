@@ -73,12 +73,13 @@ public class DashboardServiceImpl implements DashboardService {
         System.out.println("totalRooms" + totalRooms);
         System.out.println("daysInMonth" + daysInMonth);
         System.out.println("occupancy" + occupancy);
+        System.out.println("revenueGrowthRate" + revenueGrowthRate);
         return new DashboardSummaryDTO(
                 revenue,
                 totalBookings,
                 totalRooms,
                 Math.round(occupancy * 100.0) / 100.0,
-                revenueGrowthRate,
+                Math.round(revenueGrowthRate * 100.0) / 100.0,
                 cancelled
         );
     }
@@ -171,6 +172,4 @@ public class DashboardServiceImpl implements DashboardService {
 
         return result;
     }
-// getOccupancyChart
-
 }

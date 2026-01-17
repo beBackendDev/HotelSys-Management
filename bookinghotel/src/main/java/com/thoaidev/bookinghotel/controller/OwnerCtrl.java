@@ -76,7 +76,7 @@ public class OwnerCtrl {
 // GET /owner/occupancy
 // GET /owner/top-rooms (x)
 // GET /owner/summary
-    @GetMapping("/owner/revenue-daily")
+    @GetMapping("/owner/daily-revenue")
     public List<DailyRevenueDto> getDailyRevenue(
             @AuthenticationPrincipal CustomUserDetail owner,
             @RequestParam(required = false) Integer hotelId,
@@ -264,7 +264,7 @@ public class OwnerCtrl {
 //----ROOM
     //Xem toàn bộ phòng theo id khách sạn
 
-    @GetMapping("/owner/{ownerId}/hotels/{hotelId}/rooms")
+    @GetMapping("/owner/hotels/{hotelId}/rooms")
     public List<RoomDto> getRoomByHotelId(@PathVariable(value = "hotelId") Integer hotelId) {
         return roomService.getRoomByHotelId(hotelId);
     }

@@ -49,6 +49,15 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer>, JpaSpeci
 """)
     Integer countHotels(Integer ownerId);
 
+    //DASHBOARD tính tổng số khách sạn của admin
+
+    @Query("""
+        SELECT COUNT(h.hotelId)
+        FROM Hotel h
+     
+""")
+    Integer countAllHotels();
+
     @Query("""
         SELECT h.hotelId
         FROM Hotel h

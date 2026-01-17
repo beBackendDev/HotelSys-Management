@@ -1,4 +1,4 @@
-import { UserOutlined } from "@ant-design/icons";
+import { UserOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { unwrapResult } from "@reduxjs/toolkit";
 import {
     Avatar,
@@ -12,6 +12,10 @@ import {
     Alert,
     Radio,
     DatePicker,
+    Card,
+    Divider,
+    Space,
+    Tooltip,
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -40,6 +44,7 @@ const UserUpdate = () => {
 
     const isOwnProfile = String(user?.userId) === String(userId || user.userId);
     const canEdit = isAdmin || isOwnProfile;
+
     const fetchUserById = async (userId) => {
         const token = localStorage.getItem("accessToken");
         const res = await fetch(`http://localhost:8080/api/dashboard/admin/users/${userId}`, {
@@ -54,20 +59,24 @@ const UserUpdate = () => {
         }
         return res.json();
     };
-    const updateUser = async (userId) => {
+
+    const updateUser = async (data) => {
         const token = localStorage.getItem("accessToken");
-        const res = await fetch(`http://localhost:8080/api/dashboard/admin/users/${userId}/update`, {
+        const res = await fetch(`http://localhost:8080/api/dashboard/admin/users/${data.userId}/update`, {
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`,
             },
+            body: JSON.stringify(data),
         });
 
         if (!res.ok) {
-            throw new Error("Không lấy được dữ liệu người dùng");
+            throw new Error("Cập nhật người dùng thất bại");
         }
         return res.json();
     };
+
     useEffect(() => {
         const loadUser = async () => {
             if (userId) {
@@ -79,7 +88,6 @@ const UserUpdate = () => {
                 try {
                     const data = await fetchUserById(userId);
                     console.log("user inf: ", data);
-
                     setUserData(data);
                 } catch (e) {
                     setError(e.message);
@@ -91,9 +99,9 @@ const UserUpdate = () => {
             }
         };
         loadUser();
-        
     }, [userId, user]);
-    useEffect(() =>{
+
+    useEffect(() => {
         if (userData) {
             form.setFieldsValue({
                 username: userData?.username,
@@ -102,125 +110,259 @@ const UserUpdate = () => {
                 gender: userData?.gender,
                 roleName: userData?.roleName,
                 birthday: userData?.birthday ? moment(userData.birthday) : null,
-
             });
         }
     }, [userData]);
+
     const onFinish = async (values) => {
         if (!canEdit) return;
 
         const _data = {
-            ...values,
-            userId: userData?.userId,
-            urlImg: avatar?.url || userData?.urlImg,
+            fullname: values.fullname,
+            phone: values.phone,
+            gender: values.gender !== undefined ? values.gender : null,
             birthday: values.birthday ? values.birthday.format("YYYY-MM-DD") : null,
+            urlImg: avatar?.url || userData?.urlImg,
+            userId: userData?.userId,
         };
-        try {
-            const res = await updateUser(_data);
-            unwrapResult(res);
-            toast.success("Cập nhật thành công");
 
-            if (userId) {
-                const updated = await fetchUserById(userId);
-                setUserData(updated);
-            } else {
-                history.go(0);
-            }
+        try {
+            setLoading(true);
+            const res = await updateUser(_data);
+            toast.success("Cập nhật thành công");
+            setUserData(res);
+            form.setFieldsValue({
+                fullname: res.fullname,
+                phone: res.phone,
+                gender: res.gender,
+                birthday: res.birthday ? moment(res.birthday) : null,
+            });
         } catch (e) {
             console.error(e);
-            toast.error("Cập nhật thất bại");
+            toast.error(e.message || "Cập nhật thất bại");
+        } finally {
+            setLoading(false);
         }
     };
 
-    // if (loading) return <LoadingUI />; //Tạo thêm giao diện loading
-    // if (error) return <ErrorUI error={error} />; //Tạo giao diện raise lỗi
-    // if (!userData) return <NotFoundUI />;
+    if (loading) return (
+        <DashboardLayout>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "400px" }}>
+                <Spin size="large" />
+            </div>
+        </DashboardLayout>
+    );
+
+    if (error) return (
+        <DashboardLayout>
+            <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px" }}>
+                <Alert message="Lỗi" description={error} type="error" showIcon />
+            </div>
+        </DashboardLayout>
+    );
+
+    if (!userData) return null;
 
     return (
         <DashboardLayout>
-            <div className="px-8 bg-white min-h-4/5 rounded">
-                <Typography.Text className="inline-block font-bold text-3xl mt-6 mb-16">
-                    {canEdit
-                        ? "Chỉnh sửa thông tin người dùng"
-                        : `Chi tiết người dùng: ${userData.fullname}`}
-                </Typography.Text>
-
-                <Form
-                    form={form}
-                    onFinish={onFinish}
-                    autoComplete="off"
-                    layout="vertical"
+            <div style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
+                {/* Header Section */}
+                <div
+                    style={{
+                        backgroundColor: "#fff",
+                        padding: "24px",
+                        marginBottom: "24px",
+                        borderBottom: "1px solid #f0f0f0",
+                    }}
                 >
-                    <Row>
-                        <Col sm={18}>
-                            <Form.Item
-                                label="Tên tài khoản"
-                                name="username">
-                                <Input disabled />
-                            </Form.Item>
+                    <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+                        <Button
+                            icon={<ArrowLeftOutlined />}
+                            type="text"
+                            size="large"
+                            onClick={() => history.goBack()}
+                            style={{ marginBottom: 16 }}
+                        >
+                            Quay lại
+                        </Button>
+                        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 600, color: "#000" }}>
+                            {canEdit
+                                ? "Chỉnh sửa thông tin người dùng"
+                                : `Chi tiết người dùng: ${userData.fullname}`}
+                        </h1>
+                        <p style={{ margin: "8px 0 0 0", fontSize: 14, color: "#666" }}>
+                            {userData.fullname} • {userData.username}
+                        </p>
+                    </div>
+                </div>
 
-                            <Form.Item
-                                label="Họ và tên"
-                                name="fullname"
-                                rules={[{ required: true }]}>
-                                <Input disabled={!canEdit} />
-                            </Form.Item>
+                {/* Main Content */}
+                <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 24px 24px" }}>
+                    <Card>
+                        <Form
+                            form={form}
+                            onFinish={onFinish}
+                            autoComplete="off"
+                            layout="vertical"
+                        >
+                            <Row gutter={[32, 0]}>
+                                {/* Left Column - Form Fields */}
+                                <Col xs={24} lg={16}>
+                                    <div style={{ paddingRight: 16 }}>
+                                        <Typography.Title level={4} style={{ marginBottom: 24 }}>
+                                            Thông tin cơ bản
+                                        </Typography.Title>
 
-                            <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true }]}>
-                                <Input disabled={!canEdit} />
-                            </Form.Item>
+                                        <Form.Item
+                                            label="Tên tài khoản (Gmail)"
+                                            name="username"
+                                            rules={[{ required: true, message: "Vui lòng nhập tên tài khoản" }]}
+                                        >
+                                            <Input
+                                                placeholder="Nhập tên tài khoản"
+                                                disabled
+                                                prefix={<UserOutlined />}
+                                            />
+                                        </Form.Item>
 
-                            <Form.Item label="Giới tính" name="gender">
-                                <Radio.Group disabled={!canEdit}>
-                                    <Radio value={true}>Nam</Radio>
-                                    <Radio value={false}>Nữ</Radio>
-                                </Radio.Group>
-                            </Form.Item>
+                                        <Form.Item
+                                            label="Họ và tên"
+                                            name="fullname"
+                                            rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}
+                                        >
+                                            <Input
+                                                placeholder="Nhập họ và tên"
+                                                disabled={!canEdit}
+                                            />
+                                        </Form.Item>
 
-                            <Form.Item label="Ngày sinh" name="birthday">
-                                <DatePicker disabled={!canEdit} />
-                            </Form.Item>
+                                        <Row gutter={16}>
+                                            <Col xs={24} sm={12}>
+                                                <Form.Item
+                                                    label="Số điện thoại"
+                                                    name="phone"
+                                                    rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
+                                                >
+                                                    <Input
+                                                        placeholder="Nhập số điện thoại"
+                                                        disabled={!canEdit}
+                                                        prefix={<UserOutlined />}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
 
-                            {isAdmin && (
-                                <Form.Item label="Vai trò" name="roleName">
-                                    <Input disabled />
-                                </Form.Item>
-                            )}
+                                            <Col xs={24} sm={12}>
+                                                <Form.Item
+                                                    label="Giới tính"
+                                                    name="gender"
+                                                >
+                                                    <Radio.Group disabled={!canEdit}>
+                                                        <Radio value={true}>Nam</Radio>
+                                                        <Radio value={false}>Nữ</Radio>
+                                                    </Radio.Group>
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
 
-                            <Form.Item label="Đổi mật khẩu (nếu cần)" name="password">
-                                <Input.Password disabled={!canEdit} />
-                            </Form.Item>
-                        </Col>
+                                        <Form.Item
+                                            label="Ngày sinh"
+                                            name="birthday"
+                                        >
+                                            <DatePicker
+                                                style={{ width: "100%" }}
+                                                disabled={!canEdit}
+                                                format="DD/MM/YYYY"
+                                            />
+                                        </Form.Item>
 
-                        <Col sm={6}>
-                            <Avatar
-                                className="ml-8 mt-12 border"
-                                src={userData?.urlImg}
-                                size={{ lg: 130, xl: 160 }}
-                                icon={<UserOutlined />}
-                            />
+                                        {isAdmin && (
+                                            <Form.Item
+                                                label="Vai trò"
+                                                name="roleName"
+                                            >
+                                                <Input disabled placeholder="Vai trò" />
+                                            </Form.Item>
+                                        )}
+
+                                        <Divider style={{ margin: "32px 0" }} />
+
+                                        <Typography.Title level={4} style={{ marginBottom: 24 }}>
+                                            Bảo mật
+                                        </Typography.Title>
+
+                                        <Form.Item
+                                            label="Đổi mật khẩu (nếu cần)"
+                                            name="password"
+                                        >
+                                            <Input.Password
+                                                placeholder="Nhập mật khẩu mới"
+                                                disabled={!canEdit}
+                                            />
+                                        </Form.Item>
+                                    </div>
+                                </Col>
+
+                                {/* Right Column - Avatar */}
+                                <Col xs={24} lg={8}>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            paddingLeft: 16,
+                                        }}
+                                    >
+                                        <Typography.Title level={4} style={{ marginBottom: 24, textAlign: "center" }}>
+                                            Ảnh đại diện
+                                        </Typography.Title>
+
+                                        <Avatar
+                                            src={avatar?.url || userData?.urlImg}
+                                            size={160}
+                                            icon={<UserOutlined />}
+                                            style={{
+                                                backgroundColor: "#1890ff",
+                                                border: "4px solid #f0f0f0",
+                                                marginBottom: 24,
+                                            }}
+                                        />
+
+                                        {canEdit && (
+                                            <div style={{ width: "100%" }}>
+                                                <UploadImage
+                                                    onChange={setAvatar}
+                                                    setProgress={setProgress}
+                                                    progress={progress}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </Col>
+                            </Row>
+
+                            {/* Action Buttons */}
                             {canEdit && (
-                                <Form.Item className="ml-16 mt-6">
-                                    <UploadImage
-                                        onChange={setAvatar}
-                                        setProgress={setProgress}
-                                        progress={progress}
-                                    />
-                                </Form.Item>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        gap: 12,
+                                        marginTop: 32,
+                                        paddingTop: 24,
+                                        borderTop: "1px solid #f0f0f0",
+                                    }}
+                                >
+                                    <Button size="large" onClick={() => history.goBack()}>
+                                        Hủy
+                                    </Button>
+                                    <Button type="primary" size="large" htmlType="submit">
+                                        Cập nhật thông tin
+                                    </Button>
+                                </div>
                             )}
-                        </Col>
-                    </Row>
-
-                    {canEdit && (
-                        <div className="flex justify-center my-10">
-                            <Form.Item>
-                                <Button type="primary" htmlType="submit">
-                                    Cập nhật thông tin
-                                </Button>
-                            </Form.Item>
-                        </div>
-                    )}
-                </Form>
+                        </Form>
+                    </Card>
+                </div>
             </div>
         </DashboardLayout>
     );

@@ -38,6 +38,6 @@ public class RoomDto {
     private List<RoomFacilityDTO> roomFacilities;
     // private Hotel hotel;
     private Integer hotelId;// chỉ cần lấy hotelId trong Dto để truy vấn
-
+    private String hotelName;
 
 }

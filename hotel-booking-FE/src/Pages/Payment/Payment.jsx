@@ -134,7 +134,7 @@ const Payment = () => {
                 </p>
 
                 <div className={styles.totalPrice}>
-                  Tổng tiền: {formatMoney(booking?.finalPrice)} VND
+                  Tổng tiền: {formatMoney(booking?.totalPriceAfterDiscount)} VND
                 </div>
               </div>
             </Card>

@@ -19,6 +19,7 @@ public class ReviewMapper {
             .hotelId(review.getHotel().getHotelId())
             .hotelName(review.getHotel().getHotelName())
             .fullName(review.getUser().getFullname())
+            .userId(review.getUser().getUserId())
             .ratingPoint(review.getRatingPoint())
             .comment(review.getComment())
             .createdAt(review.getCreatedAt())

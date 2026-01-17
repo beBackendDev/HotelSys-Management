@@ -231,7 +231,7 @@ const confirmDisable = (hotelId) => {
     const handleDeleteHotel = async (hotelId) => {
         try {
             const res = await fetch(
-                `http://localhost:8080/api/dashboard/owner/hotels/${hotelId}/delete-room`,
+                `http://localhost:8080/api/dashboard/${getUrlByRole(role)}/${hotelId}/delete-room`,
                 {
                     method: "DELETE",
                     headers: {

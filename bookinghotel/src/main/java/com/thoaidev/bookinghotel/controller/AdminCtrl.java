@@ -3,6 +3,7 @@ package com.thoaidev.bookinghotel.controller;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -195,10 +196,18 @@ public class AdminCtrl {
     }
 //DELETE methods
 
-    @DeleteMapping("/admin/hotels/{hotelId}/delete-room/{roomId}")
-    public ResponseEntity<String> deleteRoom(@PathVariable(value = "hotelId") Integer hotelId, @PathVariable(value = "roomId") Integer roomId) {
-        roomService.deleteRoombyId(hotelId, roomId);
-        return new ResponseEntity<>("Room id =  + {roomId} + đã xóa", HttpStatus.OK);
+    @DeleteMapping("/admin/hotels/{id}/delete-room")
+    public ResponseEntity<?> deleteHotel(
+            @AuthenticationPrincipal CustomUserDetail user,
+            @PathVariable Integer id
+    ) {
+        hotelService.deActiveHotel(id);
+        return ResponseEntity.ok(
+                Map.of(
+                        "success", true,
+                        "message", "Khách sạn đã được vô hiệu hóa"
+                )
+        );
     }
 //IMAGE UPLOAD
 

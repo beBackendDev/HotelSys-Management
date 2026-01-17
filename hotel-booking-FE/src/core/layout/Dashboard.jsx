@@ -5,13 +5,14 @@ import {
   FileDoneOutlined,
   FileSearchOutlined,
   EnvironmentOutlined,
+  BarChartOutlined,
   LogoutOutlined,
   SettingOutlined,
   HomeTwoTone,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
-import Logo from "../../assets/Logo.png";
+import Logo from "../../assets/images/Logo.png";
 import { path } from "../../constant/path";
 import { logout } from "../../slices/auth.slice";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -36,10 +37,10 @@ const DashboardLayout = ({ children }) => {
 
   // Menu theo role
   const ownerMenu = [
-    { key: path.overview, icon: <HomeTwoTone />, label: "Tổng quan", link: path.overview },
+    { key: path.overview, icon: <BarChartOutlined />, label: "Tổng quan", link: path.overview },
     { key: path.hotelManagement, icon: <HomeOutlined />, label: "Quản lý khách sạn", link: path.hotelManagement },
-    { key: path.bookingManagement, icon: <HomeTwoTone />, label: "Quản lý đặt phòng", link: path.bookingManagement },
-    { key: path.paymentManagement , icon: <HomeOutlined />, label: "Quản lý hóa đơn", link: path.paymentManagement },
+    { key: path.bookingManagement, icon: <HomeOutlined />, label: "Quản lý đặt phòng", link: path.bookingManagement },
+    { key: path.paymentManagement , icon: <FileDoneOutlined />, label: "Quản lý hóa đơn", link: path.paymentManagement },
     { key: path.reviewManagement, icon: <FileDoneOutlined />, label: "Quản lý đánh giá", link: path.reviewManagement },
     { key: "settings", icon: <LogoutOutlined />, label: "Đăng xuất", link: path.login, onclick: handleLogout },
   ];
@@ -50,6 +51,7 @@ const DashboardLayout = ({ children }) => {
     { key: path.hotelManagement, icon: <HomeOutlined />, label: "Quản lý khách sạn", link: path.hotelManagement },
     { key: path.bookingManagement, icon: <HomeOutlined />, label: "Quản lý đặt phòng", link: path.bookingManagement },
     { key: "invoiceManagement", icon: <FileSearchOutlined />, label: "Quản lý hóa đơn", link: path.paymentManagement },
+    { key: path.reviewManagement, icon: <FileDoneOutlined />, label: "Quản lý đánh giá", link: path.reviewManagement },
     { key: "settings", icon: <LogoutOutlined />, label: "Đăng xuất", link: path.login, onclick: handleLogout },
   ];
 

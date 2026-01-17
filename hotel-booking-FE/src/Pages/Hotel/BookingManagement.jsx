@@ -27,11 +27,59 @@ import DashboardLayout from "../../core/layout/Dashboard";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import dayjs from "dayjs";
+import moment from "moment";
+
 import relativeTime from "dayjs/plugin/relativeTime";
+import { path } from "../../constant/path";
 dayjs.extend(relativeTime);
+const tableStyles = {
+    header: {
+        background: "#f0f7ff",
+        fontWeight: 600,
+        fontSize: 13,
+        color: "#1f2937",
+        textTransform: "uppercase",
+        borderBottom: "1px solid #e5e7eb",
+    },
 
+    cell: {
+        fontSize: 14,
+        color: "#374151",
+    },
 
+    hotelName: {
+        fontWeight: 600,
+        color: "#2563eb",
+    },
 
+    ownerName: {
+        fontWeight: 500,
+        color: "#111827",
+    },
+
+    ownerEmail: {
+        fontSize: 12,
+        color: "#6b7280",
+    },
+
+    rating: {
+        fontWeight: 500,
+        color: "#111827",
+    },
+
+    actions: {
+        display: "flex",
+        gap: 6,
+    },
+
+    actionBtn: {
+        borderRadius: 8,
+    },
+};
+
+const withHeaderStyle = () => ({
+    style: tableStyles.header,
+});
 
 const { Title } = Typography;
 
@@ -69,7 +117,7 @@ const BookingManagement = () => {
     const bookingsWithStt = useMemo(() => {
         return bookings.map((b, index) => ({
             ...b,
-            __stt: (filters.page - 1) * filters.per_page + index +1,
+            __stt: (filters.page - 1) * filters.per_page + index + 1,
         }));
     }, [bookings, filters.page, filters.per_page]);
 
@@ -85,7 +133,10 @@ const BookingManagement = () => {
         }
     };
 
-
+    //function handle
+    const handleViewDetail = (bookingId) => {
+        history.push(path.bookingDetailAdminPath(bookingId));
+    };
     /* ================= WEBSOCKET ================= */
     useEffect(() => {
         if (!token) return;
@@ -136,6 +187,7 @@ const BookingManagement = () => {
             if (!res.ok) throw new Error("Fetch notifications failed");
 
             const data = await res.json();
+            console.log("data notifications: ", data);
 
             // ❗ merge DB + realtime (không overwrite)
             setNotifications((prev) => {
@@ -147,7 +199,10 @@ const BookingManagement = () => {
                         new Date(b.createdAt) -
                         new Date(a.createdAt)
                 );
-            });
+            }
+            );
+            console.log(" notifications: ", notifications);
+
         } catch (e) {
             console.error(e);
         } finally {
@@ -323,44 +378,40 @@ const BookingManagement = () => {
             title: "STT",
             dataIndex: "__stt",
             key: "__stt",
+            onHeaderCell: withHeaderStyle,
             width: 70,
             sorter: (a, b) => a.__stt - b.__stt,
             sortDirections: ["ascend", "descend"],
         },
 
-        {
-            title: "Tên phòng",
-            dataIndex: "roomName",
-        },
-        {
-            title: "Booking",
-            render: (_, r) => (
-                <Tag color="blue">{r.bookingId}</Tag>
-            ),
-        },
-        { title: "Khách", dataIndex: "guestFullName" },
-        { title: "Khách sạn", dataIndex: "hotelName" },
-        { title: "Phòng", dataIndex: "roomName" },
+
+        { title: "Khách", dataIndex: "guestFullName" , onHeaderCell: withHeaderStyle,},
+        { title: "Khách sạn", dataIndex: "hotelName", onHeaderCell: withHeaderStyle, },
+        { title: "Tên phòng", dataIndex: "roomName", onHeaderCell: withHeaderStyle, },
         {
             title: "Check-in",
             dataIndex: "checkinDate",
+            onHeaderCell: withHeaderStyle,
             render: (d) => dayjs(d).format("DD/MM/YYYY"),
         },
         {
             title: "Check-out",
             dataIndex: "checkoutDate",
+            onHeaderCell: withHeaderStyle,
             render: (d) => dayjs(d).format("DD/MM/YYYY"),
         },
         {
             title: "Tổng tiền",
             dataIndex: "totalPrice",
             align: "right",
+            onHeaderCell: withHeaderStyle,
             render: (p) =>
                 `${p?.toLocaleString()} VNĐ`,
         },
         {
             title: "Trạng thái",
             dataIndex: "status",
+            onHeaderCell: withHeaderStyle,
             align: "center",
             render: (s) => (
                 <Tag color={s === "PAID" ? "green" : "orange"}>
@@ -370,14 +421,11 @@ const BookingManagement = () => {
         },
         {
             title: "Hành động",
+            onHeaderCell: withHeaderStyle,
             render: (_, r) => (
                 <Button
                     icon={<EyeOutlined />}
-                    onClick={() =>
-                        history.push(
-                            `/dashboard/booking-detail/${r.bookingId}`
-                        )
-                    }
+                    onClick={() => handleViewDetail(r.bookingId)}
                 >
                     Chi tiết
                 </Button>
@@ -445,23 +493,23 @@ const BookingManagement = () => {
                     columns={columns}
                     dataSource={bookingsWithStt}
                     pagination={{
-                                current: filters.page,
-                                pageSize: filters.per_page,
-                                total,
-                                showSizeChanger: true,
-                                onChange: (page, per_page) =>
-                                    setFilters((f) => ({ ...f, page, per_page })),
-                            }}
-                            onChange={(pagination, _filters, sorter) => {
-                                if (sorter.field) {
-                                    setFilters((f) => ({
-                                        ...f,
-                                        page:1,
-                                        sort_by: sorter.field,
-                                        order: sorter.order === "ascend" ? "asc" : "desc",
-                                    }));
-                                }
-                            }}
+                        current: filters.page,
+                        pageSize: filters.per_page,
+                        total,
+                        showSizeChanger: true,
+                        onChange: (page, per_page) =>
+                            setFilters((f) => ({ ...f, page, per_page })),
+                    }}
+                    onChange={(pagination, _filters, sorter) => {
+                        if (sorter.field) {
+                            setFilters((f) => ({
+                                ...f,
+                                page: 1,
+                                sort_by: sorter.field,
+                                order: sorter.order === "ascend" ? "asc" : "desc",
+                            }));
+                        }
+                    }}
                 />
             </div>
         </DashboardLayout>

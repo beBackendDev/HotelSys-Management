@@ -31,6 +31,8 @@ const CreateRoom = () => {
     const [hotels, setHotels] = useState([]);
     const [createdRoom, setCreatedRoom] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [fileList, setFileList] = useState([]);
+
     const [form] = Form.useForm();
     const history = useHistory();
     const token = localStorage.getItem("accessToken");
@@ -171,7 +173,8 @@ const CreateRoom = () => {
             }
 
             message.success("Upload hình ảnh thành công");
-            history.push(`/dashboard/${getUrlByRole(role)}/hotels/${paramHotelId}`);
+            // history.push(`/dashboard/${getUrlByRole(role)}/hotels/${paramHotelId}`);
+            history.goBack();
         } catch (err) {
             console.error(err);
             message.error(err.message || "Upload ảnh thất bại");
@@ -344,7 +347,7 @@ const CreateRoom = () => {
                             <Row gutter={24}>
                                 <Col xs={24} sm={12}>
                                     {/* ===== FACILITIES (STATIC) ===== */}
-                                    <Form.Item label="Tiện ích khách sạn" required>
+                                    <Form.Item label="Tiện ích phòng" required>
                                         {/* ===== Facilities có sẵn ===== */}
                                         <Form.Item name="roomFacilities" noStyle>
                                             <Checkbox.Group style={{ width: "100%" }}>
@@ -468,19 +471,34 @@ const CreateRoom = () => {
                             description="Bạn có thể upload hình ảnh cho phòng ngay bây giờ"
                             style={{ marginBottom: 24, marginTop: 24 }}
                         />
+                        <Row align="middle">
+                            <Col>
+                                <Upload
+                                    listType="picture-card"
+                                    multiple
+                                    beforeUpload={() => false}
+                                    fileList={fileList}
+                                    onChange={({ fileList }) => setFileList(fileList)}
+                                >
+                                    <div>
+                                        <PlusOutlined />
+                                        <div style={{ marginTop: 8 }}>Chọn ảnh</div>
+                                    </div>
+                                </Upload>
+                            </Col>
+                            <Col>
+                                <Button
+                                    type="primary"
+                                    loading={uploading}
+                                    onClick={() => uploadImages(fileList)}
+                                >
+                                    Upload ảnh
+                                </Button>
+                            </Col>
 
-                        <Upload
-                            listType="picture-card"
-                            multiple
-                            beforeUpload={() => false}
-                            customRequest={({ onSuccess }) => onSuccess("ok")}
-                            onChange={({ fileList }) => uploadImages(fileList)}
-                        >
-                            <div>
-                                <PlusOutlined />
-                                <div style={{ marginTop: 8 }}>Upload</div>
-                            </div>
-                        </Upload>
+                        </Row>
+
+
 
                         <Divider />
 
