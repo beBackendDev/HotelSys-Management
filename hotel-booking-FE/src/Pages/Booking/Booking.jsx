@@ -62,7 +62,7 @@ const Booking = () => {
       ? moment(checkOut).diff(moment(checkIn), "days")
       : 0;
 
-  const totalPrice = nights * room?.roomPricePerNight;
+  const totalPrice = nights * room?.finalPrice;
   // Giá hiển thị cuối cùng sau khi áp dụng voucher (nếu có)
   const displayPrice = finalPrice !== null ? finalPrice : totalPrice;
   // Hàm định dạng ngày từ "YYYY-MM-DD" sang "DD-MM-YYYY"

@@ -202,6 +202,8 @@ public class HotelServiceImplement implements HotelService {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             List<String> hotelFacilities,
+                        HotelStatus hotelStatus,
+
             Double ratingPoint,
             LocalDate checkin,
             LocalDate checkout,
@@ -211,7 +213,7 @@ public class HotelServiceImplement implements HotelService {
         int pageIndex = (pageNo <= 0) ? 0 : pageNo - 1; //XU li lech page
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         Page<Hotel> hotels = hotelRepository.findAll(
-                HotelSpecification.filterAll(hotelName, hotelAddress, minPrice, maxPrice, hotelFacilities, ratingPoint, checkin, checkout),
+                HotelSpecification.filterAll(hotelName, hotelAddress, minPrice, maxPrice, hotelFacilities, hotelStatus, ratingPoint, checkin, checkout),
                 pageable
         );
         List<Hotel> listOfHotels = hotels.getContent();

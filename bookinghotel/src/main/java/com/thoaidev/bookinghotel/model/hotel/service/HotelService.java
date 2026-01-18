@@ -35,6 +35,7 @@ public interface HotelService {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             List<String> hotelFacilities,
+            HotelStatus hotelStatus,
             Double ratingPoint,
             LocalDate checkin,
             LocalDate checkout,

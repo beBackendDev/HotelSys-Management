@@ -113,7 +113,6 @@ public class HotelSpecification {
         //query( CriteriaQuery<?>) tương đương với câu query trong sql
         //cb( CriteriaBuilder) tương đương trình tạo điều kiện 
         //predicate tương đương điều kiện lọc( mệnh đề quan hệ trong sql)
-
         return (root, query, cb) -> {
             //Khởi tạo một tập các điều kiện truy vấn (predicates)
             // chỉ lấy room thuộc hotel đang xem
@@ -200,6 +199,7 @@ public class HotelSpecification {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             List<String> hotelFacilities,
+            HotelStatus hotelStatus,
             Double ratingPoint,
             LocalDate checkin,
             LocalDate checkout) {
@@ -213,6 +213,10 @@ public class HotelSpecification {
             //Khởi tạo một tập các điều kiện truy vấn (predicates)
             List<Predicate> predicates = new ArrayList<>();
             Predicate predicate;
+            //Loc theo status
+            if (hotelStatus != null) {
+                predicates.add(cb.equal(root.get("hotelStatus"), hotelStatus));
+            }
             // Lọc theo khoảng giá
             if (minPrice != null || maxPrice != null) {
                 if (minPrice != null) {

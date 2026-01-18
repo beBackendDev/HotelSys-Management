@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.thoaidev.bookinghotel.model.booking.dto.BookingDTO;
 import com.thoaidev.bookinghotel.model.booking.dto.response.BookingResponse;
 import com.thoaidev.bookinghotel.model.booking.service.BookingSer;
+import com.thoaidev.bookinghotel.model.enums.HotelStatus;
 import com.thoaidev.bookinghotel.model.enums.OwnerResponseStatus;
 import com.thoaidev.bookinghotel.model.hotel.dto.HotelDto;
 import com.thoaidev.bookinghotel.model.hotel.dto.response.HotelResponse;
@@ -115,12 +116,13 @@ public class AdminCtrl {
 
     //lấy thông tin dựa theo nhiều tiêu chí(tên, đánh giá...)
     @GetMapping("/admin/hotels/filter")
-     public ResponseEntity<HotelResponse> getAllHotels(
+    public ResponseEntity<HotelResponse> getAllHotels(
             @RequestParam(value = "hotelName", required = false) String hotelName,
             @RequestParam(value = "hotelAddress", required = false) String hotelAddress,
             @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
             @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
             @RequestParam(value = "hotelFacilities", required = false) List<String> hotelFacilities,
+            @RequestParam(value = "hotelStatus", required = false) HotelStatus hotelStatus,
             @RequestParam(value = "ratingPoint", required = false) Double ratingPoint,
             @RequestParam(value = "checkin", required = false) LocalDate checkin,
             @RequestParam(value = "checkout", required = false) LocalDate checkout,
@@ -128,16 +130,17 @@ public class AdminCtrl {
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
         HotelResponse hotels = hotelService.filterHotels(
-            hotelName, 
-            hotelAddress, 
-            minPrice, 
-            maxPrice,
-            hotelFacilities, 
-            ratingPoint,
-            checkin,
-            checkout,
-            pageNo, 
-            pageSize);
+                hotelName,
+                hotelAddress,
+                minPrice,
+                maxPrice,
+                hotelFacilities,
+                hotelStatus,
+                ratingPoint,
+                checkin,
+                checkout,
+                pageNo,
+                pageSize);
         return ResponseEntity.ok(hotels);
     }
     // Lấy khách sạn theo tên
@@ -170,7 +173,6 @@ public class AdminCtrl {
     // }
 //------------------- ROOM -------------------   
 //GET methods
-
     @GetMapping("/admin/hotels/{hotelId}/rooms")
     public List<RoomDto> getRoomByHotelId(@PathVariable(value = "hotelId") Integer hotelId) {
         return roomService.getRoomByHotelId(hotelId);
@@ -275,16 +277,18 @@ public class AdminCtrl {
         return new ResponseEntity<>(bookingService.getAllBookings(pageNo, pageSize), HttpStatus.OK);
 
     }
-        //Xem toàn bộ booking cua User
+    //Xem toàn bộ booking cua User
+
     @GetMapping("/admin/hotels/{userId}/bookings-management")
     public ResponseEntity<BookingResponse> userBookings(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
             @PathVariable Integer userId
-        ) {
+    ) {
         return new ResponseEntity<>(bookingService.getAllBookings(userId, pageNo, pageSize), HttpStatus.OK);
 
     }
+
     //Xem chi tiết booking
     @GetMapping("/admin/hotels/booking/{id}")
     public ResponseEntity<BookingDTO> getBooking(
@@ -315,9 +319,9 @@ public class AdminCtrl {
     //Lấy chi tiết payment
     @GetMapping("/admin/hotels/payment/{id}")
     public ResponseEntity<?> getMethodName(
-        @PathVariable("id") Integer paymentId) {
+            @PathVariable("id") Integer paymentId) {
 
-            PaymentDto payment = paymentService.getPaymentById(paymentId);
+        PaymentDto payment = paymentService.getPaymentById(paymentId);
         return new ResponseEntity<>(payment, HttpStatus.OK);
     }
 

@@ -27,10 +27,14 @@ const Register = () => {
         }
       );
       history.push("/");
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message);
+      }
     } catch (error) {
       console.log(error);
-      if (error.status === 405) {
-        setError(error.data.message);
+      if (error.status === 400) {
+        setError(error.response.data);
       }
     }
   };
